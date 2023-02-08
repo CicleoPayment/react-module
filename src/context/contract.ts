@@ -145,4 +145,4 @@ const Contracts: Contracts = {
     },
 };
 
-export { Contracts, isGoodNetwork, doTx }
+export { Contracts, isGoodNetwork, doTx, reduceAddress }

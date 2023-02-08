@@ -2,7 +2,7 @@ import { babel } from "@rollup/plugin-babel";
 import external from "rollup-plugin-peer-deps-external";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
-import { terser } from "rollup-plugin-terser";
+import terser from '@rollup/plugin-terser';
 import dts from "rollup-plugin-dts";
 import alias from "@rollup/plugin-alias";
 import path from "path";

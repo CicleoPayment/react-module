@@ -20,7 +20,7 @@ const PaymentButton: FC<PaymentButton> = ({
 }) => {
     const [isWrongNetwork, setIsWrongNetwork] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [isLoaded, setIsLoaded] = useState(true);
+    const [isLoaded, setIsLoaded] = useState(false);
     const [step, setStep] = useState(1);
     const [subscription, setSubscription] = useState({
         isActive: true,
@@ -37,16 +37,24 @@ const PaymentButton: FC<PaymentButton> = ({
     const [errorMessage, setErrorMessage] = useState('');
 
     const createContracts = async () => {
+        setIsLoaded(false);
         setIsWrongNetwork(false);
+
+        console.log("test")
+        
+
         if (!signer) return;
 
+        console.log("uuu")
+
         try {
+            
             const { chainId } = await signer.provider.getNetwork();
 
             const address = await signer.getAddress();
 
             console.log(chainId);
-
+            console.log("hhh")
             if (!isGoodNetwork(chainId)) {
                 setIsWrongNetwork(true);
                 console.log("Wrong network");
@@ -179,6 +187,7 @@ const PaymentButton: FC<PaymentButton> = ({
             </button>
 
             <Modal show={showModal} onClose={handleClose}>
+                
                 <PaymentModalContent
                     isWrongNetwork={isWrongNetwork}
                     isLoaded={isLoaded}
@@ -488,13 +497,6 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
     loadingStep,
     errorMessage
 }) => {
-    if (!isLoaded)
-        return (
-            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
-                <BounceLoader color="#354c8b" />
-            </div>
-        );
-
     if (isWrongNetwork)
         return (
             <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
@@ -503,7 +505,14 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                 </span>
             </div>
         );
-
+    
+    if (isLoaded == false)
+        return (
+            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
+                <BounceLoader color="#354c8b" />
+            </div>
+        );
+   
     return (
         <>
             <div className="cap-flex cap-flex-col cap-py-2">

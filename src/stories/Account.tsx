@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {ethers} from "ethers"
- import { PaymentButton } from '..';
+import AccountBlock from './../components/AccountBlock';
 
 type User = {
   name: string;
@@ -27,7 +27,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <PaymentButton subManagerId={0} subscriptionId={2} signer={signer} />
+            <AccountBlock subManagerId={0} signer={signer} />
         </div>
   );
 };
