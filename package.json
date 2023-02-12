@@ -1,6 +1,6 @@
 {
     "name": "@cicleo/react-module",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "description": "",
     "main": "dist/index.js",
     "module": "dist/index.es.js",
@@ -53,6 +53,7 @@
         "ethers": "^5.7.2",
         "flowbite": "^1.6.3",
         "flowbite-react": "^0.3.8",
-        "react-spinners": "^0.13.8"
+        "react-spinners": "^0.13.8",
+        "siwe": "^2.1.3"
     }
 }
