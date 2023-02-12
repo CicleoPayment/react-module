@@ -18,10 +18,14 @@ type PaymentButton = {
     subManagerId: number;
     signer: ethers.providers.JsonRpcSigner | undefined;
 };
+let domain = "";
+let origin = "";
+if (typeof window !== "undefined") {
+    domain = window.location.host;
+    origin = window.location.origin;
+}
 
-const domain = window.location.host;
-const origin = window.location.origin;
-const BACKEND_ADDR = "http://localhost:6001";
+const BACKEND_ADDR = "https://cicleo-backend.vercel.app";
 
 async function createSiweMessage(address: string, statement: any) {
     const res = await fetch(`${BACKEND_ADDR}/nonce`, {
@@ -307,7 +311,7 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                 onClose={() => setShowModalSubApprove(false)}
                 onConfirm={handleApproveSubscribe}
                 messageHeader={`Edit your monthly approval`}
-                messageInfo={`You can edit the amount of ${subManager.coinSymbol} that we can prelevate maximum per month from your wallet. This avoid pay when price of the subscription have increase.`}
+                messageInfo={`You can edit the maximum amount of ${subManager.coinSymbol} that we can withdraw from your wallet per payment cycle. This protects you from paying any additional costs if your subscription manager raises the subscription price without your signed consent.`}
                 textInput={`Amount of ${subManager.coinSymbol} to approve`}
                 decimals={subManager.coinDecimals}
                 isLoading={isLoading}
