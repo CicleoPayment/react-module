@@ -2,7 +2,7 @@ import { babel } from "@rollup/plugin-babel";
 import external from "rollup-plugin-peer-deps-external";
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
-import terser from '@rollup/plugin-terser';
+import terser from "@rollup/plugin-terser";
 import dts from "rollup-plugin-dts";
 import alias from "@rollup/plugin-alias";
 import path from "path";
@@ -12,8 +12,9 @@ import postcss from "rollup-plugin-postcss";
 import tailwindcss from "tailwindcss";
 import tailwindConfig from "./tailwind.config.js";
 import css from "rollup-plugin-css-only";
-import commonjs from '@rollup/plugin-commonjs';
-
+import commonjs from "@rollup/plugin-commonjs";
+import rollupNodeResolve from "rollup-plugin-node-resolve";
+import rolllupJson from "rollup-plugin-json";
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -44,7 +45,13 @@ export default [
             external(),
             resolve(),
             terser(),
-            commonjs(),
+            commonjs({ include: "node_modules/axios/**" }),
+            rollupNodeResolve({
+                jsnext: true,
+                preferBuiltins: true,
+                browser: true,
+            }),
+            rolllupJson(),
             postcss({
                 minimize: true,
                 //modules: true, // <--- this line
@@ -52,7 +59,6 @@ export default [
                 extract: true,
                 extensions: [".css", ".module.css"],
                 plugins: [tailwindcss(tailwindConfig)],
-                
             }),
             css(),
             alias({

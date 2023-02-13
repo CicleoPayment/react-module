@@ -14,6 +14,8 @@ import { BounceLoader, ClipLoader } from "react-spinners";
 import { SiweMessage } from "siwe";
 import axios from "axios";
 
+axios.defaults.withCredentials = true;
+
 type PaymentButton = {
     subManagerId: number;
     signer: ethers.providers.JsonRpcSigner | undefined;
@@ -28,13 +30,11 @@ if (typeof window !== "undefined") {
 const BACKEND_ADDR = "https://cicleo-backend.vercel.app";
 
 async function createSiweMessage(address: string, statement: any) {
-    const res = await fetch(`${BACKEND_ADDR}/nonce`, {
-        credentials: "include",
+    const res = await axios.get(`${BACKEND_ADDR}/nonce`, {
+        withCredentials: true,
     });
 
-    let nonce = await res.text();
-
-    console.log(nonce);
+    let nonce = res.data.nonce;
 
     const message = new SiweMessage({
         domain,
@@ -53,18 +53,21 @@ async function signInWithEthereum(signer: ethers.providers.JsonRpcSigner) {
         await signer.getAddress(),
         "Sign in with Ethereum to the app."
     );
+
     const signature = await signer.signMessage(message);
 
-    const res = await fetch(`${BACKEND_ADDR}/verify`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message, signature }),
-        credentials: "include",
-    });
+    const res = await axios.post(
+        `${BACKEND_ADDR}/verify`,
+        { message, signature },
+        {
+            headers: {
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
+        }
+    );
 
-    const json = await res.text();
+    const json = res.data;
     return json;
 }
 
@@ -136,7 +139,7 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
             );
 
             const res = await fetch(`${BACKEND_ADDR}/subscription/${address}`, {
-                credentials: "include",
+                credentials: "same-origin",
             });
 
             const _resJson = await res.json();
@@ -190,12 +193,19 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
     };
 
     const unsubscribe = async () => {
+        const axiosInstance = axios.create({
+            withCredentials: true,
+        });
+
         await signInWithEthereum(signer!);
 
-        await fetch(`${BACKEND_ADDR}/subscription/cancel`, {
-            method: "POST",
-            credentials: "include",
-        });
+        await axios.post(
+            `${BACKEND_ADDR}/subscription/cancel`,
+            {},
+            {
+                withCredentials: true,
+            }
+        );
 
         await createContracts();
     };
