@@ -79,9 +79,11 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [subManager, setSubManager] = useState({} as subManager);
     const [subscription, setSubscription] = useState({
+        id: 0,
         name: "",
         price: "0",
         isCancelled: false,
+        isContractActive: false,
     });
     const [account, setAccount] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -165,11 +167,12 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
             );
 
             let _subscription = {
-                id: subscriptionData.subscriptionId,
+                id: subscriptionData.subscriptionId.toNumber(),
                 isActive: sub.isActive,
                 name: sub.name,
                 price: ethers.utils.formatUnits(sub.price, decimals),
                 isCancelled: !subscriptionData.isActive || _resJson.isCanceled,
+                isContractActive: subscriptionData.isActive,
                 subscriptionEndDate: userData.subscriptionEndDate.toNumber(),
             };
 
@@ -193,10 +196,6 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
     };
 
     const unsubscribe = async () => {
-        const axiosInstance = axios.create({
-            withCredentials: true,
-        });
-
         await signInWithEthereum(signer!);
 
         await axios.post(
@@ -209,6 +208,20 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
 
         await createContracts();
     };
+
+    const renew = async () => { 
+        await signInWithEthereum(signer!);
+
+        await axios.post(
+            `${BACKEND_ADDR}/subscription/renew`,
+            {},
+            {
+                withCredentials: true,
+            }
+        );
+
+        await createContracts();
+    }
 
     useEffect(() => {
         createContracts();
@@ -270,6 +283,66 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
         createContracts();
     };
 
+    const renewSubscription = async (subscriptionId: number) => {
+        if (!signer) return;
+        setIsTxSend(false);
+        setIsLoading(true);
+
+        const _subManager = await Contracts.SubscriptionManager(
+            signer,
+            subManager.address,
+            true
+        );
+
+        await doTx(
+            () => _subManager.payment(subscriptionId),
+            "Renew Subscription",
+            () => {
+                setIsTxSend(true);
+            }
+        );
+        setIsTxSend(false);
+        setShowConfirmationModal(false);
+        setIsLoading(false);
+        createContracts();
+    };
+
+    const handleConfirmationPage = () => {
+        if (subscription.isCancelled) {
+            if (subscription.isContractActive == false) {
+                return (
+                    <ConfirmationModal
+                        show={showConfirmationModal}
+                        onClose={() => setShowConfirmationModal(false)}
+                        confirmationMessageHeader={`Are you sure about restarting your subscription?`}
+                        confirmationMessage={`You will have to pay subscription price since your subscription expired.`}
+                        onConfirm={() => renewSubscription(subscription.id)}
+                    />
+                );
+            }
+
+            return (
+                <ConfirmationModal
+                    show={showConfirmationModal}
+                    onClose={() => setShowConfirmationModal(false)}
+                    confirmationMessageHeader={`Are you sure about restart your subscription?`}
+                    confirmationMessage={`Your subscription will be renewed the next cycle.`}
+                    onConfirm={renew}
+                />
+            );
+        }
+
+        return (
+            <ConfirmationModal
+                show={showConfirmationModal}
+                onClose={() => setShowConfirmationModal(false)}
+                confirmationMessageHeader={`Are you sure about cancelling your subscription?`}
+                confirmationMessage={`You will still be able to use the service until the end of the current billing period.`}
+                onConfirm={unsubscribe}
+            />
+        );
+    };
+
     return (
         <>
             <button
@@ -280,7 +353,6 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                     <span>Manage your Account</span>
                 </div>
             </button>
-
             <Modal show={showModalSubscription} onClose={handleClose}>
                 <AccountModalContent
                     isWrongNetwork={isWrongNetwork}
@@ -294,15 +366,7 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                     errorMessage={errorMessage}
                 />
             </Modal>
-
-            <ConfirmationModal
-                show={showConfirmationModal}
-                onClose={() => setShowConfirmationModal(false)}
-                confirmationMessageHeader={`Are you sure about cancelling your subscription?`}
-                confirmationMessage={`You will still be able to use the service until the end of the current billing period.`}
-                onConfirm={unsubscribe}
-            />
-
+            {handleConfirmationPage()}
             <EditApproval
                 show={showModalTokenApprove}
                 onClose={() => setShowModalTokenApprove(false)}
@@ -315,7 +379,6 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                 isTxSend={isTxSend}
                 approval={subManager.tokenApproval}
             />
-
             <EditApproval
                 show={showModalSubApprove}
                 onClose={() => setShowModalSubApprove(false)}
@@ -495,7 +558,8 @@ const AccountModalContent: FC<AccountModalContent> = ({
                 <div className="cap-flex">
                     <SubscriptionSquare
                         setShowConfirmationModal={setShowConfirmationModal}
-                        subscription={subscription}
+                            subscription={subscription}
+                            symbol={subManager.coinSymbol}
                     />
                     <div className="cap-p-4 cap-space-y-3 cap-border cap-flex-grow">
                         <span className="cap-text-gray-600 cap-font-semibold">
@@ -586,11 +650,13 @@ const AccountModalContent: FC<AccountModalContent> = ({
 type SubscriptionSquare = {
     setShowConfirmationModal: (show: boolean) => void;
     subscription: any;
+    symbol: string;
 };
 
 const SubscriptionSquare: FC<SubscriptionSquare> = ({
     setShowConfirmationModal,
     subscription,
+    symbol,
 }) => {
     if (subscription.isCancelled) {
         return (
@@ -604,7 +670,7 @@ const SubscriptionSquare: FC<SubscriptionSquare> = ({
                         {subscription.name} Package
                     </span>
                     <span className="cap-text-sm cap-text-gray-600">
-                        {subscription.price} {subscription.symbol} per year
+                        {subscription.price} {symbol} per month
                     </span>
                 </div>
 

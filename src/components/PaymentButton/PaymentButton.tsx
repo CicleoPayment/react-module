@@ -3,8 +3,8 @@ import { BigNumber, ethers } from "ethers";
 import "./PaymentButton.css";
 import Logo from "@assets/logo_white.svg";
 import LogoBlue from "@assets/logo.png";
-import BUSD from "@assets/BUSD.webp";
-import { Contracts, isGoodNetwork, doTx } from "@context/contract";
+import TOKEN_IMG from "@assets/token.svg";
+import { Contracts, isGoodNetwork, doTx, formatNumber } from "@context/contract";
 import { BounceLoader, ClipLoader } from "react-spinners";
 
 type PaymentButton = {
@@ -22,6 +22,7 @@ const PaymentButton: FC<PaymentButton> = ({
     const [showModal, setShowModal] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [step, setStep] = useState(1);
+    const [balance, setBalance] = useState<string | number>("#");
     const [subscription, setSubscription] = useState({
         isActive: true,
         name: "",
@@ -29,32 +30,24 @@ const PaymentButton: FC<PaymentButton> = ({
     });
     const [loadingStep, setLoadingStep] = useState(0);
     const [stepFunction, setStepFunction] = useState({
-        1: () => { },
-        2: () => { },
-        3: () => { },
+        1: () => {},
+        2: () => {},
+        3: () => {},
     });
 
-    const [errorMessage, setErrorMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState("");
 
     const createContracts = async () => {
         setIsLoaded(false);
         setIsWrongNetwork(false);
 
-        console.log("test")
-        
-
         if (!signer) return;
 
-        console.log("uuu")
-
         try {
-            
             const { chainId } = await signer.provider.getNetwork();
 
             const address = await signer.getAddress();
 
-            console.log(chainId);
-            console.log("hhh")
             if (!isGoodNetwork(chainId)) {
                 setIsWrongNetwork(true);
                 console.log("Wrong network");
@@ -88,6 +81,8 @@ const PaymentButton: FC<PaymentButton> = ({
 
             const erc20 = await Contracts.ERC20(signer, token, true);
 
+            setBalance(Number(ethers.utils.formatUnits(await erc20.balanceOf(address), decimals)));
+
             setStepFunction({
                 1: async () => {
                     await doTx(
@@ -100,40 +95,34 @@ const PaymentButton: FC<PaymentButton> = ({
                         () => setLoadingStep(1)
                     );
 
-                    setLoadingStep(0)
+                    setLoadingStep(0);
                     setStep(2);
                 },
                 2: async () => {
                     await doTx(
                         () =>
-                            subManager.approveSubscription(
-                                subscription.price
-                            ),
+                            subManager.approveSubscription(subscription.price),
                         "Approve Subscription",
                         () => setLoadingStep(2)
                     );
 
-                    setLoadingStep(0)
+                    setLoadingStep(0);
                     setStep(3);
                 },
                 3: async () => {
                     try {
                         await doTx(
-                            () =>
-                                subManager.payment(
-                                    subscriptionId,
-                                ),
+                            () => subManager.payment(subscriptionId),
                             "Subscribe",
                             () => setLoadingStep(3)
                         );
 
-                        setLoadingStep(0)
+                        setLoadingStep(0);
                         setStep(4);
                     } catch (error: any) {
-                        console.log(error)
-                        setErrorMessage(error.message)
+                        console.log(error);
+                        setErrorMessage(error.message);
                     }
-                    
                 },
             });
 
@@ -187,17 +176,17 @@ const PaymentButton: FC<PaymentButton> = ({
             </button>
 
             <Modal show={showModal} onClose={handleClose}>
-                
                 <PaymentModalContent
                     isWrongNetwork={isWrongNetwork}
                     isLoaded={isLoaded}
-                    BUSD={BUSD}
+                    BUSD={TOKEN_IMG}
                     subscription={subscription}
                     step={step}
                     setStep={setStep}
                     stepFunction={stepFunction}
                     loadingStep={loadingStep}
                     errorMessage={errorMessage}
+                    balance={balance}
                 />
             </Modal>
         </>
@@ -214,7 +203,13 @@ type Step = {
     errorMessage: string;
 };
 
-const Step1: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage }) => {
+const Step1: FC<Step> = ({
+    step,
+    onClick,
+    subscription,
+    isLoading,
+    errorMessage,
+}) => {
     if (step == 1) {
         return (
             <li className="cap-mb-10 cap-ml-6">
@@ -230,7 +225,9 @@ const Step1: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage 
                     cycle
                 </p>
 
-                <span className="cap-font-normal cap-text-red-400">{errorMessage}</span>
+                <span className="cap-font-normal cap-text-red-400">
+                    {errorMessage}
+                </span>
 
                 <button
                     data-tooltip-target="step1"
@@ -283,7 +280,13 @@ const Step1: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage 
     }
 };
 
-const Step2: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage }) => {
+const Step2: FC<Step> = ({
+    step,
+    onClick,
+    subscription,
+    isLoading,
+    errorMessage,
+}) => {
     if (step < 2) {
         return (
             <li className="cap-mb-10 cap-ml-6">
@@ -294,9 +297,8 @@ const Step2: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage 
                     Approve Subscription
                 </h3>
                 <p className="cap-text-sm">
-                    Approve the amount of
-                    {subscription.symbol} Cicleo can withdraw from your account
-                    each payment cycle
+                    Approve the amount of {subscription.symbol} Cicleo can
+                    withdraw from your account each payment cycle
                 </p>
             </li>
         );
@@ -310,10 +312,12 @@ const Step2: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage 
                     Approve Subscription
                 </h3>
                 <p className="cap-text-sm">
-                    Approve the amount of{subscription.symbol} Cicleo can
+                    Approve the amount of {subscription.symbol} Cicleo can
                     withdraw from your account each payment cycle
                 </p>
-                <span className="cap-font-normal cap-text-red-400">{errorMessage}</span>
+                <span className="cap-font-normal cap-text-red-400">
+                    {errorMessage}
+                </span>
                 <button
                     className="cap-text-white cap-bg-blue-700 hover:cap-bg-blue-800 cap-mt-6 focus:cap-ring-4 focus:cap-outline-none focus:cap-ring-blue-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-text-center dark:cap-bg-blue-600 dark:hover:cap-bg-blue-700 dark:focus:cap-ring-blue-800 cap-flex cap-items-center cap-space-x-3"
                     onClick={onClick}
@@ -345,16 +349,21 @@ const Step2: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage 
                     Approve Subscription :
                 </h3>
                 <p className="cap-text-sm">
-                    Approve the amount of
-                    {subscription.symbol} Cicleo can withdraw from your account
-                    each payment cycle
+                    Approve the amount of {subscription.symbol} Cicleo can
+                    withdraw from your account each payment cycle
                 </p>
             </li>
         );
     }
 };
 
-const Step3: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage }) => {
+const Step3: FC<Step> = ({
+    step,
+    onClick,
+    subscription,
+    isLoading,
+    errorMessage,
+}) => {
     if (step < 3) {
         return (
             <li className="cap-ml-6">
@@ -379,7 +388,9 @@ const Step3: FC<Step> = ({ step, onClick, subscription, isLoading, errorMessage 
                 <p className="cap-text-sm">
                     Begin your Cicleo transaction-free payment plan now!
                 </p>
-                <span className="cap-font-normal cap-text-red-400">{errorMessage}</span>
+                <span className="cap-font-normal cap-text-red-400">
+                    {errorMessage}
+                </span>
                 <button
                     className="cap-text-white cap-bg-blue-700 hover:cap-bg-blue-800 cap-mt-6 focus:cap-ring-4 focus:cap-outline-none focus:cap-ring-blue-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-text-center dark:cap-bg-blue-600 dark:hover:cap-bg-blue-700 dark:focus:cap-ring-blue-800 cap-flex cap-items-center cap-space-x-3"
                     onClick={onClick}
@@ -484,6 +495,7 @@ type PaymentModalContent = {
     stepFunction: StepFunction;
     loadingStep: number;
     errorMessage: string;
+    balance: number | string;
 };
 
 const PaymentModalContent: FC<PaymentModalContent> = ({
@@ -495,7 +507,8 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
     setStep,
     stepFunction,
     loadingStep,
-    errorMessage
+    errorMessage,
+    balance
 }) => {
     if (isWrongNetwork)
         return (
@@ -505,26 +518,27 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                 </span>
             </div>
         );
-    
+
     if (isLoaded == false)
         return (
             <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
                 <BounceLoader color="#354c8b" />
             </div>
         );
-   
+
     return (
         <>
-            <div className="cap-flex cap-flex-col cap-py-2">
+            <div className="cap-flex cap-justify-between cap-py-2">
                 <div className="cap-flex cap-flex-row cap-items-center cap-px-5 cap-space-x-3">
                     <img
                         src={BUSD}
                         alt=""
                         className="cap-h-fit"
-                        width={30}
-                        height={30}
+                        width={40}
+                        height={40}
                     />
                     <div className="cap-flex cap-flex-col cap-justify-center">
+
                         <span className="cap-text-xl cap-font-semibold">
                             Subscription "{subscription.name}"
                         </span>
@@ -532,6 +546,15 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                             {subscription.price} {subscription.symbol} per month
                         </span>
                     </div>
+                </div>
+
+                <div className="cap-pr-4 cap-flex cap-flex-col cap-items-end">
+                    <span className="cap-font-semibold">
+                        Your {subscription.symbol} Balance
+                    </span>
+                    <span>
+                        {formatNumber(balance, 2)}
+                    </span>
                 </div>
             </div>
 

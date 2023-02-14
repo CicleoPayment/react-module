@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { providers, Contract, ContractInterface, BigNumber } from "ethers";
-import config from "./config";
 import {
     SubscriptionFactory,
     SubscriptionFactory__factory,
@@ -9,6 +8,7 @@ import {
     ERC20,
     ERC20__factory,
 } from "@context/Types";
+import axios from "axios";
 
 type Contracts = {
     SubscriptionFactory: (signer: providers.JsonRpcSigner) => Promise<SubscriptionFactory>;
@@ -24,14 +24,16 @@ interface ISavedContract {
     [key: string]: Contract;
 }
 
+let config: any
 
-const getConfig = (networkId: number) => {
-    switch (networkId) {
-        case 97:
-            return config.bscTest;
-        default:
-            return null;
+
+const getConfig = async (networkId: number) => {
+    if (config == undefined) {
+        const resp = await axios.get("https://cicleo-backend.vercel.app/getcontracts")
+        config = resp.data;
     }
+
+    return config[networkId];
 };
 
 const reduceAddress = (address: string) => {
@@ -40,8 +42,8 @@ const reduceAddress = (address: string) => {
 
 let savedContract: ISavedContract = {};
 
-const isGoodNetwork = (chainId: number) => {
-    return getConfig(chainId) != null;
+const isGoodNetwork = async(chainId: number) => {
+    return await getConfig(chainId) != null;
 };
 
 const doTx = async (func: () => any, nameTx: string, callback?: any) => {
@@ -119,7 +121,7 @@ const Contracts: Contracts = {
 
         if (cachedContracts["SF"][chainId] == undefined) {
             cachedContracts["SF"][chainId] = SubscriptionFactory__factory.connect(
-                getConfig(chainId)?.subscriptionFactoryAddress || "0x0",
+                (await getConfig(chainId)).subscriptionFactoryAddress || "0x0",
                 signer
             );
         }
@@ -145,4 +147,4 @@ const Contracts: Contracts = {
     },
 };
 
-export { Contracts, isGoodNetwork, doTx, reduceAddress }
+export { Contracts, isGoodNetwork, doTx, reduceAddress, formatNumber }
