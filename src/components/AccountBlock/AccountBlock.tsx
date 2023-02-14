@@ -140,7 +140,7 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                 subManager.address
             );
 
-            const res = await fetch(`${BACKEND_ADDR}/subscription/${address}`, {
+            const res = await fetch(`${BACKEND_ADDR}/chain/${chainId}/subscription/${address}`, {
                 credentials: "same-origin",
             });
 
@@ -162,6 +162,9 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                 address
             );
 
+            console.log(subManager)
+            console.log(subscriptionData);
+
             const sub = await subManager.subscriptions(
                 subscriptionData.subscriptionId
             );
@@ -176,18 +179,6 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                 subscriptionEndDate: userData.subscriptionEndDate.toNumber(),
             };
 
-            let step = 1;
-
-            if (allowance.gt(subscription.price)) {
-                step = 2;
-
-                const allowanceSubscription = await subManager.users(address);
-
-                if (allowanceSubscription.approval.gte(subscription.price)) {
-                    step = 3;
-                }
-            }
-
             setIsLoaded(true);
             setSubscription(_subscription);
         } catch (error: any) {
@@ -196,10 +187,12 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
     };
 
     const unsubscribe = async () => {
-        await signInWithEthereum(signer!);
+        if (!signer) return;
+        await signInWithEthereum(signer);
+        const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
-            `${BACKEND_ADDR}/subscription/cancel`,
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.address}/cancel`,
             {},
             {
                 withCredentials: true,
@@ -210,10 +203,12 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
     };
 
     const renew = async () => { 
-        await signInWithEthereum(signer!);
+        if (!signer) return;
+        await signInWithEthereum(signer);
+        const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
-            `${BACKEND_ADDR}/subscription/renew`,
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.address}/renew`,
             {},
             {
                 withCredentials: true,
@@ -526,8 +521,6 @@ const AccountModalContent: FC<AccountModalContent> = ({
                 <BounceLoader color="#354c8b" />
             </div>
         );
-
-    console.log(subscription.subscriptionEndDate);
 
     const endCycleDate = new Date(subscription.subscriptionEndDate * 1000);
 

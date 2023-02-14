@@ -29,7 +29,7 @@ let config: any
 
 const getConfig = async (networkId: number) => {
     if (config == undefined) {
-        const resp = await axios.get("https://cicleo-backend.vercel.app/getcontracts")
+        const resp = await axios.get("https://cicleo-backend.vercel.app/chain")
         config = resp.data;
     }
 
