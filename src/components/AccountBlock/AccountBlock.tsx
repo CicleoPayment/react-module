@@ -140,7 +140,7 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
                 subManager.address
             );
 
-            const res = await fetch(`${BACKEND_ADDR}/subscription/${address}`, {
+            const res = await fetch(`${BACKEND_ADDR}/chain/${chainId}/subscription/${address}`, {
                 credentials: "same-origin",
             });
 
@@ -196,10 +196,12 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
     };
 
     const unsubscribe = async () => {
-        await signInWithEthereum(signer!);
+        if (!signer) return;
+        await signInWithEthereum(signer);
+        const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
-            `${BACKEND_ADDR}/subscription/cancel`,
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/cancel`,
             {},
             {
                 withCredentials: true,
@@ -210,10 +212,12 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
     };
 
     const renew = async () => { 
-        await signInWithEthereum(signer!);
+        if (!signer) return;
+        await signInWithEthereum(signer);
+        const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
-            `${BACKEND_ADDR}/subscription/renew`,
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/renew`,
             {},
             {
                 withCredentials: true,
