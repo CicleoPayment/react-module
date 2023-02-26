@@ -23,18 +23,27 @@ import type {
 export interface ISubscriptionFactoryInterface extends utils.Interface {
   functions: {
     "botAddress()": FunctionFragment;
+    "executor()": FunctionFragment;
+    "router()": FunctionFragment;
     "taxAccount()": FunctionFragment;
     "taxPercent()": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "botAddress" | "taxAccount" | "taxPercent"
+    nameOrSignatureOrTopic:
+      | "botAddress"
+      | "executor"
+      | "router"
+      | "taxAccount"
+      | "taxPercent"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "botAddress",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "executor", values?: undefined): string;
+  encodeFunctionData(functionFragment: "router", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "taxAccount",
     values?: undefined
@@ -45,6 +54,8 @@ export interface ISubscriptionFactoryInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "botAddress", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "executor", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "router", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "taxAccount", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "taxPercent", data: BytesLike): Result;
 
@@ -80,6 +91,10 @@ export interface ISubscriptionFactory extends BaseContract {
   functions: {
     botAddress(overrides?: CallOverrides): Promise<[string]>;
 
+    executor(overrides?: CallOverrides): Promise<[string]>;
+
+    router(overrides?: CallOverrides): Promise<[string]>;
+
     taxAccount(overrides?: CallOverrides): Promise<[string]>;
 
     taxPercent(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -87,12 +102,20 @@ export interface ISubscriptionFactory extends BaseContract {
 
   botAddress(overrides?: CallOverrides): Promise<string>;
 
+  executor(overrides?: CallOverrides): Promise<string>;
+
+  router(overrides?: CallOverrides): Promise<string>;
+
   taxAccount(overrides?: CallOverrides): Promise<string>;
 
   taxPercent(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
     botAddress(overrides?: CallOverrides): Promise<string>;
+
+    executor(overrides?: CallOverrides): Promise<string>;
+
+    router(overrides?: CallOverrides): Promise<string>;
 
     taxAccount(overrides?: CallOverrides): Promise<string>;
 
@@ -104,6 +127,10 @@ export interface ISubscriptionFactory extends BaseContract {
   estimateGas: {
     botAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
+    executor(overrides?: CallOverrides): Promise<BigNumber>;
+
+    router(overrides?: CallOverrides): Promise<BigNumber>;
+
     taxAccount(overrides?: CallOverrides): Promise<BigNumber>;
 
     taxPercent(overrides?: CallOverrides): Promise<BigNumber>;
@@ -111,6 +138,10 @@ export interface ISubscriptionFactory extends BaseContract {
 
   populateTransaction: {
     botAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    executor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    router(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     taxAccount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

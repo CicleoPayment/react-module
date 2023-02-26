@@ -27,7 +27,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <PaymentButton subManagerId={1} subscriptionId={1} signer={signer} />
+            <PaymentButton subManagerId={2} subscriptionId={1} signer={signer} />
         </div>
   );
 };

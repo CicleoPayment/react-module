@@ -4,8 +4,10 @@ import "./PaymentButton.css";
 import Logo from "@assets/logo_white.svg";
 import LogoBlue from "@assets/logo.png";
 import TOKEN_IMG from "@assets/token.svg";
-import { Contracts, isGoodNetwork, doTx, formatNumber } from "@context/contract";
-import { BounceLoader, ClipLoader } from "react-spinners";
+import { Contracts, isGoodNetwork, doTx } from "@context/contract";
+import PaymentModalContent from "./PaymentModalContent";
+import SelectCoinModalContent from "./SelectCoinModalContent";
+import axios from "axios";
 
 type PaymentButton = {
     subManagerId: number;
@@ -21,12 +23,24 @@ const PaymentButton: FC<PaymentButton> = ({
     const [isWrongNetwork, setIsWrongNetwork] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [subManager, setSubManager] = useState({
+        address: "",
+        token: "",
+        decimals: 0,
+        allowance: BigNumber.from("0"),
+    });
+    const [subManagerContract, setSubManagerContract] = useState<any>(null);
+    const [swapInfo, setSwapInfo] = useState<any>(null);
+    const [coin, setCoin] = useState<string | null>(null);
+    const [coinLists, setCoinLists] = useState([]);
     const [step, setStep] = useState(1);
     const [balance, setBalance] = useState<string | number>("#");
     const [subscription, setSubscription] = useState({
         isActive: true,
         name: "",
         price: "0",
+        originalPrice: BigNumber.from("0"),
     });
     const [loadingStep, setLoadingStep] = useState(0);
     const [stepFunction, setStepFunction] = useState({
@@ -34,8 +48,111 @@ const PaymentButton: FC<PaymentButton> = ({
         2: () => {},
         3: () => {},
     });
+    
+    const iface = new ethers.utils.Interface(
+        [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Paused","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":true,"internalType":"contract IERC20","name":"srcToken","type":"address"},{"indexed":true,"internalType":"contract IERC20","name":"dstToken","type":"address"},{"indexed":false,"internalType":"address","name":"dstReceiver","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"spentAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"returnAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"minReturnAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"guaranteedAmount","type":"uint256"},{"indexed":false,"internalType":"address","name":"referrer","type":"address"}],"name":"Swapped","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"account","type":"address"}],"name":"Unpaused","type":"event"},{"inputs":[],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pause","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"contract IERC20","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"rescueFunds","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"contract IOpenOceanCaller","name":"caller","type":"address"},{"components":[{"internalType":"contract IERC20","name":"srcToken","type":"address"},{"internalType":"contract IERC20","name":"dstToken","type":"address"},{"internalType":"address","name":"srcReceiver","type":"address"},{"internalType":"address","name":"dstReceiver","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"minReturnAmount","type":"uint256"},{"internalType":"uint256","name":"guaranteedAmount","type":"uint256"},{"internalType":"uint256","name":"flags","type":"uint256"},{"internalType":"address","name":"referrer","type":"address"},{"internalType":"bytes","name":"permit","type":"bytes"}],"internalType":"struct OpenOceanExchange.SwapDescription","name":"desc","type":"tuple"},{"components":[{"internalType":"uint256","name":"target","type":"uint256"},{"internalType":"uint256","name":"gasLimit","type":"uint256"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"internalType":"struct IOpenOceanCaller.CallDescription[]","name":"calls","type":"tuple[]"}],"name":"swap","outputs":[{"internalType":"uint256","name":"returnAmount","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}]    );
 
-    const [errorMessage, setErrorMessage] = useState("");
+    const getSwap = async () => {
+        if (!signer) return;
+        if (!coin) return;
+
+        const address = await signer.getAddress();
+        
+        let data = JSON.stringify({
+            tokenIn: coin,
+            tokenOut: subManager.token,
+            price: subscription.originalPrice,
+            fromAddress: subManager.address,
+        });
+
+        let config = {
+            method: "post",
+            maxBodyLength: Infinity,
+            url: "http://localhost:6001/chain/56/getExactPrice/",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            data: data,
+        };
+
+        const resp = await axios(config);
+
+        let step = 1;
+
+        const erc20 = await Contracts.ERC20(signer, coin);
+
+        const allowance = await erc20.allowance(address, subManager.address);
+
+        if (allowance.gt(subscription.originalPrice)) {
+            step = 2;
+
+            if (subManager.allowance.gte(subscription.originalPrice)) {
+                step = 3;
+            }
+        }
+
+        setStep(step);
+
+        setStepFunction({
+            1: async () => {
+                await doTx(
+                    () =>
+                        erc20.approve(
+                            subManager.address,
+                            ethers.constants.MaxUint256
+                        ),
+                    `Approve ${resp.data.data.inToken.symbol}`,
+                    () => setLoadingStep(1)
+                );
+
+                setLoadingStep(0);
+                setStep(2);
+            },
+            2: async () => {
+                await doTx(
+                    () =>
+                        subManagerContract.approveSubscription(subscription.originalPrice),
+                    "Approve Subscription",
+                    () => setLoadingStep(2)
+                );
+
+                setLoadingStep(0);
+                setStep(3);
+            },
+            3: async () => {
+                try {
+                    let decodedData = iface.parseTransaction({ data: resp.data.data.data, value: resp.data.data.value });
+
+                    console.log(decodedData);
+
+                    await doTx(
+                        () => subManagerContract.paymentWithSwap(
+                            subscriptionId,
+                            decodedData.args.caller,
+                            decodedData.args.desc,
+                            decodedData.args.calls,
+                            //{gasLimit: '1000000'}
+                        ),
+                        "Subscribe",
+                        () => setLoadingStep(3)
+                    );
+
+                    setLoadingStep(0);
+                    setStep(4);
+                } catch (error: any) {
+                    console.log(error);
+                    setErrorMessage(error.message);
+                }
+            },
+        });
+
+
+        setSwapInfo(resp.data.data);
+    };
+
+    useEffect(() => {
+        getSwap();
+    }, [coin]);
 
     const createContracts = async () => {
         setIsLoaded(false);
@@ -48,7 +165,7 @@ const PaymentButton: FC<PaymentButton> = ({
 
             const address = await signer.getAddress();
 
-            if (!isGoodNetwork(chainId)) {
+            if (!(await isGoodNetwork(chainId))) {
                 setIsWrongNetwork(true);
                 console.log("Wrong network");
                 return;
@@ -67,83 +184,51 @@ const PaymentButton: FC<PaymentButton> = ({
                 true
             );
 
+            setSubManagerContract(subManager);
+
             let subscription = await subManager.subscriptions(subscriptionId);
             const decimals = await subManager.getDecimals();
             const token = await subManager.token();
             const symbol = await subManager.getSymbol();
+            const _user = await subManager.users(address);
+
+            setSubManager({
+                address: _subManagerAddy,
+                token,
+                decimals,
+                allowance: _user.approval
+            });
 
             let _subscription = {
                 isActive: subscription.isActive,
                 name: subscription.name,
                 price: ethers.utils.formatUnits(subscription.price, decimals),
                 symbol,
+                originalPrice: subscription.price,
             };
 
             const erc20 = await Contracts.ERC20(signer, token, true);
 
-            setBalance(Number(ethers.utils.formatUnits(await erc20.balanceOf(address), decimals)));
-
-            setStepFunction({
-                1: async () => {
-                    await doTx(
-                        () =>
-                            erc20.approve(
-                                subManager.address,
-                                ethers.constants.MaxUint256
-                            ),
-                        `Approve ${symbol}`,
-                        () => setLoadingStep(1)
-                    );
-
-                    setLoadingStep(0);
-                    setStep(2);
-                },
-                2: async () => {
-                    await doTx(
-                        () =>
-                            subManager.approveSubscription(subscription.price),
-                        "Approve Subscription",
-                        () => setLoadingStep(2)
-                    );
-
-                    setLoadingStep(0);
-                    setStep(3);
-                },
-                3: async () => {
-                    try {
-                        await doTx(
-                            () => subManager.payment(subscriptionId),
-                            "Subscribe",
-                            () => setLoadingStep(3)
-                        );
-
-                        setLoadingStep(0);
-                        setStep(4);
-                    } catch (error: any) {
-                        console.log(error);
-                        setErrorMessage(error.message);
-                    }
-                },
-            });
-
-            let step = 1;
-
-            const allowance = await erc20.allowance(
-                address,
-                subManager.address
+            setBalance(
+                Number(
+                    ethers.utils.formatUnits(
+                        await erc20.balanceOf(address),
+                        decimals
+                    )
+                )
             );
 
-            if (allowance.gt(subscription.price)) {
-                step = 2;
+            //--------------------------------------------------------------
 
-                const allowanceSubscription = await subManager.users(address);
+            const coinList = await axios.get(
+                `https://cicleo-backend.vercel.app/chain/56/getBalance/${address}/${token}/${subscription.price}`
+            );
 
-                if (allowanceSubscription.approval.gte(subscription.price)) {
-                    step = 3;
-                }
-            }
+            console.log(coinList.data);
 
-            setStep(step);
+            let coinData = coinList.data;
+
+            setCoinLists(coinData);
             setIsLoaded(true);
             setSubscription(_subscription);
         } catch (error: any) {
@@ -176,232 +261,35 @@ const PaymentButton: FC<PaymentButton> = ({
             </button>
 
             <Modal show={showModal} onClose={handleClose}>
-                <PaymentModalContent
-                    isWrongNetwork={isWrongNetwork}
-                    isLoaded={isLoaded}
-                    BUSD={TOKEN_IMG}
-                    subscription={subscription}
-                    step={step}
-                    setStep={setStep}
-                    stepFunction={stepFunction}
-                    loadingStep={loadingStep}
-                    errorMessage={errorMessage}
-                    balance={balance}
-                />
+                {coin == null ? (
+                    <SelectCoinModalContent
+                        isWrongNetwork={isWrongNetwork}
+                        isLoaded={isLoaded}
+                        BUSD={TOKEN_IMG}
+                        subscription={subscription}
+                        balance={balance}
+                        coinLists={coinLists}
+                        setCoin={(coin: string) => setCoin(coin)}
+                    />
+                ) : (
+                    <PaymentModalContent
+                        isLoaded={isLoaded}
+                        BUSD={TOKEN_IMG}
+                        subscription={subscription}
+                        step={step}
+                        stepFunction={stepFunction}
+                        loadingStep={loadingStep}
+                        errorMessage={errorMessage}
+                        balance={balance}
+                        swapInfo={swapInfo}
+                    />
+                )}
             </Modal>
         </>
     );
 };
 
 export default PaymentButton;
-
-type Step = {
-    step: number;
-    onClick: () => void;
-    subscription: any;
-    isLoading: boolean;
-    errorMessage: string;
-};
-
-const Step1: FC<Step> = ({
-    step,
-    onClick,
-    subscription,
-    isLoading,
-    errorMessage,
-}) => {
-    if (step == 1) {
-        return (
-            <li className="cap-mb-10 cap-ml-6">
-                <span className="cap-absolute cap-flex cap-items-center cap-justify-center cap-w-8 cap-h-8 cap-text-gray-600 cap-bg-blue-300 cap-rounded-full cap--left-4 cap-ring-4 cap-ring-white dark:cap-ring-gray-900 dark:cap-bg-gray-700">
-                    1
-                </span>
-                <h3 className="cap-font-medium cap-leading-tight cap-text-black">
-                    Approve {subscription.symbol}
-                </h3>
-                <p className="cap-text-sm">
-                    Approve Cicleo to automatically withdraw $
-                    {subscription.symbol} from your wallet for each payment
-                    cycle
-                </p>
-
-                <span className="cap-font-normal cap-text-red-400">
-                    {errorMessage}
-                </span>
-
-                <button
-                    data-tooltip-target="step1"
-                    data-tooltip-trigger="cap-hover"
-                    className="cap-text-white cap-bg-blue-700 hover:cap-bg-blue-800 cap-mt-6 focus:cap-ring-4 focus:cap-outline-none focus:cap-ring-blue-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-text-center dark:cap-bg-blue-600 dark:hover:cap-bg-blue-700 dark:focus:cap-ring-blue-800 cap-flex cap-items-center cap-space-x-3"
-                    onClick={onClick}
-                >
-                    <span>Approve</span>
-                    {isLoading && <ClipLoader color={"#fff"} size={20} />}
-                </button>
-
-                <div
-                    id="step1"
-                    role="tooltip"
-                    className="cap-absolute cap-z-10 cap-invisible cap-inline-block cap-px-3 cap-py-2 cap-text-sm cap-font-medium cap-text-white cap-bg-gray-900 cap-rounded-lg cap-shadow-sm cap-opacity-0 tooltip dark:cap-bg-gray-700"
-                >
-                    Tooltip content
-                    <div className="tooltip-arrow" data-popper-arrow></div>
-                </div>
-            </li>
-        );
-    } else {
-        return (
-            <li className="cap-mb-10 cap-ml-6">
-                <span className="cap-absolute cap-flex cap-items-center cap-justify-center cap-w-8 cap-h-8 cap-bg-green-200 cap-rounded-full cap--left-4 cap-ring-4 cap-ring-white dark:cap-ring-gray-900 dark:cap-bg-green-900">
-                    <svg
-                        aria-hidden="true"
-                        className="cap-w-5 cap-h-5 cap-text-green-500 dark:cap-text-green-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                        ></path>
-                    </svg>
-                </span>
-                <h3 className="cap-font-medium cap-leading-tight">
-                    Approve {subscription.symbol}
-                </h3>
-                <p className="cap-text-sm">
-                    Approve Cicleo to automatically withdraw $
-                    {subscription.symbol} from your wallet for each payment
-                    cycle
-                </p>
-            </li>
-        );
-    }
-};
-
-const Step2: FC<Step> = ({
-    step,
-    onClick,
-    subscription,
-    isLoading,
-    errorMessage,
-}) => {
-    if (step < 2) {
-        return (
-            <li className="cap-mb-10 cap-ml-6">
-                <span className="cap-absolute cap-flex cap-items-center cap-justify-center cap-w-8 cap-h-8 cap-bg-gray-100 cap-rounded-full cap--left-4 cap-ring-4 cap-ring-white dark:cap-ring-gray-900 dark:cap-bg-gray-700">
-                    2
-                </span>
-                <h3 className="cap-font-medium cap-leading-tight">
-                    Approve Subscription
-                </h3>
-                <p className="cap-text-sm">
-                    Approve the amount of {subscription.symbol} Cicleo can
-                    withdraw from your account each payment cycle
-                </p>
-            </li>
-        );
-    } else if (step == 2) {
-        return (
-            <li className="cap-mb-10 cap-ml-6">
-                <span className="cap-absolute cap-flex cap-items-center cap-justify-center cap-w-8 cap-h-8 cap-text-gray-600 cap-bg-blue-300 cap-rounded-full cap--left-4 cap-ring-4 cap-ring-white dark:cap-ring-gray-900 dark:cap-bg-gray-700">
-                    2
-                </span>
-                <h3 className="cap-font-medium cap-leading-tight cap-text-black">
-                    Approve Subscription
-                </h3>
-                <p className="cap-text-sm">
-                    Approve the amount of {subscription.symbol} Cicleo can
-                    withdraw from your account each payment cycle
-                </p>
-                <span className="cap-font-normal cap-text-red-400">
-                    {errorMessage}
-                </span>
-                <button
-                    className="cap-text-white cap-bg-blue-700 hover:cap-bg-blue-800 cap-mt-6 focus:cap-ring-4 focus:cap-outline-none focus:cap-ring-blue-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-text-center dark:cap-bg-blue-600 dark:hover:cap-bg-blue-700 dark:focus:cap-ring-blue-800 cap-flex cap-items-center cap-space-x-3"
-                    onClick={onClick}
-                >
-                    <span>Subscription Approve</span>
-                    {isLoading && <ClipLoader color={"#fff"} size={20} />}
-                </button>
-            </li>
-        );
-    } else {
-        return (
-            <li className="cap-mb-10 cap-ml-6">
-                <span className="cap-absolute cap-flex cap-items-center cap-justify-center cap-w-8 cap-h-8 cap-bg-green-200 cap-rounded-full cap--left-4 cap-ring-4 cap-ring-white dark:cap-ring-gray-900 dark:cap-bg-green-900">
-                    <svg
-                        aria-hidden="true"
-                        className="cap-w-5 cap-h-5 cap-text-green-500 dark:cap-text-green-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                        ></path>
-                    </svg>
-                </span>
-                <h3 className="cap-font-medium cap-leading-tight">
-                    Approve Subscription :
-                </h3>
-                <p className="cap-text-sm">
-                    Approve the amount of {subscription.symbol} Cicleo can
-                    withdraw from your account each payment cycle
-                </p>
-            </li>
-        );
-    }
-};
-
-const Step3: FC<Step> = ({
-    step,
-    onClick,
-    subscription,
-    isLoading,
-    errorMessage,
-}) => {
-    if (step < 3) {
-        return (
-            <li className="cap-ml-6">
-                <span className="cap-absolute cap-flex cap-items-center cap-justify-center cap-w-8 cap-h-8 cap-bg-gray-100 cap-rounded-full cap--left-4 cap-ring-4 cap-ring-white dark:cap-ring-gray-900 dark:cap-bg-gray-700">
-                    3
-                </span>
-                <h3 className="cap-font-medium cap-leading-tight">Subscribe</h3>
-                <p className="cap-text-sm">
-                    Begin your Cicleo transaction-free payment plan now!
-                </p>
-            </li>
-        );
-    } else {
-        return (
-            <li className="cap-mb-10 cap-ml-6">
-                <span className="cap-absolute cap-flex cap-items-center cap-justify-center cap-w-8 cap-h-8 cap-text-gray-600 cap-bg-blue-300 cap-rounded-full cap--left-4 cap-ring-4 cap-ring-white dark:cap-ring-gray-900 dark:cap-bg-gray-700">
-                    3
-                </span>
-                <h3 className="cap-font-medium cap-leading-tight cap-text-black">
-                    Subscribe
-                </h3>
-                <p className="cap-text-sm">
-                    Begin your Cicleo transaction-free payment plan now!
-                </p>
-                <span className="cap-font-normal cap-text-red-400">
-                    {errorMessage}
-                </span>
-                <button
-                    className="cap-text-white cap-bg-blue-700 hover:cap-bg-blue-800 cap-mt-6 focus:cap-ring-4 focus:cap-outline-none focus:cap-ring-blue-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-text-center dark:cap-bg-blue-600 dark:hover:cap-bg-blue-700 dark:focus:cap-ring-blue-800 cap-flex cap-items-center cap-space-x-3"
-                    onClick={onClick}
-                >
-                    <span>Start your {subscription.name} Package</span>
-                    {isLoading && <ClipLoader color={"#fff"} size={20} />}
-                </button>
-            </li>
-        );
-    }
-};
 
 type Modal = {
     children: JSX.Element;
@@ -462,138 +350,8 @@ const Modal: FC<Modal> = ({ children, show, onClose }) => {
                     </div>
                     {/* <!-- Modal body --> */}
                     {children}
-                    {/* <!-- Modal footer --> */}
-                    <div className="cap-flex cap-items-center cap-p-6 cap-space-x-2 cap-border-t cap-border-gray-200 cap-rounded-b dark:cap-border-gray-600">
-                        <button
-                            data-modal-hide="defaultModal"
-                            type="button"
-                            className="cap-text-gray-500 cap-bg-white hover:cap-bg-gray-100 focus:cap-ring-4 focus:cap-outline-none focus:cap-ring-blue-300 cap-rounded-lg cap-border cap-border-gray-200 cap-text-sm cap-font-medium cap-px-5 cap-py-2.5 hover:cap-text-gray-900 focus:cap-z-10 dark:cap-bg-gray-700 dark:cap-text-gray-300 dark:cap-border-gray-500 dark:hover:cap-text-white dark:hover:cap-bg-gray-600 dark:focus:cap-ring-gray-600"
-                            onClick={onClose}
-                        >
-                            Decline
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
-    );
-};
-
-type StepFunction = {
-    1: () => void;
-    2: () => void;
-    3: () => void;
-};
-
-type PaymentModalContent = {
-    isWrongNetwork: boolean;
-    isLoaded: boolean;
-    BUSD: string;
-    step: number;
-    subscription: any;
-    setStep: (step: number) => void;
-    stepFunction: StepFunction;
-    loadingStep: number;
-    errorMessage: string;
-    balance: number | string;
-};
-
-const PaymentModalContent: FC<PaymentModalContent> = ({
-    isWrongNetwork,
-    isLoaded,
-    BUSD,
-    step,
-    subscription,
-    setStep,
-    stepFunction,
-    loadingStep,
-    errorMessage,
-    balance
-}) => {
-    if (isWrongNetwork)
-        return (
-            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
-                <span className="cap-font-semibold cap-text-2xl">
-                    Sorry but this network is unsuported
-                </span>
-            </div>
-        );
-
-    if (isLoaded == false)
-        return (
-            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
-                <BounceLoader color="#354c8b" />
-            </div>
-        );
-
-    return (
-        <>
-            <div className="cap-flex cap-justify-between cap-py-2">
-                <div className="cap-flex cap-flex-row cap-items-center cap-px-5 cap-space-x-3">
-                    <img
-                        src={BUSD}
-                        alt=""
-                        className="cap-h-fit"
-                        width={40}
-                        height={40}
-                    />
-                    <div className="cap-flex cap-flex-col cap-justify-center">
-
-                        <span className="cap-text-xl cap-font-semibold">
-                            Subscription "{subscription.name}"
-                        </span>
-                        <span className="cap-text-lg cap-font-medium">
-                            {subscription.price} {subscription.symbol} per month
-                        </span>
-                    </div>
-                </div>
-
-                <div className="cap-pr-4 cap-flex cap-flex-col cap-items-end">
-                    <span className="cap-font-semibold">
-                        Your {subscription.symbol} Balance
-                    </span>
-                    <span>
-                        {formatNumber(balance, 2)}
-                    </span>
-                </div>
-            </div>
-
-            <hr />
-
-            <div className="cap-flex cap-flex-col cap-p-3 cap-px-6 cap-font-medium cap-space-y-7">
-                <span className="cap-font-semibold cap-text-gray-600">
-                    To process your subscription on-boarding, we will require
-                    you to sign the following 3 transactions:
-                </span>
-
-                <div className="cap-flex cap-justify-center">
-                    <ol className="cap-relative cap-ml-4 cap-text-gray-500 cap-border-l cap-border-gray-200 dark:cap-border-gray-700 dark:cap-text-gray-400">
-                        <Step1
-                            step={step}
-                            onClick={() => stepFunction[1]()}
-                            subscription={subscription}
-                            isLoading={loadingStep == 1}
-                            errorMessage={errorMessage}
-                        />
-
-                        <Step2
-                            step={step}
-                            onClick={() => stepFunction[2]()}
-                            subscription={subscription}
-                            isLoading={loadingStep == 2}
-                            errorMessage={errorMessage}
-                        />
-
-                        <Step3
-                            step={step}
-                            onClick={() => stepFunction[3]()}
-                            subscription={subscription}
-                            isLoading={loadingStep == 3}
-                            errorMessage={errorMessage}
-                        />
-                    </ol>
-                </div>
-            </div>
-        </>
     );
 };

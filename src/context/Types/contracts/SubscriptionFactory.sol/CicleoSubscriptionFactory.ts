@@ -25,7 +25,7 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../common";
+} from "../../common";
 
 export type SubscriptionManagerStructStruct = {
   id: PromiseOrValue<BigNumberish>;
@@ -41,7 +41,7 @@ export type SubscriptionManagerStructStructOutput = [
   string
 ] & { id: BigNumber; name: string; activeSub: BigNumber; symbol: string };
 
-export interface SubscriptionFactoryInterface extends utils.Interface {
+export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
   functions: {
     "accessAllowed(address,uint256)": FunctionFragment;
     "botAddress()": FunctionFragment;
@@ -52,10 +52,11 @@ export interface SubscriptionFactoryInterface extends utils.Interface {
     "getTokenSymbol(uint256)": FunctionFragment;
     "idCount()": FunctionFragment;
     "ids(uint256)": FunctionFragment;
-    "initialize(address,uint256,address)": FunctionFragment;
+    "initialize(address,uint256,address,address)": FunctionFragment;
     "isSubscriptionAddress(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "router()": FunctionFragment;
     "setBotAddress(address)": FunctionFragment;
     "setTaxAccount(address)": FunctionFragment;
     "setTaxPercent(uint256)": FunctionFragment;
@@ -79,6 +80,7 @@ export interface SubscriptionFactoryInterface extends utils.Interface {
       | "isSubscriptionAddress"
       | "owner"
       | "renounceOwnership"
+      | "router"
       | "setBotAddress"
       | "setTaxAccount"
       | "setTaxPercent"
@@ -129,6 +131,7 @@ export interface SubscriptionFactoryInterface extends utils.Interface {
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
       PromiseOrValue<string>
     ]
   ): string;
@@ -141,6 +144,7 @@ export interface SubscriptionFactoryInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "router", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setBotAddress",
     values: [PromiseOrValue<string>]
@@ -200,6 +204,7 @@ export interface SubscriptionFactoryInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "router", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setBotAddress",
     data: BytesLike
@@ -261,12 +266,12 @@ export type SubscriptionManagerCreatedEvent = TypedEvent<
 export type SubscriptionManagerCreatedEventFilter =
   TypedEventFilter<SubscriptionManagerCreatedEvent>;
 
-export interface SubscriptionFactory extends BaseContract {
+export interface CicleoSubscriptionFactory extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: SubscriptionFactoryInterface;
+  interface: CicleoSubscriptionFactoryInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -334,6 +339,7 @@ export interface SubscriptionFactory extends BaseContract {
       _botAddress: PromiseOrValue<string>,
       _taxPercent: PromiseOrValue<BigNumberish>,
       _taxAccount: PromiseOrValue<string>,
+      _router: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -347,6 +353,8 @@ export interface SubscriptionFactory extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    router(overrides?: CallOverrides): Promise<[string]>;
 
     setBotAddress(
       _botAddress: PromiseOrValue<string>,
@@ -419,6 +427,7 @@ export interface SubscriptionFactory extends BaseContract {
     _botAddress: PromiseOrValue<string>,
     _taxPercent: PromiseOrValue<BigNumberish>,
     _taxAccount: PromiseOrValue<string>,
+    _router: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -432,6 +441,8 @@ export interface SubscriptionFactory extends BaseContract {
   renounceOwnership(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  router(overrides?: CallOverrides): Promise<string>;
 
   setBotAddress(
     _botAddress: PromiseOrValue<string>,
@@ -504,6 +515,7 @@ export interface SubscriptionFactory extends BaseContract {
       _botAddress: PromiseOrValue<string>,
       _taxPercent: PromiseOrValue<BigNumberish>,
       _taxAccount: PromiseOrValue<string>,
+      _router: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -515,6 +527,8 @@ export interface SubscriptionFactory extends BaseContract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    router(overrides?: CallOverrides): Promise<string>;
 
     setBotAddress(
       _botAddress: PromiseOrValue<string>,
@@ -611,6 +625,7 @@ export interface SubscriptionFactory extends BaseContract {
       _botAddress: PromiseOrValue<string>,
       _taxPercent: PromiseOrValue<BigNumberish>,
       _taxAccount: PromiseOrValue<string>,
+      _router: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -624,6 +639,8 @@ export interface SubscriptionFactory extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    router(overrides?: CallOverrides): Promise<BigNumber>;
 
     setBotAddress(
       _botAddress: PromiseOrValue<string>,
@@ -697,6 +714,7 @@ export interface SubscriptionFactory extends BaseContract {
       _botAddress: PromiseOrValue<string>,
       _taxPercent: PromiseOrValue<BigNumberish>,
       _taxAccount: PromiseOrValue<string>,
+      _router: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -710,6 +728,8 @@ export interface SubscriptionFactory extends BaseContract {
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    router(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setBotAddress(
       _botAddress: PromiseOrValue<string>,

@@ -27,7 +27,44 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export declare namespace SubscriptionManager {
+export type SwapDescriptionStruct = {
+  srcToken: PromiseOrValue<string>;
+  dstToken: PromiseOrValue<string>;
+  srcReceiver: PromiseOrValue<string>;
+  dstReceiver: PromiseOrValue<string>;
+  amount: PromiseOrValue<BigNumberish>;
+  minReturnAmount: PromiseOrValue<BigNumberish>;
+  guaranteedAmount: PromiseOrValue<BigNumberish>;
+  flags: PromiseOrValue<BigNumberish>;
+  referrer: PromiseOrValue<string>;
+  permit: PromiseOrValue<BytesLike>;
+};
+
+export type SwapDescriptionStructOutput = [
+  string,
+  string,
+  string,
+  string,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  string,
+  string
+] & {
+  srcToken: string;
+  dstToken: string;
+  srcReceiver: string;
+  dstReceiver: string;
+  amount: BigNumber;
+  minReturnAmount: BigNumber;
+  guaranteedAmount: BigNumber;
+  flags: BigNumber;
+  referrer: string;
+  permit: string;
+};
+
+export declare namespace CicleoSubscriptionManager {
   export type SubscriptionStructStruct = {
     price: PromiseOrValue<BigNumberish>;
     isActive: PromiseOrValue<boolean>;
@@ -41,10 +78,32 @@ export declare namespace SubscriptionManager {
   };
 }
 
-export interface SubscriptionManagerInterface extends utils.Interface {
+export declare namespace IOpenOceanCaller {
+  export type CallDescriptionStruct = {
+    target: PromiseOrValue<BigNumberish>;
+    gasLimit: PromiseOrValue<BigNumberish>;
+    value: PromiseOrValue<BigNumberish>;
+    data: PromiseOrValue<BytesLike>;
+  };
+
+  export type CallDescriptionStructOutput = [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string
+  ] & {
+    target: BigNumber;
+    gasLimit: BigNumber;
+    value: BigNumber;
+    data: string;
+  };
+}
+
+export interface CicleoSubscriptionManagerInterface extends utils.Interface {
   functions: {
     "approveSubscription(uint256)": FunctionFragment;
     "cancel()": FunctionFragment;
+    "editAccount(address,uint256,uint256)": FunctionFragment;
     "editSubscription(uint256,uint256,string,bool)": FunctionFragment;
     "factory()": FunctionFragment;
     "getActiveSubscriptionCount()": FunctionFragment;
@@ -56,7 +115,9 @@ export interface SubscriptionManagerInterface extends utils.Interface {
     "newSubscription(uint256,string)": FunctionFragment;
     "owner()": FunctionFragment;
     "payment(uint8)": FunctionFragment;
+    "paymentWithSwap(uint8,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "router()": FunctionFragment;
     "setName(string)": FunctionFragment;
     "setTreasury(address)": FunctionFragment;
     "subscriptionNumber()": FunctionFragment;
@@ -72,6 +133,7 @@ export interface SubscriptionManagerInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "approveSubscription"
       | "cancel"
+      | "editAccount"
       | "editSubscription"
       | "factory"
       | "getActiveSubscriptionCount"
@@ -83,7 +145,9 @@ export interface SubscriptionManagerInterface extends utils.Interface {
       | "newSubscription"
       | "owner"
       | "payment"
+      | "paymentWithSwap"
       | "renounceOwnership"
+      | "router"
       | "setName"
       | "setTreasury"
       | "subscriptionNumber"
@@ -100,6 +164,14 @@ export interface SubscriptionManagerInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(functionFragment: "cancel", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "editAccount",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
   encodeFunctionData(
     functionFragment: "editSubscription",
     values: [
@@ -138,9 +210,19 @@ export interface SubscriptionManagerInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "paymentWithSwap",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "router", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setName",
     values: [PromiseOrValue<string>]
@@ -178,6 +260,10 @@ export interface SubscriptionManagerInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "cancel", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "editAccount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "editSubscription",
     data: BytesLike
   ): Result;
@@ -207,9 +293,14 @@ export interface SubscriptionManagerInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "payment", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "paymentWithSwap",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "router", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setName", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setTreasury",
@@ -240,7 +331,7 @@ export interface SubscriptionManagerInterface extends utils.Interface {
     "Cancel(address)": EventFragment;
     "NameEdited(address,string)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
-    "Payment(address,uint256)": EventFragment;
+    "PaymentSubscription(address,uint256,uint256)": EventFragment;
     "SubscriptionEdited(address,uint256,uint256,bool)": EventFragment;
     "TreasuryEdited(address,address)": EventFragment;
   };
@@ -249,7 +340,7 @@ export interface SubscriptionManagerInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Cancel"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NameEdited"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Payment"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PaymentSubscription"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SubscriptionEdited"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TreasuryEdited"): EventFragment;
 }
@@ -296,13 +387,18 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface PaymentEventObject {
+export interface PaymentSubscriptionEventObject {
   user: string;
   subscrptionType: BigNumber;
+  price: BigNumber;
 }
-export type PaymentEvent = TypedEvent<[string, BigNumber], PaymentEventObject>;
+export type PaymentSubscriptionEvent = TypedEvent<
+  [string, BigNumber, BigNumber],
+  PaymentSubscriptionEventObject
+>;
 
-export type PaymentEventFilter = TypedEventFilter<PaymentEvent>;
+export type PaymentSubscriptionEventFilter =
+  TypedEventFilter<PaymentSubscriptionEvent>;
 
 export interface SubscriptionEditedEventObject {
   user: string;
@@ -329,12 +425,12 @@ export type TreasuryEditedEvent = TypedEvent<
 
 export type TreasuryEditedEventFilter = TypedEventFilter<TreasuryEditedEvent>;
 
-export interface SubscriptionManager extends BaseContract {
+export interface CicleoSubscriptionManager extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: SubscriptionManagerInterface;
+  interface: CicleoSubscriptionManagerInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -365,6 +461,13 @@ export interface SubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    editAccount(
+      user: PromiseOrValue<string>,
+      subscriptionEndDate: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     editSubscription(
       id: PromiseOrValue<BigNumberish>,
       _subscriptionPrice: PromiseOrValue<BigNumberish>,
@@ -390,7 +493,7 @@ export interface SubscriptionManager extends BaseContract {
 
     getSubscriptions(
       overrides?: CallOverrides
-    ): Promise<[SubscriptionManager.SubscriptionStructStructOutput[]]>;
+    ): Promise<[CicleoSubscriptionManager.SubscriptionStructStructOutput[]]>;
 
     getSymbol(overrides?: CallOverrides): Promise<[string]>;
 
@@ -409,9 +512,19 @@ export interface SubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    paymentWithSwap(
+      id: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    router(overrides?: CallOverrides): Promise<[string]>;
 
     setName(
       _name: PromiseOrValue<string>,
@@ -473,6 +586,13 @@ export interface SubscriptionManager extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  editAccount(
+    user: PromiseOrValue<string>,
+    subscriptionEndDate: PromiseOrValue<BigNumberish>,
+    subscriptionId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   editSubscription(
     id: PromiseOrValue<BigNumberish>,
     _subscriptionPrice: PromiseOrValue<BigNumberish>,
@@ -496,7 +616,7 @@ export interface SubscriptionManager extends BaseContract {
 
   getSubscriptions(
     overrides?: CallOverrides
-  ): Promise<SubscriptionManager.SubscriptionStructStructOutput[]>;
+  ): Promise<CicleoSubscriptionManager.SubscriptionStructStructOutput[]>;
 
   getSymbol(overrides?: CallOverrides): Promise<string>;
 
@@ -515,9 +635,19 @@ export interface SubscriptionManager extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  paymentWithSwap(
+    id: PromiseOrValue<BigNumberish>,
+    executor: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   renounceOwnership(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  router(overrides?: CallOverrides): Promise<string>;
 
   setName(
     _name: PromiseOrValue<string>,
@@ -577,6 +707,13 @@ export interface SubscriptionManager extends BaseContract {
 
     cancel(overrides?: CallOverrides): Promise<void>;
 
+    editAccount(
+      user: PromiseOrValue<string>,
+      subscriptionEndDate: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     editSubscription(
       id: PromiseOrValue<BigNumberish>,
       _subscriptionPrice: PromiseOrValue<BigNumberish>,
@@ -600,7 +737,7 @@ export interface SubscriptionManager extends BaseContract {
 
     getSubscriptions(
       overrides?: CallOverrides
-    ): Promise<SubscriptionManager.SubscriptionStructStructOutput[]>;
+    ): Promise<CicleoSubscriptionManager.SubscriptionStructStructOutput[]>;
 
     getSymbol(overrides?: CallOverrides): Promise<string>;
 
@@ -619,7 +756,17 @@ export interface SubscriptionManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    paymentWithSwap(
+      id: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    router(overrides?: CallOverrides): Promise<string>;
 
     setName(
       _name: PromiseOrValue<string>,
@@ -703,14 +850,16 @@ export interface SubscriptionManager extends BaseContract {
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
 
-    "Payment(address,uint256)"(
+    "PaymentSubscription(address,uint256,uint256)"(
       user?: PromiseOrValue<string> | null,
-      subscrptionType?: PromiseOrValue<BigNumberish> | null
-    ): PaymentEventFilter;
-    Payment(
+      subscrptionType?: PromiseOrValue<BigNumberish> | null,
+      price?: null
+    ): PaymentSubscriptionEventFilter;
+    PaymentSubscription(
       user?: PromiseOrValue<string> | null,
-      subscrptionType?: PromiseOrValue<BigNumberish> | null
-    ): PaymentEventFilter;
+      subscrptionType?: PromiseOrValue<BigNumberish> | null,
+      price?: null
+    ): PaymentSubscriptionEventFilter;
 
     "SubscriptionEdited(address,uint256,uint256,bool)"(
       user?: PromiseOrValue<string> | null,
@@ -742,6 +891,13 @@ export interface SubscriptionManager extends BaseContract {
     ): Promise<BigNumber>;
 
     cancel(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    editAccount(
+      user: PromiseOrValue<string>,
+      subscriptionEndDate: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -783,9 +939,19 @@ export interface SubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    paymentWithSwap(
+      id: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    router(overrides?: CallOverrides): Promise<BigNumber>;
 
     setName(
       _name: PromiseOrValue<string>,
@@ -834,6 +1000,13 @@ export interface SubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    editAccount(
+      user: PromiseOrValue<string>,
+      subscriptionEndDate: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     editSubscription(
       id: PromiseOrValue<BigNumberish>,
       _subscriptionPrice: PromiseOrValue<BigNumberish>,
@@ -874,9 +1047,19 @@ export interface SubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    paymentWithSwap(
+      id: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    router(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setName(
       _name: PromiseOrValue<string>,

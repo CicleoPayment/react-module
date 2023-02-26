@@ -25,6 +25,32 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "executor",
+    outputs: [
+      {
+        internalType: "contract IAggregationExecutor",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "router",
+    outputs: [
+      {
+        internalType: "contract IRouter",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "taxAccount",
     outputs: [
       {

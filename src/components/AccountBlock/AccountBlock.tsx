@@ -108,7 +108,7 @@ const AccountBlock: FC<PaymentButton> = ({ subManagerId, signer }) => {
 
             setAccount(address);
 
-            if (!isGoodNetwork(chainId)) {
+            if (! await isGoodNetwork(chainId)) {
                 setIsWrongNetwork(true);
                 console.log("Wrong network");
                 return;

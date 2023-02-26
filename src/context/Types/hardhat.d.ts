@@ -45,17 +45,29 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
-      name: "SubscriptionFactory",
+      name: "CicleoSubscriptionFactory",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SubscriptionFactory__factory>;
+    ): Promise<Contracts.CicleoSubscriptionFactory__factory>;
+    getContractFactory(
+      name: "CicleoSubscriptionManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoSubscriptionManager__factory>;
+    getContractFactory(
+      name: "IAggregationExecutor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAggregationExecutor__factory>;
+    getContractFactory(
+      name: "IOpenOceanCaller",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IOpenOceanCaller__factory>;
+    getContractFactory(
+      name: "IRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IRouter__factory>;
     getContractFactory(
       name: "ISubscriptionFactory",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ISubscriptionFactory__factory>;
-    getContractFactory(
-      name: "SubscriptionManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SubscriptionManager__factory>;
     getContractFactory(
       name: "TestnetUSDC",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -102,20 +114,35 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
-      name: "SubscriptionFactory",
+      name: "CicleoSubscriptionFactory",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.SubscriptionFactory>;
+    ): Promise<Contracts.CicleoSubscriptionFactory>;
+    getContractAt(
+      name: "CicleoSubscriptionManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoSubscriptionManager>;
+    getContractAt(
+      name: "IAggregationExecutor",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAggregationExecutor>;
+    getContractAt(
+      name: "IOpenOceanCaller",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IOpenOceanCaller>;
+    getContractAt(
+      name: "IRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IRouter>;
     getContractAt(
       name: "ISubscriptionFactory",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ISubscriptionFactory>;
-    getContractAt(
-      name: "SubscriptionManager",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SubscriptionManager>;
     getContractAt(
       name: "TestnetUSDC",
       address: string,

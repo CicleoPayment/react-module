@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { providers, Contract, ContractInterface, BigNumber } from "ethers";
 import {
-    SubscriptionFactory,
-    SubscriptionFactory__factory,
-    SubscriptionManager,
-    SubscriptionManager__factory,
+    CicleoSubscriptionFactory,
+    CicleoSubscriptionFactory__factory,
+    CicleoSubscriptionManager,
+    CicleoSubscriptionManager__factory,
     ERC20,
     ERC20__factory,
 } from "@context/Types";
 import axios from "axios";
 
 type Contracts = {
-    SubscriptionFactory: (signer: providers.JsonRpcSigner) => Promise<SubscriptionFactory>;
+    SubscriptionFactory: (signer: providers.JsonRpcSigner) => Promise<CicleoSubscriptionFactory>;
     ERC20: (signer: providers.JsonRpcSigner, address: string, forceReload?:boolean) => Promise<ERC20>;
-    SubscriptionManager: (signer: providers.JsonRpcSigner, address: string, forceReload?:boolean) => Promise<SubscriptionManager>;
+    SubscriptionManager: (signer: providers.JsonRpcSigner, address: string, forceReload?:boolean) => Promise<CicleoSubscriptionManager>;
 }
 
 interface IError {
@@ -120,7 +120,7 @@ const Contracts: Contracts = {
         const { chainId } = await signer.provider.getNetwork()
 
         if (cachedContracts["SF"][chainId] == undefined) {
-            cachedContracts["SF"][chainId] = SubscriptionFactory__factory.connect(
+            cachedContracts["SF"][chainId] = CicleoSubscriptionFactory__factory.connect(
                 (await getConfig(chainId)).subscriptionFactoryAddress || "0x0",
                 signer
             );
@@ -138,7 +138,7 @@ const Contracts: Contracts = {
     },
     SubscriptionManager: async (signer: providers.JsonRpcSigner, address: string, force?: boolean) => {
         if (cachedContracts["SM"][address] == null || force) {
-            cachedContracts["SM"][address] = SubscriptionManager__factory.connect(
+            cachedContracts["SM"][address] = CicleoSubscriptionManager__factory.connect(
                 address,
                 signer
             );

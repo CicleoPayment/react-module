@@ -3,8 +3,9 @@
 /* eslint-disable */
 import type * as interfaces from "./Interfaces";
 export type { interfaces };
+import type * as subscriptionFactorySol from "./SubscriptionFactory.sol";
+export type { subscriptionFactorySol };
 import type * as subscriptionManagerSol from "./SubscriptionManager.sol";
 export type { subscriptionManagerSol };
 import type * as test from "./Test";
 export type { test };
-export type { SubscriptionFactory } from "./SubscriptionFactory";
