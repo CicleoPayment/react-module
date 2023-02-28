@@ -35,7 +35,8 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
 
     if (isLoaded == false)
         return (
-            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
+            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20 cap-flex-col cap-space-y-4">
+                <span className="cap-font-medium">Scanning of your ERC20 coins...</span>
                 <BounceLoader color="#354c8b" />
             </div>
         );
@@ -71,52 +72,89 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
 
             <hr />
 
-            <div className="cap-flex cap-flex-col cap-p-3 cap-px-6 cap-font-medium cap-space-y-7 ">
-                <span className="cap-font-semibold cap-text-gray-600">
-                    You can chose to pay with any of this coin bellow, anyway
-                    the price deducted each month will still be{" "}
-                    {subscription.price} {subscription.symbol} worth of the coin
-                    you chose (calculated on the day of payment)
-                </span>
-
-                <div className="cap-flex cap-items-center cap-flex-col cap-px-20 cap-space-y-10">
-                    <div className="cap-w-fit cap-space-y-5">
-                        {coinLists.map((coin, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setSelectedCoin(coin.id)}
-                                disabled={BigNumber.from(coin.raw_amount.toString()).lt(coin.toPay.toString())}
-                                className={`cap-flex cap-space-x-5 cap-items-center cap-justify-between cap-border cap-rounded-xl cap-py-2 cap-px-5 hover:cap-border-blue-200 disabled:cap-border-gray-400 ${
-                                    (selectedCoin == coin.id &&
-                                        "!cap-border-blue-500 cap-bg-blue-50") ||
-                                    ""
-                                } cap-cursor-pointer cap-w-full`}
-                            >
-                                <div className="cap-flex cap-space-x-5 cap-items-center">
-                                    <img
-                                        src={coin.logo_url}
-                                        alt=""
-                                        width={40}
-                                        height={40}
-                                    />
-                                    <span className={BigNumber.from(coin.raw_amount.toString()).lt(coin.toPay.toString()) ? "cap-text-gray-500" : ""}>{coin.name}</span>
-                                </div>
-                                
-                                <div className="cap-flex cap-flex-col cap-items-end">
-                                    <span className="cap-text-gray-500">{Number(utils.formatUnits(coin.toPay, coin.decimals)).toFixed(2) + '.. ' + coin.symbol}</span>
-                                    {BigNumber.from(coin.raw_amount.toString()).lt(coin.toPay.toString()) && <span className="cap-text-red-500 cap-ml-2">Insufficient Balance</span>}
-                                </div>
-                                
-                            </button>
-                        ))}
-                    </div>
-
-                    <button
-                        className="cap-text-white cap-bg-blue-700 hover:cap-bg-blue-800 focus:cap-ring-4 focus:cap-ring-blue-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-mr-2 cap-mb-2 dark:cap-bg-blue-600 dark:hover:cap-bg-blue-700 focus:cap-outline-none dark:focus:cap-ring-blue-800"
-                        onClick={() => setCoin(selectedCoin)}
-                    >Continue</button>
+            {coinLists.length == 0 ? (
+                <div className="cap-p-5 ">
+                    <span className="cap-text-xl cap-font-medium">
+                        Unfortunally we detecting no ERC20 coin on your account,
+                        swap your native tokens to ERC20 tokens to continue
+                    </span>
                 </div>
-            </div>
+            ) : (
+                <div className="cap-flex cap-flex-col cap-p-3 cap-px-6 cap-font-medium cap-space-y-7 ">
+                    <span className="cap-font-semibold cap-text-gray-600">
+                        You can chose to pay with any of this coin bellow,
+                        anyway the price deducted each month will still be{" "}
+                        {subscription.price} {subscription.symbol} worth of the
+                        coin you chose (calculated on the day of payment)
+                    </span>
+
+                    <div className="cap-flex cap-items-center cap-flex-col cap-px-20 cap-space-y-10">
+                        <div className="cap-w-fit cap-space-y-5">
+                            {coinLists.map((coin, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setSelectedCoin(coin.id)}
+                                    disabled={BigNumber.from(
+                                        coin.raw_amount.toString()
+                                    ).lt(coin.toPay.toString())}
+                                    className={`cap-flex cap-space-x-5 cap-items-center cap-justify-between cap-border cap-rounded-xl cap-py-2 cap-px-5 hover:cap-border-blue-200 disabled:cap-border-gray-400 ${
+                                        (selectedCoin == coin.id &&
+                                            "!cap-border-blue-500 cap-bg-blue-50") ||
+                                        ""
+                                    } cap-cursor-pointer cap-w-full`}
+                                >
+                                    <div className="cap-flex cap-space-x-5 cap-items-center">
+                                        <img
+                                            src={coin.logo_url}
+                                            alt=""
+                                            width={40}
+                                            height={40}
+                                        />
+                                        <span
+                                            className={
+                                                BigNumber.from(
+                                                    coin.raw_amount.toString()
+                                                ).lt(coin.toPay.toString())
+                                                    ? "cap-text-gray-500"
+                                                    : ""
+                                            }
+                                        >
+                                            {coin.name}
+                                        </span>
+                                    </div>
+
+                                    <div className="cap-flex cap-flex-col cap-items-end">
+                                        <span className="cap-text-gray-500">
+                                            {Number(
+                                                utils.formatUnits(
+                                                    coin.toPay,
+                                                    coin.decimals
+                                                )
+                                            ).toFixed(2) +
+                                                ".. " +
+                                                coin.symbol}
+                                        </span>
+                                        {BigNumber.from(
+                                            coin.raw_amount.toString()
+                                        ).lt(coin.toPay.toString()) && (
+                                            <span className="cap-text-red-500 cap-ml-2">
+                                                Insufficient Balance
+                                            </span>
+                                        )}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            className="cap-text-white cap-bg-blue-700 hover:cap-bg-blue-800 focus:cap-ring-4 focus:cap-ring-blue-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-mr-2 cap-mb-2 dark:cap-bg-blue-600 dark:hover:cap-bg-blue-700 focus:cap-outline-none dark:focus:cap-ring-blue-800"
+                            onClick={() => setCoin(selectedCoin)}
+                        >
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

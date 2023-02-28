@@ -251,7 +251,8 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
 }) => {
     if (isLoaded == false)
         return (
-            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20">
+            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20 cap-flex-col">
+                <span className="cap-font-medium">Finding the best way to swap your tokens</span>
                 <BounceLoader color="#354c8b" />
             </div>
         );

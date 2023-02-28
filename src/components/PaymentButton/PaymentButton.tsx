@@ -68,7 +68,7 @@ const PaymentButton: FC<PaymentButton> = ({
         let config = {
             method: "post",
             maxBodyLength: Infinity,
-            url: "http://localhost:6001/chain/56/getExactPrice/",
+            url: "https://cicleo-backend.vercel.app/chain/56/getExactPrice/",
             headers: {
                 "Content-Type": "application/json",
             },
