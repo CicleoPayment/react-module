@@ -27,7 +27,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <AccountBlock subManagerId={1} signer={signer} />
+            <AccountBlock config={{56: 2,  }} signer={signer} />
         </div>
   );
 };

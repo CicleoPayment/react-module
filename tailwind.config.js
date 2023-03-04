@@ -2,10 +2,8 @@
  * @type {import('@types/tailwindcss/tailwind-config').TailwindConfig}
  */
 module.exports = {
-    darkMode: 'class',
     content: [
         "./src/**/*.{js,ts,jsx,tsx}",
-        "./node_modules/flowbite-react/**/*.js",
         "./pages/**/*.{js,ts,jsx,tsx}",
         "./components/**/*.{js,ts,jsx,tsx}",
     ],
@@ -28,5 +26,30 @@ module.exports = {
             },
         },
     },
-    plugins: [],
+    daisyui: {
+        themes: [
+            {
+                mytheme: {
+                    primary: "#009dff",
+
+                    secondary: "#2429b7",
+
+                    accent: "#e5ff68",
+
+                    neutral: "#1D2B35",
+
+                    "base-100": "#191E24",
+
+                    info: "#72C6F3",
+
+                    success: "#1A844A",
+
+                    warning: "#F8C612",
+
+                    error: "#E81725",
+                },
+            },
+        ],
+    },
+    plugins: [require("daisyui")],
 };
