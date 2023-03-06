@@ -161,7 +161,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                                     coin.toPay,
                                                     coin.decimals
                                                 )
-                                            ).toFixed(2) + coin.symbol}
+                                            ).toFixed(2) + ' ' + coin.symbol}
                                         </span>
                                         {BigNumber.from(
                                             coin.raw_amount.toString()

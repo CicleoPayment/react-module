@@ -14,7 +14,7 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({subManager, subscription, addre
     const [selectedCoin, setSelectedCoin] = React.useState<any>(null);
 
     const getCoinList = async () => {
-        if (subscription == undefined) return;
+        if (subscription.originalPrice == undefined) return;
         if (subManager == undefined) return;
         console.log(subscription);
         
@@ -168,7 +168,7 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({subManager, subscription, addre
                                                             coin.toPay,
                                                             coin.decimals
                                                         )
-                                                    ).toFixed(2) + coin.symbol}
+                                                    ).toFixed(2) + " " + coin.symbol}
                                                 </span>
                                                 {BigNumber.from(
                                                     coin.raw_amount.toString()

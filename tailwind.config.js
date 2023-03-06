@@ -30,9 +30,9 @@ module.exports = {
         themes: [
             {
                 mytheme: {
-                    primary: "#009dff",
+                    primary: "#0061FF",
 
-                    secondary: "#2429b7",
+                    secondary: "#0044FF",
 
                     accent: "#e5ff68",
 
@@ -40,13 +40,13 @@ module.exports = {
 
                     "base-100": "#191E24",
 
-                    info: "#72C6F3",
+                    info: "#0061FF",
 
-                    success: "#1A844A",
+                    success: "#2FBC34",
 
-                    warning: "#F8C612",
+                    warning: "#FFC200",
 
-                    error: "#E81725",
+                    error: "#D42620",
                 },
             },
         ],
