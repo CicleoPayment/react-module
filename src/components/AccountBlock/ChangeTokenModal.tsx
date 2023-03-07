@@ -14,7 +14,7 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({
     subManager,
     subscription,
     address,
-    changeToken
+    changeToken,
 }) => {
     const [coinLists, setCoinLists] = useState([]);
     const [selectedCoin, setSelectedCoin] = React.useState<any>(null);
@@ -40,7 +40,7 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({
 
         changeToken(selectedCoin.id, selectedCoin.symbol);
         document.getElementById("cicleo-change-token")?.click();
-    }
+    };
 
     useEffect(() => {
         getCoinList();
@@ -126,11 +126,13 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({
                     ) : (
                         <div className="cap-flex cap-flex-col cap-p-3 cap-px-6 cap-font-medium cap-space-y-6">
                             <span className="cap-font-semibold ">
-                                You can chose to pay with any of this coin
-                                bellow, anyway the price deducted each month
-                                will still be {subscription.price}{" "}
-                                {subscription.symbol} worth of the coin you
-                                chose (calculated on the day of payment)
+                                Payment can be made with any of the below ERC20
+                                coins. The value will always be worth{" "}
+                                {subscription.price} {subscription.symbol} as
+                                calculated on the day of payment. This means the
+                                raw token amount you pay each month may vary
+                                depending on market conditions of the coin you
+                                have chosen.
                             </span>
 
                             <div className="cap-items-center cap-flex-col cap-space-y-10 cap-px-4">
@@ -215,7 +217,10 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({
                                 </div>
 
                                 <div className="cap-modal-action">
-                                    <button className="cap-btn cap-btn-primary" onClick={handleChangeToken}>
+                                    <button
+                                        className="cap-btn cap-btn-primary"
+                                        onClick={handleChangeToken}
+                                    >
                                         Continue
                                     </button>
                                 </div>
