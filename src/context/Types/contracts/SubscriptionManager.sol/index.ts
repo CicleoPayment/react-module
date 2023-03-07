@@ -2,7 +2,3 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { CicleoSubscriptionManager } from "./CicleoSubscriptionManager";
-export type { IAggregationExecutor } from "./IAggregationExecutor";
-export type { IOpenOceanCaller } from "./IOpenOceanCaller";
-export type { IRouter } from "./IRouter";
-export type { ISubscriptionFactory } from "./ISubscriptionFactory";

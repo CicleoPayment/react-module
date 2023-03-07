@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IAggregationExecutor,
   IAggregationExecutorInterface,
-} from "../../../contracts/SubscriptionManager.sol/IAggregationExecutor";
+} from "../../../../contracts/Types/CicleoTypes.sol/IAggregationExecutor";
 
 const _abi = [
   {

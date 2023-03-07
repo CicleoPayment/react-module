@@ -2,6 +2,19 @@ import { formatNumber } from "@context/contract";
 import { BigNumber, utils } from "ethers";
 import React, { FC } from "react";
 
+type SubManagerInfo = {
+    id: number;
+    address: string;
+    name: string;
+    owner: string;
+    decimals: number;
+    tokenAddress: string;
+    treasury: string;
+    tokenSymbol: string;
+    subscriptions: any;
+    allowance: BigNumber;
+};
+
 type PaymentModalContent = {
     tokenOutImage: string;
     isWrongNetwork: boolean;
@@ -29,25 +42,24 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
         return (
             <div className="cap-p-4">
                 <div className="cap-alert cap-alert-error cap-shadow-lg">
-                <div>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="cap-stroke-current cap-flex-shrink-0 cap-h-6 cap-w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    <span>Sorry but this network is unsuported</span>
+                    <div>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="cap-stroke-current cap-flex-shrink-0 cap-h-6 cap-w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <span>Sorry but this network is unsuported</span>
+                    </div>
                 </div>
             </div>
-            </div>
-            
         );
 
     if (isLoaded == false)
@@ -76,13 +88,39 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                             {subscription.name}
                         </span>
                         <span className="cap-text-lg cap-font-medium">
-                            {subscription.price} {subscription.symbol} per month
+                            {subscription.price} {subscription.tokenSymbol} per
+                            month
                         </span>
                     </div>
                 </div>
             </div>
 
             <div className="cap-divider"></div>
+            {subscription.price != subscription.userPrice && (
+                <div className="cap-px-4">
+                    <div className="cap-shadow-lg cap-alert cap-alert-info ">
+                        <div>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                            </svg>
+                            <span>
+                                You will pay less for this subscription cycle since
+                                you are already subscribed (-{Number(subscription.price) - Number(subscription.userPrice) + " " + subscription.tokenSymbol})
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {coinLists.length == 0 ? (
                 <div className="cap-p-5">
@@ -114,8 +152,8 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                     <span className="cap-font-semibold ">
                         You can chose to pay with any of this coin bellow,
                         anyway the price deducted each month will still be{" "}
-                        {subscription.price} {subscription.symbol} worth of the
-                        coin you chose (calculated on the day of payment)
+                        {subscription.price} {subscription.tokenSymbol} worth of
+                        the coin you chose (calculated on the day of payment)
                     </span>
 
                     <div className="cap-items-center cap-flex-col cap-space-y-10 cap-px-4">
@@ -161,7 +199,9 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                                     coin.toPay,
                                                     coin.decimals
                                                 )
-                                            ).toFixed(2) + ' ' + coin.symbol}
+                                            ).toFixed(2) +
+                                                " " +
+                                                coin.symbol}
                                         </span>
                                         {BigNumber.from(
                                             coin.raw_amount.toString()

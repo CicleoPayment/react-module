@@ -20,6 +20,20 @@ import ChangeTokenModal from "./ChangeTokenModal";
 
 axios.defaults.withCredentials = true;
 
+type SubManagerInfo = {
+    id: number;
+    address: string;
+    name: string;
+    owner: string;
+    decimals: number;
+    tokenAddress: string;
+    treasury: string;
+    tokenSymbol: string;
+    subscriptions: any;
+    allowance: BigNumber;
+    tokenApproval: BigNumber;
+};
+
 let domain = "";
 let origin = "";
 if (typeof window !== "undefined") {
@@ -71,21 +85,11 @@ async function signInWithEthereum(signer: ethers.providers.JsonRpcSigner) {
     return json;
 }
 
-type subManager = {
-    name: string;
-    address: string;
-    coinSymbol: string;
-    coinAddress: string;
-    coinDecimals: number;
-    subApproval: BigNumber;
-    tokenApproval: BigNumber;
-};
-
 type AccountModalContent = {
     isWrongNetwork: boolean;
     isLoaded: boolean;
     account: string;
-    subManager: subManager;
+    subManager: any;
     subscription: any;
     errorMessage: string;
 };
@@ -181,9 +185,7 @@ const AccountModalContent: FC<AccountModalContent> = ({
 
                     <div className="cap-divider cap-divider-horizontal"></div>
 
-                    <ApprovalPart
-                        subManager={subManager}
-                    />
+                    <ApprovalPart subManager={subManager} />
 
                     <div className="cap-divider cap-divider-horizontal"></div>
 
@@ -202,7 +204,7 @@ type AccountBlock = {
 const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
     const [isWrongNetwork, setIsWrongNetwork] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [subManager, setSubManager] = useState({} as subManager);
+    const [subManager, setSubManager] = useState({} as SubManagerInfo);
     const [subscription, setSubscription] = useState({
         id: 0,
         name: "",
@@ -227,11 +229,6 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
 
             const address = await signer.getAddress();
 
-            signer.provider.on("accountsChanged", (accounts: string[]) => {
-                console.log("Test");
-                createContracts();
-            });
-
             setAccount(address);
 
             const subManagerId = config[chainId];
@@ -242,77 +239,90 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                 return;
             }
 
-            const subFactory = await Contracts.SubscriptionFactory(signer);
+            const subscriptionRouterContract =
+                await Contracts.SubscriptionRouter(signer);
+            if (subscriptionRouterContract == null) return;
 
-            const _subManagerAddy = await subFactory.ids(subManagerId);
+            // @ts-ignore
+            try {
+                let _subManagerInfo =
+                    await subscriptionRouterContract.getSubscriptionManager(
+                        subManagerId
+                    );
+                
 
-            if (_subManagerAddy == "0x0000000000000000000000000000000000000000")
-                return;
+                const _subManagerContract = await Contracts.SubscriptionManager(
+                    signer,
+                    _subManagerInfo._address
+                );
+                
+                //setSubManagerContract(_subManagerContract);
 
-            const subManager = await Contracts.SubscriptionManager(
-                signer,
-                _subManagerAddy,
-                true
-            );
+                const userInfo = await _subManagerContract.users(address);
 
-            let subscription = await subManager.subscriptions(1);
-            const decimals = await subManager.getDecimals();
-            const token = await subManager.token();
-            const symbol = await subManager.getSymbol();
+                const erc20 = await Contracts.ERC20(signer, _subManagerInfo.tokenAddress, true);
+                const allowance = await erc20.allowance(
+                    address,
+                    _subManagerInfo._address
+                );
 
-            const userData = await subManager.users(address);
+                console.log("vvvv")
+                
+                setSubManager({
+                    id: Number(subManagerId),
+                    address: _subManagerInfo._address,
+                    name: _subManagerInfo.name,
+                    owner: _subManagerInfo.owners[0],
+                    decimals: Number(_subManagerInfo.tokenDecimals),
+                    tokenAddress: _subManagerInfo.tokenAddress,
+                    treasury: _subManagerInfo.treasury,
+                    tokenSymbol: _subManagerInfo.tokenSymbol,
+                    subscriptions: _subManagerInfo.subscriptions,
+                    allowance: userInfo.approval,
+                    tokenApproval: allowance,
+                });
 
-            const erc20 = await Contracts.ERC20(signer, token, true);
-            const allowance = await erc20.allowance(
-                address,
-                subManager.address
-            );
+                console.log("drgdg")
 
-            const res = await fetch(
-                `${BACKEND_ADDR}/chain/${chainId}/subscription/${address}`,
-                {
-                    credentials: "same-origin",
-                }
-            );
+                const res = await fetch(
+                    `${BACKEND_ADDR}/chain/${chainId}/subscription/${address}`,
+                    {
+                        credentials: "same-origin",
+                    }
+                );
 
-            const _resJson = await res.json();
+                const _resJson = await res.json();
 
-            let _subManager: subManager = {
-                address: _subManagerAddy,
-                name: await subManager.name(),
-                coinSymbol: symbol,
-                coinDecimals: decimals,
-                coinAddress: token,
-                subApproval: userData.approval,
-                tokenApproval: allowance,
-            };
+                const subscriptionData = await _subManagerContract.getSubscriptionStatus(
+                    address
+                );
 
-            setSubManager(_subManager);
+                console.log(subManager);
+                console.log(subscriptionData);
 
-            const subscriptionData = await subManager.getSubscriptionStatus(
-                address
-            );
+                const sub = await _subManagerContract.subscriptions(
+                    subscriptionData.subscriptionId
+                );
 
-            console.log(subManager);
-            console.log(subscriptionData);
+                let _subscription = {
+                    id: subscriptionData.subscriptionId.toNumber(),
+                    isActive: sub.isActive,
+                    name: sub.name,
+                    price: ethers.utils.formatUnits(sub.price, Number(_subManagerInfo.tokenDecimals)),
+                    isCancelled:
+                        !subscriptionData.isActive || _resJson.isCanceled,
+                    isContractActive: subscriptionData.isActive,
+                    subscriptionEndDate:
+                        userInfo.subscriptionEndDate.toNumber(),
+                    originalPrice: sub.price,
+                };
 
-            const sub = await subManager.subscriptions(
-                subscriptionData.subscriptionId
-            );
-
-            let _subscription = {
-                id: subscriptionData.subscriptionId.toNumber(),
-                isActive: sub.isActive,
-                name: sub.name,
-                price: ethers.utils.formatUnits(sub.price, decimals),
-                isCancelled: !subscriptionData.isActive || _resJson.isCanceled,
-                isContractActive: subscriptionData.isActive,
-                subscriptionEndDate: userData.subscriptionEndDate.toNumber(),
-                originalPrice: sub.price
-            };
-
-            setIsLoaded(true);
-            setSubscription(_subscription);
+                setIsLoaded(true);
+                setSubscription(_subscription);
+            } catch (e) {
+                console.log(e);
+                setIsWrongNetwork(true);
+            }
         } catch (error: any) {
             console.log(error);
         }
@@ -361,7 +371,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
 
         const erc20 = await Contracts.ERC20(
             signer,
-            subManager.coinAddress,
+            subManager.tokenAddress,
             true
         );
 
@@ -500,27 +510,27 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
             {handleConfirmationPage()}
             <EditApprovalModal
                 name="token"
-                labelTextInput={subManager.coinSymbol}
+                labelTextInput={subManager.tokenSymbol}
                 onConfirm={handleApproveToken}
-                messageHeader={`Edit your ${subManager.coinSymbol} approval`}
-                messageInfo={`You can edit the total amount of ${subManager.coinSymbol} that we can withdraw from your wallet. This total amount will decrease over time as each payment for your subscription is withdrawn from your wallet in the appropriate installments.`}
-                textInput={`Amount of ${subManager.coinSymbol} to approve`}
-                decimals={subManager.coinDecimals}
+                messageHeader={`Edit your ${subManager.tokenSymbol} approval`}
+                messageInfo={`You can edit the total amount of ${subManager.tokenSymbol} that we can withdraw from your wallet. This total amount will decrease over time as each payment for your subscription is withdrawn from your wallet in the appropriate installments.`}
+                textInput={`Amount of ${subManager.tokenSymbol} to approve`}
+                decimals={subManager.decimals}
                 isLoading={isLoading}
                 isTxSend={isTxSend}
                 approval={subManager.tokenApproval}
             />
             <EditApprovalModal
                 name="subscription"
-                labelTextInput={`${subManager.coinSymbol} / Month`}
+                labelTextInput={`${subManager.tokenSymbol} / Month`}
                 onConfirm={handleApproveSubscribe}
                 messageHeader={`Edit your monthly approval`}
-                messageInfo={`You can edit the maximum amount of ${subManager.coinSymbol} that we can withdraw from your wallet per payment cycle. This protects you from paying any additional costs if your subscription manager raises the subscription price without your signed consent.`}
-                textInput={`Amount of ${subManager.coinSymbol} to approve`}
-                decimals={subManager.coinDecimals}
+                messageInfo={`You can edit the maximum amount of ${subManager.tokenSymbol} that we can withdraw from your wallet per payment cycle. This protects you from paying any additional costs if your subscription manager raises the subscription price without your signed consent.`}
+                textInput={`Amount of ${subManager.tokenSymbol} to approve`}
+                decimals={subManager.decimals}
                 isLoading={isLoading}
                 isTxSend={isTxSend}
-                approval={subManager.subApproval}
+                approval={subManager.allowance}
             />
             <ChangeTokenModal
                 address={account}

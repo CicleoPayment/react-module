@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IOpenOceanCaller,
   IOpenOceanCallerInterface,
-} from "../../../contracts/SubscriptionManager.sol/IOpenOceanCaller";
+} from "../../../../contracts/Types/CicleoTypes.sol/IOpenOceanCaller";
 
 const _abi = [
   {

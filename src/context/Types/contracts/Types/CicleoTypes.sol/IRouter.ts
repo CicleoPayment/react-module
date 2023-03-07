@@ -8,7 +8,6 @@ import type {
   BytesLike,
   CallOverrides,
   ContractTransaction,
-  Overrides,
   PayableOverrides,
   PopulatedTransaction,
   Signer,
@@ -22,7 +21,44 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../common";
+} from "../../../common";
+
+export type SwapDescriptionStruct = {
+  srcToken: PromiseOrValue<string>;
+  dstToken: PromiseOrValue<string>;
+  srcReceiver: PromiseOrValue<string>;
+  dstReceiver: PromiseOrValue<string>;
+  amount: PromiseOrValue<BigNumberish>;
+  minReturnAmount: PromiseOrValue<BigNumberish>;
+  guaranteedAmount: PromiseOrValue<BigNumberish>;
+  flags: PromiseOrValue<BigNumberish>;
+  referrer: PromiseOrValue<string>;
+  permit: PromiseOrValue<BytesLike>;
+};
+
+export type SwapDescriptionStructOutput = [
+  string,
+  string,
+  string,
+  string,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  string,
+  string
+] & {
+  srcToken: string;
+  dstToken: string;
+  srcReceiver: string;
+  dstReceiver: string;
+  amount: BigNumber;
+  minReturnAmount: BigNumber;
+  guaranteedAmount: BigNumber;
+  flags: BigNumber;
+  referrer: string;
+  permit: string;
+};
 
 export declare namespace IOpenOceanCaller {
   export type CallDescriptionStruct = {
@@ -45,37 +81,33 @@ export declare namespace IOpenOceanCaller {
   };
 }
 
-export interface IOpenOceanCallerInterface extends utils.Interface {
+export interface IRouterInterface extends utils.Interface {
   functions: {
-    "makeCall((uint256,uint256,uint256,bytes))": FunctionFragment;
-    "makeCalls((uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "swap(address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
   };
 
-  getFunction(
-    nameOrSignatureOrTopic: "makeCall" | "makeCalls"
-  ): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "swap"): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "makeCall",
-    values: [IOpenOceanCaller.CallDescriptionStruct]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "makeCalls",
-    values: [IOpenOceanCaller.CallDescriptionStruct[]]
+    functionFragment: "swap",
+    values: [
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
   ): string;
 
-  decodeFunctionResult(functionFragment: "makeCall", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "makeCalls", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "swap", data: BytesLike): Result;
 
   events: {};
 }
 
-export interface IOpenOceanCaller extends BaseContract {
+export interface IRouter extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IOpenOceanCallerInterface;
+  interface: IRouterInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -97,61 +129,46 @@ export interface IOpenOceanCaller extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    makeCall(
-      desc: IOpenOceanCaller.CallDescriptionStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    makeCalls(
-      desc: IOpenOceanCaller.CallDescriptionStruct[],
+    swap(
+      caller: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
-  makeCall(
-    desc: IOpenOceanCaller.CallDescriptionStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  makeCalls(
-    desc: IOpenOceanCaller.CallDescriptionStruct[],
+  swap(
+    caller: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    makeCall(
-      desc: IOpenOceanCaller.CallDescriptionStruct,
+    swap(
+      caller: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: CallOverrides
-    ): Promise<void>;
-
-    makeCalls(
-      desc: IOpenOceanCaller.CallDescriptionStruct[],
-      overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
   };
 
   filters: {};
 
   estimateGas: {
-    makeCall(
-      desc: IOpenOceanCaller.CallDescriptionStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    makeCalls(
-      desc: IOpenOceanCaller.CallDescriptionStruct[],
+    swap(
+      caller: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    makeCall(
-      desc: IOpenOceanCaller.CallDescriptionStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    makeCalls(
-      desc: IOpenOceanCaller.CallDescriptionStruct[],
+    swap(
+      caller: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

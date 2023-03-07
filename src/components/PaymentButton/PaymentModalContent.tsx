@@ -1,14 +1,26 @@
 import { formatNumber } from "@context/contract";
-import { ethers, utils } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import React, { FC } from "react";
-import { BounceLoader, ClipLoader } from "react-spinners";
-import TOKEN_IMG from "@assets/token.svg";
+import { ClipLoader } from "react-spinners";
 type Step = {
     onClick: () => void;
     subscription: any;
     isLoading: boolean;
     errorMessage: string;
     swapInfo: any;
+};
+
+type SubManagerInfo = {
+    id: number;
+    address: string;
+    name: string;
+    owner: string;
+    decimals: number;
+    tokenAddress: string;
+    treasury: string;
+    tokenSymbol: string;
+    subscriptions: any;
+    allowance: BigNumber;
 };
 
 type StepFunction = {
@@ -45,7 +57,7 @@ const Step1: FC<Step> = ({
                 <button
                     data-tooltip-target="step1"
                     data-tooltip-trigger="cap-hover"
-                    className="cap-btn cap-btn-primary"
+                    className="cap-space-x-3 cap-btn cap-btn-primary"
                     onClick={onClick}
                 >
                     <span>Approve</span>
@@ -76,7 +88,10 @@ const Step2: FC<Step> = ({
             </div>
 
             <div className="cap-modal-action">
-                <button className="cap-btn cap-btn-primary" onClick={onClick}>
+                <button
+                    className="cap-space-x-3 cap-btn cap-btn-primary"
+                    onClick={onClick}
+                >
                     <span>Subscription Limit</span>
                     {isLoading && <ClipLoader color={"#fff"} size={20} />}
                 </button>
@@ -114,15 +129,18 @@ const Step3: FC<Step> = ({
             </div>
 
             <div className="cap-modal-action">
-                <button className="cap-btn cap-btn-primary" onClick={onClick}>
+                <button
+                    className="cap-space-x-3 cap-btn cap-btn-primary"
+                    onClick={onClick}
+                >
                     <span>
                         Subscribe for{" "}
-                        {ethers.utils
-                            .formatUnits(
-                                subscription.originalPrice,
-                                swapInfo.outToken.decimals
-                            )
-                            .toString()}{" "}
+                        {Number(
+                        utils.formatUnits(
+                            swapInfo.inAmount,
+                            swapInfo.inToken.decimals
+                        )
+                    ).toFixed(2)}{" "}
                         {swapInfo.outToken.symbol}
                     </span>
                     {isLoading && <ClipLoader color={"#fff"} size={20} />}
@@ -148,6 +166,7 @@ type PaymentModalContent = {
     errorMessage: string;
     balance: number | string;
     swapInfo: any;
+    isPurchased: boolean;
 };
 
 const PaymentModalContent: FC<PaymentModalContent> = ({
@@ -160,7 +179,38 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
     errorMessage,
     balance,
     swapInfo,
+    isPurchased,
 }) => {
+    if (isPurchased) {
+        return (
+            <div className="cap-p-4 cap-space-y-8">
+                <h2 className="cap-text-xl cap-font-semibold">Thanks for your subscription!</h2>
+                <div className="cap-shadow-lg cap-alert cap-alert-success">
+                    <div>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <div className="cap-flex cap-flex-col">
+                            <span>Your subscription has been confirmed!</span>
+                            <span>You can close this page</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+
     if (isLoaded == false)
         return (
             <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20 cap-flex-col">
@@ -180,7 +230,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                             {subscription.name}
                         </span>
                         <span className="cap-text-lg cap-font-medium">
-                            {subscription.price} {subscription.symbol} per month
+                            {subscription.price} {subscription.tokenSymbol} per month
                         </span>
                     </div>
                 </div>

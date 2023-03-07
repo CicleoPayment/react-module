@@ -4,4 +4,7 @@
 export * as interfaces from "./Interfaces";
 export * as subscriptionFactorySol from "./SubscriptionFactory.sol";
 export * as subscriptionManagerSol from "./SubscriptionManager.sol";
+export * as subscriptionRouterSol from "./SubscriptionRouter.sol";
+export * as subscriptionSecuritySol from "./SubscriptionSecurity.sol";
 export * as test from "./Test";
+export * as types from "./Types";

@@ -7,7 +7,7 @@ import type { Provider } from "@ethersproject/providers";
 import type {
   IRouter,
   IRouterInterface,
-} from "../../../contracts/SubscriptionManager.sol/IRouter";
+} from "../../../../contracts/Types/CicleoTypes.sol/IRouter";
 
 const _abi = [
   {

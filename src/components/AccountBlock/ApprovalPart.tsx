@@ -42,10 +42,10 @@ const ApprovalPart: FC<ApprovalPart> = ({
                     Subscription Limit
                 </span>
                 <span className="cap-text-gray-600">
-                    {subManager.subApproval.eq(ethers.constants.MaxUint256)
+                    {subManager.allowance.eq(ethers.constants.MaxUint256)
                         ? "Infinity"
                         : ethers.utils.formatUnits(
-                              subManager.subApproval,
+                              subManager.allowance,
                               subManager.coinDecimals
                           )}{" "}
                     {subManager.coinSymbol} per month

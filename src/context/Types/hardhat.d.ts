@@ -21,13 +21,45 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Initializable__factory>;
     getContractFactory(
+      name: "ReentrancyGuardUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ReentrancyGuardUpgradeable__factory>;
+    getContractFactory(
+      name: "ERC721Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721Upgradeable__factory>;
+    getContractFactory(
+      name: "ERC721EnumerableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721EnumerableUpgradeable__factory>;
+    getContractFactory(
+      name: "IERC721EnumerableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721EnumerableUpgradeable__factory>;
+    getContractFactory(
+      name: "IERC721MetadataUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721MetadataUpgradeable__factory>;
+    getContractFactory(
+      name: "IERC721ReceiverUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721ReceiverUpgradeable__factory>;
+    getContractFactory(
+      name: "IERC721Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721Upgradeable__factory>;
+    getContractFactory(
       name: "ContextUpgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ContextUpgradeable__factory>;
     getContractFactory(
-      name: "Ownable",
+      name: "ERC165Upgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Ownable__factory>;
+    ): Promise<Contracts.ERC165Upgradeable__factory>;
+    getContractFactory(
+      name: "IERC165Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -53,6 +85,18 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CicleoSubscriptionManager__factory>;
     getContractFactory(
+      name: "CicleoSubscriptionRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoSubscriptionRouter__factory>;
+    getContractFactory(
+      name: "CicleoSubscriptionSecurity",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoSubscriptionSecurity__factory>;
+    getContractFactory(
+      name: "TestnetUSDC",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestnetUSDC__factory>;
+    getContractFactory(
       name: "IAggregationExecutor",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IAggregationExecutor__factory>;
@@ -64,14 +108,6 @@ declare module "hardhat/types/runtime" {
       name: "IRouter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IRouter__factory>;
-    getContractFactory(
-      name: "ISubscriptionFactory",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ISubscriptionFactory__factory>;
-    getContractFactory(
-      name: "TestnetUSDC",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.TestnetUSDC__factory>;
 
     getContractAt(
       name: "OwnableUpgradeable",
@@ -84,15 +120,55 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Initializable>;
     getContractAt(
+      name: "ReentrancyGuardUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ReentrancyGuardUpgradeable>;
+    getContractAt(
+      name: "ERC721Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721Upgradeable>;
+    getContractAt(
+      name: "ERC721EnumerableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721EnumerableUpgradeable>;
+    getContractAt(
+      name: "IERC721EnumerableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721EnumerableUpgradeable>;
+    getContractAt(
+      name: "IERC721MetadataUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721MetadataUpgradeable>;
+    getContractAt(
+      name: "IERC721ReceiverUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721ReceiverUpgradeable>;
+    getContractAt(
+      name: "IERC721Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721Upgradeable>;
+    getContractAt(
       name: "ContextUpgradeable",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ContextUpgradeable>;
     getContractAt(
-      name: "Ownable",
+      name: "ERC165Upgradeable",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Ownable>;
+    ): Promise<Contracts.ERC165Upgradeable>;
+    getContractAt(
+      name: "IERC165Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
       name: "ERC20",
       address: string,
@@ -124,6 +200,21 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.CicleoSubscriptionManager>;
     getContractAt(
+      name: "CicleoSubscriptionRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoSubscriptionRouter>;
+    getContractAt(
+      name: "CicleoSubscriptionSecurity",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoSubscriptionSecurity>;
+    getContractAt(
+      name: "TestnetUSDC",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestnetUSDC>;
+    getContractAt(
       name: "IAggregationExecutor",
       address: string,
       signer?: ethers.Signer
@@ -138,16 +229,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IRouter>;
-    getContractAt(
-      name: "ISubscriptionFactory",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ISubscriptionFactory>;
-    getContractAt(
-      name: "TestnetUSDC",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.TestnetUSDC>;
 
     // default types
     getContractFactory(

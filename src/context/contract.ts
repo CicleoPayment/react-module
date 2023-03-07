@@ -5,6 +5,8 @@ import {
     CicleoSubscriptionFactory__factory,
     CicleoSubscriptionManager,
     CicleoSubscriptionManager__factory,
+    CicleoSubscriptionRouter,
+    CicleoSubscriptionRouter__factory,
     ERC20,
     ERC20__factory,
 } from "@context/Types";
@@ -12,6 +14,7 @@ import axios from "axios";
 
 type Contracts = {
     SubscriptionFactory: (signer: providers.JsonRpcSigner) => Promise<CicleoSubscriptionFactory>;
+    SubscriptionRouter: (signer: providers.JsonRpcSigner) => Promise<CicleoSubscriptionRouter>;
     ERC20: (signer: providers.JsonRpcSigner, address: string, forceReload?:boolean) => Promise<ERC20>;
     SubscriptionManager: (signer: providers.JsonRpcSigner, address: string, forceReload?:boolean) => Promise<CicleoSubscriptionManager>;
 }
@@ -384,7 +387,8 @@ const formatNumber = (number: any, decimals: number) => {
 let cachedContracts: any = {
     SF: {},
     ERC20: {},
-    SM: {}
+    SM: {},
+    Router: {}
 }
 
 const Contracts: Contracts = {
@@ -398,6 +402,17 @@ const Contracts: Contracts = {
             );
         }
         return cachedContracts["SF"][chainId];
+    },
+    SubscriptionRouter: async (signer: providers.JsonRpcSigner) => {
+        const { chainId } = await signer.provider.getNetwork()
+
+        if (cachedContracts["Router"][chainId] == undefined) {
+            cachedContracts["Router"][chainId] = CicleoSubscriptionRouter__factory.connect(
+                (await getConfig(chainId)).subscriptionRouterAddress || "0x0",
+                signer
+            );
+        }
+        return cachedContracts["Router"][chainId];
     },
     ERC20: async (signer: providers.JsonRpcSigner, address: string, force?: boolean) => {
         if (cachedContracts["ERC20"][address] == null || force) {
