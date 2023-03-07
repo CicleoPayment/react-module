@@ -88,6 +88,7 @@ async function signInWithEthereum(signer: ethers.providers.JsonRpcSigner) {
 type AccountModalContent = {
     isWrongNetwork: boolean;
     isLoaded: boolean;
+    isNotSubscribed: boolean;
     account: string;
     subManager: any;
     subscription: any;
@@ -97,6 +98,7 @@ type AccountModalContent = {
 const AccountModalContent: FC<AccountModalContent> = ({
     isWrongNetwork,
     isLoaded,
+    isNotSubscribed,
     account,
     subManager,
     subscription,
@@ -121,6 +123,34 @@ const AccountModalContent: FC<AccountModalContent> = ({
                             />
                         </svg>
                         <span>Sorry but this network is unsuported</span>
+                    </div>
+                </div>
+            </div>
+        );
+    
+    if (isNotSubscribed)
+        return (
+            <div className="cap-p-4">
+                <div className="cap-shadow-lg cap-alert cap-alert-warning">
+                    <div>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                        <div className="cap-flex cap-flex-col">
+                            <span>You currently dont have an subscription</span>
+                            <span>Close this page and click on "Pay with Cicleo" button to get started !</span>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -219,6 +249,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isTxSend, setIsTxSend] = useState(false);
+    const [isNotSubscribed, setIsNotSubscribed] = useState(false);
 
     const createContracts = async () => {
         setIsLoaded(false);
@@ -274,11 +305,18 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
 
                 console.log(_resJson.tokenPaymentAddress)
 
+                if (_resJson.tokenPaymentAddress == undefined) { 
+                    console.log('okje')
+                    setIsNotSubscribed(true);
+                    return
+                }
+
                 const erc20 = await Contracts.ERC20(signer, _resJson.tokenPaymentAddress.toLowerCase(), true);
                 const allowance = await erc20.allowance(
                     address,
                     _subManagerInfo._address
                 );
+                
 
                 console.log("vvvv")
                 
@@ -529,6 +567,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     <AccountModalContent
                         isWrongNetwork={isWrongNetwork}
                         isLoaded={isLoaded}
+                        isNotSubscribed={isNotSubscribed}
                         account={account}
                         subManager={subManager}
                         subscription={subscription}
