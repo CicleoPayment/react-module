@@ -27,12 +27,12 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
                     </span>
                 </div>
 
-                <button
-                    type="button"
-                    className="focus:cap-outline-none cap-text-white cap-bg-red-700 hover:cap-bg-red-800 focus:cap-ring-4 focus:cap-ring-red-300 cap-font-medium cap-rounded-lg cap-text-sm cap-px-5 cap-py-2.5 cap-mr-2 cap-mb-2 dark:cap-bg-red-600 dark:hover:cap-bg-red-700 dark:focus:cap-ring-red-900"
+                <label
+                    className="cap-btn cap-btn-error"
+                    htmlFor="cicleo-confirm-modal-renew"
                 >
                     Renew my subscription
-                </button>
+                </label>
             </div>
         );
     }
@@ -52,7 +52,7 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
                             {subscription.name}
                         </span>
                         <span className="cap-text-sm cap-text-gray-500">
-                            {subscription.price} {subscription.symbol} per month
+                            {subscription.price} {symbol} per month
                         </span>
                     </div>
 
@@ -61,7 +61,7 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
                             Token
                         </span>
                         <span className="cap-text-sm cap-text-gray-500">
-                            BUSD
+                            {subscription.userTokenSymbol}
                         </span>
                     </div>
                 </div>

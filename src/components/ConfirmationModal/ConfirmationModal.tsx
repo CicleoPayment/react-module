@@ -51,6 +51,7 @@ const ConfirmationModal: FC<ConfirmationModal> = ({ name, confirmationMessageHea
                         <label
                             className="cap-btn cap-btn-primary"
                             htmlFor={"cicleo-confirm-modal-" + name}
+                            onClick={() => onConfirm()}
                         >
                             Confirm
                         </label>

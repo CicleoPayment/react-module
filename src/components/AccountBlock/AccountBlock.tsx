@@ -180,12 +180,12 @@ const AccountModalContent: FC<AccountModalContent> = ({
                 <div className="cap-flex">
                     <SubscriptionPart
                         subscription={subscription}
-                        symbol={subManager.coinSymbol}
+                        symbol={subManager.tokenSymbol}
                     />
 
                     <div className="cap-divider cap-divider-horizontal"></div>
 
-                    <ApprovalPart subManager={subManager} />
+                    <ApprovalPart subManager={subManager} subscription={subscription} />
 
                     <div className="cap-divider cap-divider-horizontal"></div>
 
@@ -211,6 +211,8 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         price: "0",
         isCancelled: false,
         isContractActive: false,
+        userTokenAddress: "",
+        userTokenSymbol: "",
     });
     const [account, setAccount] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -259,8 +261,20 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                 //setSubManagerContract(_subManagerContract);
 
                 const userInfo = await _subManagerContract.users(address);
+                
+                
+                const res = await fetch(
+                    `${BACKEND_ADDR}/chain/${chainId}/subscription/${_subManagerInfo._address}/${address}`,
+                    {
+                        credentials: "same-origin",
+                    }
+                );
 
-                const erc20 = await Contracts.ERC20(signer, _subManagerInfo.tokenAddress, true);
+                const _resJson = await res.json();
+
+                console.log(_resJson.tokenPaymentAddress)
+
+                const erc20 = await Contracts.ERC20(signer, _resJson.tokenPaymentAddress.toLowerCase(), true);
                 const allowance = await erc20.allowance(
                     address,
                     _subManagerInfo._address
@@ -284,14 +298,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
 
                 console.log("drgdg")
 
-                const res = await fetch(
-                    `${BACKEND_ADDR}/chain/${chainId}/subscription/${address}`,
-                    {
-                        credentials: "same-origin",
-                    }
-                );
-
-                const _resJson = await res.json();
+                
 
                 const subscriptionData = await _subManagerContract.getSubscriptionStatus(
                     address
@@ -315,6 +322,9 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     subscriptionEndDate:
                         userInfo.subscriptionEndDate.toNumber(),
                     originalPrice: sub.price,
+                    userTokenAddress: _resJson.tokenPaymentAddress.toLowerCase(),
+                    userTokenSymbol: _resJson.tokenPaymentSymbol,
+                    
                 };
 
                 setIsLoaded(true);
@@ -360,6 +370,25 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         await createContracts();
     };
 
+    const changeToken = async (tokenAddress: string, tokenSymbol: string) => {
+        if (!signer) return;
+        await signInWithEthereum(signer);
+        const { chainId } = await signer.provider.getNetwork();
+
+        await axios.post(
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.address}/changeCoin`,
+            {
+                tokenPaymentAddress: tokenAddress,
+                tokenPaymentSymbol: tokenSymbol,
+            },
+            {
+                withCredentials: true,
+            }
+        );
+
+        await createContracts();
+    };
+
     useEffect(() => {
         createContracts();
     }, [signer]);
@@ -371,7 +400,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
 
         const erc20 = await Contracts.ERC20(
             signer,
-            subManager.tokenAddress,
+            subscription.userTokenAddress,
             true
         );
 
@@ -536,6 +565,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                 address={account}
                 subManager={subManager}
                 subscription={subscription}
+                changeToken={changeToken}
             />
         </>
     );

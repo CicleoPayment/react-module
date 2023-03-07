@@ -7,9 +7,15 @@ type ChangeTokenModal = {
     subManager: any;
     subscription: any;
     address: string;
+    changeToken: (tokenAddress: string, tokenSymbol: string) => void;
 };
 
-const ChangeTokenModal: FC<ChangeTokenModal> = ({subManager, subscription, address}) => {
+const ChangeTokenModal: FC<ChangeTokenModal> = ({
+    subManager,
+    subscription,
+    address,
+    changeToken
+}) => {
     const [coinLists, setCoinLists] = useState([]);
     const [selectedCoin, setSelectedCoin] = React.useState<any>(null);
 
@@ -17,7 +23,7 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({subManager, subscription, addre
         if (subscription.originalPrice == undefined) return;
         if (subManager == undefined) return;
         console.log(subscription);
-        
+
         const coinList = await axios.get(
             `https://backend.cicleo.io/chain/56/getBalance/${address}/${subManager.tokenAddress}/${subscription.originalPrice}`
         );
@@ -28,6 +34,13 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({subManager, subscription, addre
 
         setCoinLists(coinData);
     };
+
+    const handleChangeToken = async () => {
+        if (selectedCoin == null) return;
+
+        changeToken(selectedCoin.id, selectedCoin.symbol);
+        document.getElementById("cicleo-change-token")?.click();
+    }
 
     useEffect(() => {
         getCoinList();
@@ -151,24 +164,43 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({subManager, subscription, addre
                                             <div className="cap-flex cap-flex-col cap-items-end cap-text-right">
                                                 <span
                                                     className={
-                                                        BigNumber.from(
+                                                        (BigNumber.from(
                                                             coin.raw_amount.toString()
                                                         ).lt(
                                                             coin.toPay.toString()
                                                         )
                                                             ? "cap-text-gray-400"
-                                                            : ""
+                                                            : "") +
+                                                        " " +
+                                                        (selectedCoin !=
+                                                            undefined &&
+                                                        selectedCoin.id ==
+                                                            coin.id
+                                                            ? "cap-text-white"
+                                                            : "")
                                                     }
                                                 >
                                                     {coin.name}
                                                 </span>
-                                                <span className="cap-text-gray-500">
+                                                <span
+                                                    className={
+                                                        "cap-text-gray-500 " +
+                                                        (selectedCoin !=
+                                                            undefined &&
+                                                        selectedCoin.id ==
+                                                            coin.id
+                                                            ? "!cap-text-gray-400"
+                                                            : "")
+                                                    }
+                                                >
                                                     {Number(
                                                         utils.formatUnits(
                                                             coin.toPay,
                                                             coin.decimals
                                                         )
-                                                    ).toFixed(2) + " " + coin.symbol}
+                                                    ).toFixed(2) +
+                                                        " " +
+                                                        coin.symbol}
                                                 </span>
                                                 {BigNumber.from(
                                                     coin.raw_amount.toString()
@@ -183,9 +215,7 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({subManager, subscription, addre
                                 </div>
 
                                 <div className="cap-modal-action">
-                                    <button
-                                        className="cap-btn cap-btn-primary"
-                                    >
+                                    <button className="cap-btn cap-btn-primary" onClick={handleChangeToken}>
                                         Continue
                                     </button>
                                 </div>

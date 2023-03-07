@@ -3,11 +3,20 @@ import React, { FC } from "react";
 
 type ApprovalPart = {
     subManager: any;
+    subscription: any;
 };
 
-const ApprovalPart: FC<ApprovalPart> = ({
-    subManager,
-}) => {
+const ApprovalPart: FC<ApprovalPart> = ({ subManager, subscription }) => {
+    const getDefaultValueInput = (approval: any, decimals: number) => {
+        if (approval == undefined) return;
+        if (approval.eq(ethers.constants.MaxUint256)) return "Inifity";
+        if (approval) {
+            if (Number(ethers.utils.formatUnits(approval, decimals)) > 1000000)
+                return ">1M";
+            return ethers.utils.formatUnits(approval, decimals);
+        }
+    };
+
     return (
         <div className="cap-space-y-3 cap-flex-grow cap-mb-4">
             <div className="cap-flex cap-flex-col cap-items-center">
@@ -19,15 +28,13 @@ const ApprovalPart: FC<ApprovalPart> = ({
 
             <div className="cap-flex cap-flex-col">
                 <span className="cap-font-semibold cap-text-md">
-                    {subManager.coinSymbol} Approval
+                    {subscription.userTokenSymbol} Approval
                 </span>
                 <span className="cap-text-gray-600">
-                    {subManager.tokenApproval.eq(ethers.constants.MaxUint256)
-                        ? "Infinity"
-                        : ethers.utils.formatUnits(
-                              subManager.tokenApproval,
-                              subManager.coinDecimals
-                          )}
+                    {getDefaultValueInput(
+                        subManager.tokenApproval,
+                        subManager.tokenDecimals
+                    )}
                 </span>
 
                 <label
@@ -46,9 +53,9 @@ const ApprovalPart: FC<ApprovalPart> = ({
                         ? "Infinity"
                         : ethers.utils.formatUnits(
                               subManager.allowance,
-                              subManager.coinDecimals
+                              subManager.tokenDecimals
                           )}{" "}
-                    {subManager.coinSymbol} per month
+                    {subManager.tokenSymbol} per month
                 </span>
 
                 <label

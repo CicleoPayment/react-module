@@ -114,8 +114,13 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                 ></path>
                             </svg>
                             <span>
-                                You will pay less for this subscription cycle since
-                                you are already subscribed (-{Number(subscription.price) - Number(subscription.userPrice) + " " + subscription.tokenSymbol})
+                                You will pay less for this subscription cycle
+                                since you are already subscribed (-
+                                {Number(subscription.price) -
+                                    Number(subscription.userPrice) +
+                                    " " +
+                                    subscription.tokenSymbol}
+                                )
                             </span>
                         </div>
                     </div>
@@ -184,16 +189,29 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                     <div className="cap-flex cap-flex-col cap-items-end cap-text-right">
                                         <span
                                             className={
-                                                BigNumber.from(
+                                                (BigNumber.from(
                                                     coin.raw_amount.toString()
                                                 ).lt(coin.toPay.toString())
                                                     ? "cap-text-gray-400"
-                                                    : ""
+                                                    : "") +
+                                                " " +
+                                                (selectedCoin != undefined &&
+                                                selectedCoin.id == coin.id
+                                                    ? "cap-text-white"
+                                                    : "")
                                             }
                                         >
                                             {coin.name}
                                         </span>
-                                        <span className="cap-text-gray-500">
+                                        <span
+                                            className={
+                                                "cap-text-gray-500 " +
+                                                (selectedCoin != undefined &&
+                                                selectedCoin.id == coin.id
+                                                    ? "!cap-text-gray-400"
+                                                    : "")
+                                            }
+                                        >
                                             {Number(
                                                 utils.formatUnits(
                                                     coin.toPay,

@@ -56,7 +56,9 @@ const EditApprovalModal: FC<EditApprovalModal> = ({
     const getDefaultValueInput = () => {
         if (approval == undefined) return;
         if (approval.eq(ethers.constants.MaxUint256)) return "1";
-        if (approval) return ethers.utils.formatUnits(approval, decimals);
+        if (approval) {
+            return ethers.utils.formatUnits(approval, decimals)
+        };
     };
 
     useEffect(() => {
