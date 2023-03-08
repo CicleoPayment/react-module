@@ -40,7 +40,7 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
     return (
         <div className=" cap-flex cap-flex-col cap-space-y-3">
             <div className="cap-flex cap-flex-col cap-items-center">
-                <span className="cap-text-xl cap-font-bold cap-text-center cap-pl-4">
+                <span className="cap-text-xl cap-font-semibold cap-text-center cap-pl-4">
                     Your current subscription
                 </span>
                 <div className="cap-divider !cap-mt-0 !cap-mb-0"></div>
