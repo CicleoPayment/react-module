@@ -2,6 +2,7 @@ import React, { useState, FC, useEffect } from "react";
 import { BigNumber, ethers } from "ethers";
 import "./PaymentButton.css";
 import TextWhite from "@assets/logo_text_white.svg";
+import PayImage from "@assets/pay.svg";
 import TOKEN_IMG from "@assets/token.svg";
 import {
     Contracts,
@@ -410,13 +411,10 @@ const PaymentButton: FC<PaymentButton> = ({
         <>
             <label
                 htmlFor="cicleo-payment-modal"
-                className="cap-btn cap-btn-primary cap-max-w-[300px] cap-flex cap-justify-center "
+                className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
                 <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
-                    <span className="cap-mt-2 cap-text-xl cap-normal-case">
-                        Pay with
-                    </span>
-                    <img src={TextWhite} alt="" className="cap-max-w-[100px]" />
+                    <img src={PayImage} alt="" className="cap-max-w-[100px]" />
                 </div>
             </label>
 

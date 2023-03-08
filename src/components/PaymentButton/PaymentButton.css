@@ -4,6 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'Cicleo';
+    font-style: normal;
+    font-weight: 400;
+    src: url('https://cicleo.io/fonts/Cicleo.woff2') format('woff2'),
+    url('https://cicleo.io/fonts/Cicleo.woff') format('woff');
+  }
+
+.cap-font-bold, .cap-font-semibold {
+    font-family: "Outfit", sans-serif;
+}
+
+.cap-btn {
+    font-family: "Cicleo", sans-serif;
+}
+
 .cicleo-modal {
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
