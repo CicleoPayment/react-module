@@ -116,6 +116,10 @@ const PaymentButton: FC<PaymentButton> = ({
                 }
             }
 
+            if (subscription.originalPrice.eq(BigNumber.from("0"))) {
+                step = 3;
+            }
+
             setStep(step);
 
             setStepFunction({
@@ -194,6 +198,8 @@ const PaymentButton: FC<PaymentButton> = ({
             const resp = await axios(config);
 
             let step = 1;
+
+            
 
             const allowance = await erc20.allowance(
                 address,
@@ -378,6 +384,8 @@ const PaymentButton: FC<PaymentButton> = ({
                     )
                 );
 
+               
+
                 //--------------------------------------------------------------
 
                 const coinList = await axios.get(
@@ -389,6 +397,10 @@ const PaymentButton: FC<PaymentButton> = ({
                 setCoinLists(coinData);
                 setIsLoaded(true);
                 setSubscription(_subscription);
+                
+                if (subscription.price.eq(BigNumber.from("0"))) {
+                    changeToken({id: _subManagerInfo.tokenAddress})
+                }
             } catch (error) {
                 console.log(error);
                 return;
@@ -410,7 +422,7 @@ const PaymentButton: FC<PaymentButton> = ({
     return (
         <>
             <label
-                htmlFor="cicleo-payment-modal"
+                htmlFor={"cicleo-payment-modal-" + subscriptionId}
                 className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
                 <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
@@ -420,17 +432,17 @@ const PaymentButton: FC<PaymentButton> = ({
 
             <input
                 type="checkbox"
-                id="cicleo-payment-modal"
+                id={"cicleo-payment-modal-" + subscriptionId}
                 className="cap-modal-toggle"
                 onChange={updateModal}
             />
             <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
-                <div className="cap-modal-box cap-relative cap-p-0">
+                <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
                     <div className="cap-mb-4 cap-px-4 cap-py-3 cap-bg-base-300">
                         <img src={TextWhite} alt="" className="cap-h-10" />
                     </div>
                     <label
-                        htmlFor="cicleo-payment-modal"
+                        htmlFor={"cicleo-payment-modal-" + subscriptionId}
                         className="cap-absolute cap-btn cap-btn-sm cap-btn-circle cap-right-2 cap-top-2"
                     >
                         ✕

@@ -136,11 +136,11 @@ const Step3: FC<Step> = ({
                     <span>
                         Subscribe for{" "}
                         {Number(
-                        utils.formatUnits(
-                            swapInfo.inAmount,
-                            swapInfo.inToken.decimals
-                        )
-                    ).toFixed(2)}{" "}
+                            utils.formatUnits(
+                                swapInfo.inAmount,
+                                swapInfo.inToken.decimals
+                            )
+                        ).toFixed(2)}{" "}
                         {swapInfo.outToken.symbol}
                     </span>
                     {isLoading && <ClipLoader color={"#fff"} size={20} />}
@@ -184,7 +184,9 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
     if (isPurchased) {
         return (
             <div className="cap-p-4 cap-space-y-8">
-                <h2 className="cap-text-xl cap-font-semibold">Thanks for your subscription!</h2>
+                <h2 className="cap-text-xl cap-font-semibold">
+                    Thanks for your subscription!
+                </h2>
                 <div className="cap-shadow-lg cap-alert cap-alert-success">
                     <div>
                         <svg
@@ -209,7 +211,6 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
             </div>
         );
     }
-    
 
     if (isLoaded == false)
         return (
@@ -230,26 +231,29 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                             {subscription.name}
                         </span>
                         <span className="cap-text-lg cap-font-medium">
-                            {subscription.price} {subscription.tokenSymbol} per month
+                            {subscription.price} {subscription.tokenSymbol} per
+                            month
                         </span>
                     </div>
                 </div>
 
-                <div className="cap-flex cap-items-center">
-                    <div className="cap-pr-4 cap-flex cap-flex-col cap-items-end">
-                        <span className="cap-font-semibold">
-                            Your {inToken.symbol} Balance
-                        </span>
-                        <span>{formatNumber(inToken.balance, 2)}</span>
+                {subscription.price != "0.0" && (
+                    <div className="cap-flex cap-items-center">
+                        <div className="cap-pr-4 cap-flex cap-flex-col cap-items-end">
+                            <span className="cap-font-semibold">
+                                Your {inToken.symbol} Balance
+                            </span>
+                            <span>{formatNumber(inToken.balance, 2)}</span>
+                        </div>
+                        <img
+                            src={inToken.image}
+                            alt=""
+                            className="cap-h-fit"
+                            width={40}
+                            height={40}
+                        />
                     </div>
-                    <img
-                        src={inToken.image}
-                        alt=""
-                        className="cap-h-fit"
-                        width={40}
-                        height={40}
-                    />
-                </div>
+                )}
             </div>
 
             <div className="cap-divider"></div>
@@ -337,7 +341,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                         </>
                     ) : (
                         <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-py-10 cap-px-4 cap-flex-col cap-space-y-4">
-                            <span className="cap-font-medium cap-text-2xl ">
+                            <span className="cap-text-center cap-font-medium cap-text-2xl">
                                 Finding best path to pay subscripiton...
                             </span>
                             <progress className="cap-w-56 cap-progress"></progress>

@@ -161,7 +161,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                         the coin you chose (calculated on the day of payment)
                     </span>
 
-                    <div className="cap-items-center cap-flex-col cap-space-y-10 cap-px-4">
+                    <div className="cap-items-center cap-flex-col cap-space-y-10">
                         <div className="cap-grid cap-grid-cols-2 cap-gap-4">
                             {coinLists.map((coin, index) => (
                                 <button
@@ -183,6 +183,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                             alt=""
                                             width={40}
                                             height={40}
+                                            className="cap-min-w-[40px]"
                                         />
                                     </div>
 
