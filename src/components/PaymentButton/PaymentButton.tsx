@@ -426,7 +426,7 @@ const PaymentButton: FC<PaymentButton> = ({
                 className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
                 <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
-                    <img src={PayImage} alt="" className="cap-max-w-[100px]" />
+                    <img src={PayImage} alt="" className="cap-max-w-[90px]" />
                 </div>
             </label>
 

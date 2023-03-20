@@ -542,7 +542,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                 htmlFor="cicleo-account-modal"
                 className="cap-btn cap-btn-primary cap-max-w-[300px] cap-flex cap-justify-center "
             >
-                <div className="cap-flex cap-items-center cap-justify-center">
+                <div className="cap-flex cap-items-center cap-justify-center cap-capitalize cap-text-xl cap-text-white">
                     <span>Manage your Account</span>
                 </div>
             </label>

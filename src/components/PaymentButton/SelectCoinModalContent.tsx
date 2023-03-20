@@ -155,10 +155,13 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
             ) : (
                 <div className="cap-flex cap-flex-col cap-p-3 cap-px-6 cap-font-medium cap-space-y-6">
                     <span className="cap-font-semibold ">
-                        You can chose to pay with any of this coin bellow,
-                        anyway the price deducted each month will still be{" "}
-                        {subscription.price} {subscription.tokenSymbol} worth of
-                        the coin you chose (calculated on the day of payment)
+                        You can choose to pay with any of the ERC20 tokens
+                        below, but be advised that the amount of tokens used to
+                        make the payment will be equal to {subscription.price}{" "}
+                        {subscription.tokenSymbol} in value. The amount of
+                        tokens equal to {subscription.price}{" "}
+                        {subscription.tokenSymbol} is calculated at the time of
+                        payment.
                     </span>
 
                     <div className="cap-items-center cap-flex-col cap-space-y-10">
