@@ -20,7 +20,7 @@ const SubscriptionInfo: FC<SubscriptionInfo> = ({ endCycleDate }) => {
 
             <div className="cap-flex cap-flex-col cap-space-y-1">
                 <span className="cap-font-semibold cap-text-md">
-                    Next Subscription Cycle Payment Due
+                    Next Due Date
                 </span>
                 <div>
                     <div>
