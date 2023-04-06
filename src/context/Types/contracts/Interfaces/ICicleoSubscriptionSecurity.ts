@@ -27,10 +27,11 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
+export interface ICicleoSubscriptionSecurityInterface extends utils.Interface {
   functions: {
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
+    "blacklist(address)": FunctionFragment;
     "deleteSubManager()": FunctionFragment;
     "factory()": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
@@ -50,6 +51,7 @@ export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
+    "setBlacklist(address,bool)": FunctionFragment;
     "setFactory(address)": FunctionFragment;
     "setURI(string)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
@@ -67,6 +69,7 @@ export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "approve"
       | "balanceOf"
+      | "blacklist"
       | "deleteSubManager"
       | "factory"
       | "getApproved"
@@ -86,6 +89,7 @@ export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setApprovalForAll"
+      | "setBlacklist"
       | "setFactory"
       | "setURI"
       | "supportsInterface"
@@ -105,6 +109,10 @@ export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "blacklist",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -181,6 +189,10 @@ export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
     values: [PromiseOrValue<string>, PromiseOrValue<boolean>]
   ): string;
   encodeFunctionData(
+    functionFragment: "setBlacklist",
+    values: [PromiseOrValue<string>, PromiseOrValue<boolean>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setFactory",
     values: [PromiseOrValue<string>]
   ): string;
@@ -228,6 +240,7 @@ export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "blacklist", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "deleteSubManager",
     data: BytesLike
@@ -281,6 +294,10 @@ export interface CicleoSubscriptionSecurityInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setApprovalForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setBlacklist",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setFactory", data: BytesLike): Result;
@@ -399,12 +416,12 @@ export type TransferEvent = TypedEvent<
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export interface CicleoSubscriptionSecurity extends BaseContract {
+export interface ICicleoSubscriptionSecurity extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CicleoSubscriptionSecurityInterface;
+  interface: ICicleoSubscriptionSecurityInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -436,6 +453,11 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
       owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    blacklist(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
     deleteSubManager(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -527,6 +549,12 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setBlacklist(
+      user: PromiseOrValue<string>,
+      isBlacklist: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setFactory(
       _factory: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -591,6 +619,11 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
     owner: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  blacklist(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   deleteSubManager(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -682,6 +715,12 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setBlacklist(
+    user: PromiseOrValue<string>,
+    isBlacklist: PromiseOrValue<boolean>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setFactory(
     _factory: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -746,6 +785,11 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
       owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    blacklist(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     deleteSubManager(overrides?: CallOverrides): Promise<void>;
 
@@ -828,6 +872,12 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
     setApprovalForAll(
       operator: PromiseOrValue<string>,
       approved: PromiseOrValue<boolean>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setBlacklist(
+      user: PromiseOrValue<string>,
+      isBlacklist: PromiseOrValue<boolean>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -953,6 +1003,11 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    blacklist(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     deleteSubManager(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1043,6 +1098,12 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setBlacklist(
+      user: PromiseOrValue<string>,
+      isBlacklist: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setFactory(
       _factory: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1106,6 +1167,11 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
 
     balanceOf(
       owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    blacklist(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1196,6 +1262,12 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
     setApprovalForAll(
       operator: PromiseOrValue<string>,
       approved: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setBlacklist(
+      user: PromiseOrValue<string>,
+      isBlacklist: PromiseOrValue<boolean>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

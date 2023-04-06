@@ -7,7 +7,6 @@ type User = {
 };
 
 export const Page: React.FC = () => {
-
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | undefined>()
     
     const getSigner = async () => {
@@ -27,7 +26,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <PaymentButton config={{ 56: 5, }} subscriptionId={1} signer={signer} />
+            <PaymentButton config={{ 43113: 1, 250: 1 }} subscriptionId={1} signer={signer} />
         </div>
-  );
+    );
 };

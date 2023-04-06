@@ -85,22 +85,28 @@ export declare namespace IOpenOceanCaller {
   };
 }
 
-export interface CicleoSubscriptionManagerInterface extends utils.Interface {
+export interface CicleoDynamicSubscriptionManagerInterface
+  extends utils.Interface {
   functions: {
+    "approveSubscription(uint256)": FunctionFragment;
     "cancel()": FunctionFragment;
-    "changeSubscriptionLimit(uint256)": FunctionFragment;
     "deleteSubManager()": FunctionFragment;
-    "editAccount(address,uint256,uint8)": FunctionFragment;
+    "editAccount(address,uint256,uint256,string)": FunctionFragment;
+    "enabled()": FunctionFragment;
     "factory()": FunctionFragment;
-    "getUserSubscriptionId(address)": FunctionFragment;
-    "getUserSubscriptionStatus(address)": FunctionFragment;
+    "getSubscriptionName(address)": FunctionFragment;
+    "getSubscriptionStatus(address)": FunctionFragment;
     "name()": FunctionFragment;
-    "payFunctionWithSubToken(address,uint8,uint256,uint256)": FunctionFragment;
-    "payFunctionWithSwap(address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[],uint8,uint256,uint256)": FunctionFragment;
+    "paymentDynnamic(uint256,string)": FunctionFragment;
+    "paymentDynnamicWithSwap(uint256,string,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "router()": FunctionFragment;
     "setName(string)": FunctionFragment;
     "setTreasury(address)": FunctionFragment;
-    "subscriptionDuration()": FunctionFragment;
     "subscriptionNumber()": FunctionFragment;
+    "subscriptionRenew(address)": FunctionFragment;
+    "subscriptionRenewWithSwap(address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "subscriptions(uint256)": FunctionFragment;
+    "timerange()": FunctionFragment;
     "token()": FunctionFragment;
     "tokenAddress()": FunctionFragment;
     "tokenDecimals()": FunctionFragment;
@@ -111,20 +117,25 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "approveSubscription"
       | "cancel"
-      | "changeSubscriptionLimit"
       | "deleteSubManager"
       | "editAccount"
+      | "enabled"
       | "factory"
-      | "getUserSubscriptionId"
-      | "getUserSubscriptionStatus"
+      | "getSubscriptionName"
+      | "getSubscriptionStatus"
       | "name"
-      | "payFunctionWithSubToken"
-      | "payFunctionWithSwap"
+      | "paymentDynnamic"
+      | "paymentDynnamicWithSwap"
+      | "router"
       | "setName"
       | "setTreasury"
-      | "subscriptionDuration"
       | "subscriptionNumber"
+      | "subscriptionRenew"
+      | "subscriptionRenewWithSwap"
+      | "subscriptions"
+      | "timerange"
       | "token"
       | "tokenAddress"
       | "tokenDecimals"
@@ -133,11 +144,11 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
       | "users"
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: "cancel", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "changeSubscriptionLimit",
+    functionFragment: "approveSubscription",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
+  encodeFunctionData(functionFragment: "cancel", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "deleteSubManager",
     values?: undefined
@@ -147,40 +158,36 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>
     ]
   ): string;
+  encodeFunctionData(functionFragment: "enabled", values?: undefined): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getUserSubscriptionId",
+    functionFragment: "getSubscriptionName",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getUserSubscriptionStatus",
+    functionFragment: "getSubscriptionStatus",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "payFunctionWithSubToken",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    functionFragment: "paymentDynnamic",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "payFunctionWithSwap",
+    functionFragment: "paymentDynnamicWithSwap",
     values: [
+      PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<string>,
       SwapDescriptionStruct,
-      IOpenOceanCaller.CallDescriptionStruct[],
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
+      IOpenOceanCaller.CallDescriptionStruct[]
     ]
   ): string;
+  encodeFunctionData(functionFragment: "router", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setName",
     values: [PromiseOrValue<string>]
@@ -190,13 +197,27 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "subscriptionDuration",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "subscriptionNumber",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptionRenew",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptionRenewWithSwap",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptions",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(functionFragment: "timerange", values?: undefined): string;
   encodeFunctionData(functionFragment: "token", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "tokenAddress",
@@ -216,11 +237,11 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
 
-  decodeFunctionResult(functionFragment: "cancel", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "changeSubscriptionLimit",
+    functionFragment: "approveSubscription",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "cancel", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "deleteSubManager",
     data: BytesLike
@@ -229,37 +250,48 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     functionFragment: "editAccount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "enabled", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getUserSubscriptionId",
+    functionFragment: "getSubscriptionName",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getUserSubscriptionStatus",
+    functionFragment: "getSubscriptionStatus",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "payFunctionWithSubToken",
+    functionFragment: "paymentDynnamic",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "payFunctionWithSwap",
+    functionFragment: "paymentDynnamicWithSwap",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "router", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setName", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setTreasury",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "subscriptionDuration",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "subscriptionNumber",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptionRenew",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptionRenewWithSwap",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptions",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "timerange", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "tokenAddress",
@@ -277,21 +309,37 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "users", data: BytesLike): Result;
 
   events: {
+    "ApproveDynamicSubscription(address,uint256)": EventFragment;
     "Cancel(address)": EventFragment;
-    "EditSubscriptionLimit(address,uint256)": EventFragment;
     "NameEdited(address,string)": EventFragment;
-    "SubscriptionEdited(address,uint256,uint256,bool)": EventFragment;
+    "PaymentDynamicSubscription(address,string,uint256)": EventFragment;
+    "SelectToken(address,address)": EventFragment;
+    "ToggleSubscriptionManager(bool)": EventFragment;
     "TreasuryEdited(address,address)": EventFragment;
-    "UserEdited(address,uint256,uint256)": EventFragment;
+    "UserDynamicEdited(address,string,uint256,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ApproveDynamicSubscription"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Cancel"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "EditSubscriptionLimit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NameEdited"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SubscriptionEdited"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PaymentDynamicSubscription"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SelectToken"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ToggleSubscriptionManager"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TreasuryEdited"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "UserEdited"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UserDynamicEdited"): EventFragment;
 }
+
+export interface ApproveDynamicSubscriptionEventObject {
+  user: string;
+  amount: BigNumber;
+}
+export type ApproveDynamicSubscriptionEvent = TypedEvent<
+  [string, BigNumber],
+  ApproveDynamicSubscriptionEventObject
+>;
+
+export type ApproveDynamicSubscriptionEventFilter =
+  TypedEventFilter<ApproveDynamicSubscriptionEvent>;
 
 export interface CancelEventObject {
   user: string;
@@ -299,18 +347,6 @@ export interface CancelEventObject {
 export type CancelEvent = TypedEvent<[string], CancelEventObject>;
 
 export type CancelEventFilter = TypedEventFilter<CancelEvent>;
-
-export interface EditSubscriptionLimitEventObject {
-  user: string;
-  amountMaxPerPeriod: BigNumber;
-}
-export type EditSubscriptionLimitEvent = TypedEvent<
-  [string, BigNumber],
-  EditSubscriptionLimitEventObject
->;
-
-export type EditSubscriptionLimitEventFilter =
-  TypedEventFilter<EditSubscriptionLimitEvent>;
 
 export interface NameEditedEventObject {
   user: string;
@@ -323,19 +359,40 @@ export type NameEditedEvent = TypedEvent<
 
 export type NameEditedEventFilter = TypedEventFilter<NameEditedEvent>;
 
-export interface SubscriptionEditedEventObject {
+export interface PaymentDynamicSubscriptionEventObject {
   user: string;
-  subscrptionId: BigNumber;
+  subscrptionName: string;
   price: BigNumber;
-  isActive: boolean;
 }
-export type SubscriptionEditedEvent = TypedEvent<
-  [string, BigNumber, BigNumber, boolean],
-  SubscriptionEditedEventObject
+export type PaymentDynamicSubscriptionEvent = TypedEvent<
+  [string, string, BigNumber],
+  PaymentDynamicSubscriptionEventObject
 >;
 
-export type SubscriptionEditedEventFilter =
-  TypedEventFilter<SubscriptionEditedEvent>;
+export type PaymentDynamicSubscriptionEventFilter =
+  TypedEventFilter<PaymentDynamicSubscriptionEvent>;
+
+export interface SelectTokenEventObject {
+  user: string;
+  tokenAddress: string;
+}
+export type SelectTokenEvent = TypedEvent<
+  [string, string],
+  SelectTokenEventObject
+>;
+
+export type SelectTokenEventFilter = TypedEventFilter<SelectTokenEvent>;
+
+export interface ToggleSubscriptionManagerEventObject {
+  enabled: boolean;
+}
+export type ToggleSubscriptionManagerEvent = TypedEvent<
+  [boolean],
+  ToggleSubscriptionManagerEventObject
+>;
+
+export type ToggleSubscriptionManagerEventFilter =
+  TypedEventFilter<ToggleSubscriptionManagerEvent>;
 
 export interface TreasuryEditedEventObject {
   user: string;
@@ -348,24 +405,26 @@ export type TreasuryEditedEvent = TypedEvent<
 
 export type TreasuryEditedEventFilter = TypedEventFilter<TreasuryEditedEvent>;
 
-export interface UserEditedEventObject {
+export interface UserDynamicEditedEventObject {
   user: string;
-  subscrptionId: BigNumber;
+  subscrptionName: string;
+  price: BigNumber;
   endDate: BigNumber;
 }
-export type UserEditedEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
-  UserEditedEventObject
+export type UserDynamicEditedEvent = TypedEvent<
+  [string, string, BigNumber, BigNumber],
+  UserDynamicEditedEventObject
 >;
 
-export type UserEditedEventFilter = TypedEventFilter<UserEditedEvent>;
+export type UserDynamicEditedEventFilter =
+  TypedEventFilter<UserDynamicEditedEvent>;
 
-export interface CicleoSubscriptionManager extends BaseContract {
+export interface CicleoDynamicSubscriptionManager extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CicleoSubscriptionManagerInterface;
+  interface: CicleoDynamicSubscriptionManagerInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -387,12 +446,12 @@ export interface CicleoSubscriptionManager extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    cancel(
+    approveSubscription(
+      amountMax: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    changeSubscriptionLimit(
-      amountMaxPerPeriod: PromiseOrValue<BigNumberish>,
+    cancel(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -403,44 +462,49 @@ export interface CicleoSubscriptionManager extends BaseContract {
     editAccount(
       user: PromiseOrValue<string>,
       subscriptionEndDate: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscriptionPrice: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    enabled(overrides?: CallOverrides): Promise<[boolean]>;
+
     factory(overrides?: CallOverrides): Promise<[string]>;
 
-    getUserSubscriptionId(
+    getSubscriptionName(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<[number] & { subscriptionId: number }>;
+    ): Promise<[string] & { subName: string }>;
 
-    getUserSubscriptionStatus(
+    getSubscriptionStatus(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [number, boolean] & { subscriptionId: number; isActive: boolean }
+      [BigNumber, string, boolean] & {
+        subscriptionPrice: BigNumber;
+        subscriptionName: string;
+        isActive: boolean;
+      }
     >;
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
-    payFunctionWithSubToken(
-      user: PromiseOrValue<string>,
-      subscrptionId: PromiseOrValue<BigNumberish>,
+    paymentDynnamic(
       price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    payFunctionWithSwap(
-      user: PromiseOrValue<string>,
+    paymentDynnamicWithSwap(
+      price: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
-      subscrptionId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    router(overrides?: CallOverrides): Promise<[string]>;
 
     setName(
       _name: PromiseOrValue<string>,
@@ -452,9 +516,33 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    subscriptionDuration(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     subscriptionNumber(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    subscriptionRenew(
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscriptionRenewWithSwap(
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, boolean, string] & {
+        price: BigNumber;
+        isActive: boolean;
+        name: string;
+      }
+    >;
+
+    timerange(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     token(overrides?: CallOverrides): Promise<[string]>;
 
@@ -470,22 +558,23 @@ export interface CicleoSubscriptionManager extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, number, BigNumber, BigNumber, boolean] & {
+      [BigNumber, BigNumber, BigNumber, boolean, string, BigNumber] & {
         subscriptionEndDate: BigNumber;
-        subscriptionId: number;
-        subscriptionLimit: BigNumber;
+        approval: BigNumber;
         lastPayment: BigNumber;
         canceled: boolean;
+        subscriptionName: string;
+        subscriptionPrice: BigNumber;
       }
     >;
   };
 
-  cancel(
+  approveSubscription(
+    amountMax: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  changeSubscriptionLimit(
-    amountMaxPerPeriod: PromiseOrValue<BigNumberish>,
+  cancel(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -496,42 +585,49 @@ export interface CicleoSubscriptionManager extends BaseContract {
   editAccount(
     user: PromiseOrValue<string>,
     subscriptionEndDate: PromiseOrValue<BigNumberish>,
-    subscriptionId: PromiseOrValue<BigNumberish>,
+    subscriptionPrice: PromiseOrValue<BigNumberish>,
+    subscriptionName: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  enabled(overrides?: CallOverrides): Promise<boolean>;
 
   factory(overrides?: CallOverrides): Promise<string>;
 
-  getUserSubscriptionId(
+  getSubscriptionName(
     user: PromiseOrValue<string>,
     overrides?: CallOverrides
-  ): Promise<number>;
+  ): Promise<string>;
 
-  getUserSubscriptionStatus(
+  getSubscriptionStatus(
     user: PromiseOrValue<string>,
     overrides?: CallOverrides
-  ): Promise<[number, boolean] & { subscriptionId: number; isActive: boolean }>;
+  ): Promise<
+    [BigNumber, string, boolean] & {
+      subscriptionPrice: BigNumber;
+      subscriptionName: string;
+      isActive: boolean;
+    }
+  >;
 
   name(overrides?: CallOverrides): Promise<string>;
 
-  payFunctionWithSubToken(
-    user: PromiseOrValue<string>,
-    subscrptionId: PromiseOrValue<BigNumberish>,
+  paymentDynnamic(
     price: PromiseOrValue<BigNumberish>,
-    endDate: PromiseOrValue<BigNumberish>,
+    subscriptionName: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  payFunctionWithSwap(
-    user: PromiseOrValue<string>,
+  paymentDynnamicWithSwap(
+    price: PromiseOrValue<BigNumberish>,
+    subscriptionName: PromiseOrValue<string>,
     executor: PromiseOrValue<string>,
     desc: SwapDescriptionStruct,
     calls: IOpenOceanCaller.CallDescriptionStruct[],
-    subscrptionId: PromiseOrValue<BigNumberish>,
-    price: PromiseOrValue<BigNumberish>,
-    endDate: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  router(overrides?: CallOverrides): Promise<string>;
 
   setName(
     _name: PromiseOrValue<string>,
@@ -543,9 +639,33 @@ export interface CicleoSubscriptionManager extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  subscriptionDuration(overrides?: CallOverrides): Promise<BigNumber>;
-
   subscriptionNumber(overrides?: CallOverrides): Promise<BigNumber>;
+
+  subscriptionRenew(
+    user: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscriptionRenewWithSwap(
+    user: PromiseOrValue<string>,
+    executor: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscriptions(
+    arg0: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, boolean, string] & {
+      price: BigNumber;
+      isActive: boolean;
+      name: string;
+    }
+  >;
+
+  timerange(overrides?: CallOverrides): Promise<BigNumber>;
 
   token(overrides?: CallOverrides): Promise<string>;
 
@@ -561,66 +681,72 @@ export interface CicleoSubscriptionManager extends BaseContract {
     arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, number, BigNumber, BigNumber, boolean] & {
+    [BigNumber, BigNumber, BigNumber, boolean, string, BigNumber] & {
       subscriptionEndDate: BigNumber;
-      subscriptionId: number;
-      subscriptionLimit: BigNumber;
+      approval: BigNumber;
       lastPayment: BigNumber;
       canceled: boolean;
+      subscriptionName: string;
+      subscriptionPrice: BigNumber;
     }
   >;
 
   callStatic: {
-    cancel(overrides?: CallOverrides): Promise<void>;
-
-    changeSubscriptionLimit(
-      amountMaxPerPeriod: PromiseOrValue<BigNumberish>,
+    approveSubscription(
+      amountMax: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    cancel(overrides?: CallOverrides): Promise<void>;
 
     deleteSubManager(overrides?: CallOverrides): Promise<void>;
 
     editAccount(
       user: PromiseOrValue<string>,
       subscriptionEndDate: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscriptionPrice: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
+    enabled(overrides?: CallOverrides): Promise<boolean>;
+
     factory(overrides?: CallOverrides): Promise<string>;
 
-    getUserSubscriptionId(
+    getSubscriptionName(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<number>;
+    ): Promise<string>;
 
-    getUserSubscriptionStatus(
+    getSubscriptionStatus(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [number, boolean] & { subscriptionId: number; isActive: boolean }
+      [BigNumber, string, boolean] & {
+        subscriptionPrice: BigNumber;
+        subscriptionName: string;
+        isActive: boolean;
+      }
     >;
 
     name(overrides?: CallOverrides): Promise<string>;
 
-    payFunctionWithSubToken(
-      user: PromiseOrValue<string>,
-      subscrptionId: PromiseOrValue<BigNumberish>,
+    paymentDynnamic(
       price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    payFunctionWithSwap(
-      user: PromiseOrValue<string>,
+    paymentDynnamicWithSwap(
+      price: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
-      subscrptionId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    router(overrides?: CallOverrides): Promise<string>;
 
     setName(
       _name: PromiseOrValue<string>,
@@ -632,9 +758,33 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    subscriptionDuration(overrides?: CallOverrides): Promise<BigNumber>;
-
     subscriptionNumber(overrides?: CallOverrides): Promise<BigNumber>;
+
+    subscriptionRenew(
+      user: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscriptionRenewWithSwap(
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, boolean, string] & {
+        price: BigNumber;
+        isActive: boolean;
+        name: string;
+      }
+    >;
+
+    timerange(overrides?: CallOverrides): Promise<BigNumber>;
 
     token(overrides?: CallOverrides): Promise<string>;
 
@@ -650,28 +800,29 @@ export interface CicleoSubscriptionManager extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, number, BigNumber, BigNumber, boolean] & {
+      [BigNumber, BigNumber, BigNumber, boolean, string, BigNumber] & {
         subscriptionEndDate: BigNumber;
-        subscriptionId: number;
-        subscriptionLimit: BigNumber;
+        approval: BigNumber;
         lastPayment: BigNumber;
         canceled: boolean;
+        subscriptionName: string;
+        subscriptionPrice: BigNumber;
       }
     >;
   };
 
   filters: {
+    "ApproveDynamicSubscription(address,uint256)"(
+      user?: PromiseOrValue<string> | null,
+      amount?: null
+    ): ApproveDynamicSubscriptionEventFilter;
+    ApproveDynamicSubscription(
+      user?: PromiseOrValue<string> | null,
+      amount?: null
+    ): ApproveDynamicSubscriptionEventFilter;
+
     "Cancel(address)"(user?: PromiseOrValue<string> | null): CancelEventFilter;
     Cancel(user?: PromiseOrValue<string> | null): CancelEventFilter;
-
-    "EditSubscriptionLimit(address,uint256)"(
-      user?: PromiseOrValue<string> | null,
-      amountMaxPerPeriod?: null
-    ): EditSubscriptionLimitEventFilter;
-    EditSubscriptionLimit(
-      user?: PromiseOrValue<string> | null,
-      amountMaxPerPeriod?: null
-    ): EditSubscriptionLimitEventFilter;
 
     "NameEdited(address,string)"(
       user?: PromiseOrValue<string> | null,
@@ -682,18 +833,32 @@ export interface CicleoSubscriptionManager extends BaseContract {
       newName?: null
     ): NameEditedEventFilter;
 
-    "SubscriptionEdited(address,uint256,uint256,bool)"(
+    "PaymentDynamicSubscription(address,string,uint256)"(
       user?: PromiseOrValue<string> | null,
-      subscrptionId?: PromiseOrValue<BigNumberish> | null,
-      price?: null,
-      isActive?: null
-    ): SubscriptionEditedEventFilter;
-    SubscriptionEdited(
+      subscrptionName?: PromiseOrValue<string> | null,
+      price?: null
+    ): PaymentDynamicSubscriptionEventFilter;
+    PaymentDynamicSubscription(
       user?: PromiseOrValue<string> | null,
-      subscrptionId?: PromiseOrValue<BigNumberish> | null,
-      price?: null,
-      isActive?: null
-    ): SubscriptionEditedEventFilter;
+      subscrptionName?: PromiseOrValue<string> | null,
+      price?: null
+    ): PaymentDynamicSubscriptionEventFilter;
+
+    "SelectToken(address,address)"(
+      user?: PromiseOrValue<string> | null,
+      tokenAddress?: PromiseOrValue<string> | null
+    ): SelectTokenEventFilter;
+    SelectToken(
+      user?: PromiseOrValue<string> | null,
+      tokenAddress?: PromiseOrValue<string> | null
+    ): SelectTokenEventFilter;
+
+    "ToggleSubscriptionManager(bool)"(
+      enabled?: null
+    ): ToggleSubscriptionManagerEventFilter;
+    ToggleSubscriptionManager(
+      enabled?: null
+    ): ToggleSubscriptionManagerEventFilter;
 
     "TreasuryEdited(address,address)"(
       user?: PromiseOrValue<string> | null,
@@ -704,25 +869,27 @@ export interface CicleoSubscriptionManager extends BaseContract {
       newTreasury?: null
     ): TreasuryEditedEventFilter;
 
-    "UserEdited(address,uint256,uint256)"(
+    "UserDynamicEdited(address,string,uint256,uint256)"(
       user?: PromiseOrValue<string> | null,
-      subscrptionId?: PromiseOrValue<BigNumberish> | null,
+      subscrptionName?: PromiseOrValue<string> | null,
+      price?: null,
       endDate?: null
-    ): UserEditedEventFilter;
-    UserEdited(
+    ): UserDynamicEditedEventFilter;
+    UserDynamicEdited(
       user?: PromiseOrValue<string> | null,
-      subscrptionId?: PromiseOrValue<BigNumberish> | null,
+      subscrptionName?: PromiseOrValue<string> | null,
+      price?: null,
       endDate?: null
-    ): UserEditedEventFilter;
+    ): UserDynamicEditedEventFilter;
   };
 
   estimateGas: {
-    cancel(
+    approveSubscription(
+      amountMax: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    changeSubscriptionLimit(
-      amountMaxPerPeriod: PromiseOrValue<BigNumberish>,
+    cancel(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -733,42 +900,43 @@ export interface CicleoSubscriptionManager extends BaseContract {
     editAccount(
       user: PromiseOrValue<string>,
       subscriptionEndDate: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscriptionPrice: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    enabled(overrides?: CallOverrides): Promise<BigNumber>;
+
     factory(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getUserSubscriptionId(
+    getSubscriptionName(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getUserSubscriptionStatus(
+    getSubscriptionStatus(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
-    payFunctionWithSubToken(
-      user: PromiseOrValue<string>,
-      subscrptionId: PromiseOrValue<BigNumberish>,
+    paymentDynnamic(
       price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    payFunctionWithSwap(
-      user: PromiseOrValue<string>,
+    paymentDynnamicWithSwap(
+      price: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
-      subscrptionId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    router(overrides?: CallOverrides): Promise<BigNumber>;
 
     setName(
       _name: PromiseOrValue<string>,
@@ -780,9 +948,27 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    subscriptionDuration(overrides?: CallOverrides): Promise<BigNumber>;
-
     subscriptionNumber(overrides?: CallOverrides): Promise<BigNumber>;
+
+    subscriptionRenew(
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscriptionRenewWithSwap(
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    timerange(overrides?: CallOverrides): Promise<BigNumber>;
 
     token(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -801,12 +987,12 @@ export interface CicleoSubscriptionManager extends BaseContract {
   };
 
   populateTransaction: {
-    cancel(
+    approveSubscription(
+      amountMax: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    changeSubscriptionLimit(
-      amountMaxPerPeriod: PromiseOrValue<BigNumberish>,
+    cancel(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -817,42 +1003,43 @@ export interface CicleoSubscriptionManager extends BaseContract {
     editAccount(
       user: PromiseOrValue<string>,
       subscriptionEndDate: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscriptionPrice: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    enabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getUserSubscriptionId(
+    getSubscriptionName(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getUserSubscriptionStatus(
+    getSubscriptionStatus(
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    payFunctionWithSubToken(
-      user: PromiseOrValue<string>,
-      subscrptionId: PromiseOrValue<BigNumberish>,
+    paymentDynnamic(
       price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    payFunctionWithSwap(
-      user: PromiseOrValue<string>,
+    paymentDynnamicWithSwap(
+      price: PromiseOrValue<BigNumberish>,
+      subscriptionName: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
-      subscrptionId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      endDate: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    router(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setName(
       _name: PromiseOrValue<string>,
@@ -864,13 +1051,29 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    subscriptionDuration(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     subscriptionNumber(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    subscriptionRenew(
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscriptionRenewWithSwap(
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    timerange(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

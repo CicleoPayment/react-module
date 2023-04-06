@@ -3,3 +3,4 @@
 /* eslint-disable */
 import type * as fakeUsdcSol from "./FakeUSDC.sol";
 export type { fakeUsdcSol };
+export type { FakeRouterSwap } from "./FakeRouterSwap";

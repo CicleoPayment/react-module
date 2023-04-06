@@ -73,6 +73,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
+      name: "ICicleoSubscriptionRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ICicleoSubscriptionRouter__factory>;
+    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
@@ -92,6 +96,10 @@ declare module "hardhat/types/runtime" {
       name: "CicleoSubscriptionSecurity",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CicleoSubscriptionSecurity__factory>;
+    getContractFactory(
+      name: "FakeRouterSwap",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FakeRouterSwap__factory>;
     getContractFactory(
       name: "TestnetUSDC",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -185,6 +193,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
+      name: "ICicleoSubscriptionRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ICicleoSubscriptionRouter>;
+    getContractAt(
       name: "IERC20",
       address: string,
       signer?: ethers.Signer
@@ -209,6 +222,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.CicleoSubscriptionSecurity>;
+    getContractAt(
+      name: "FakeRouterSwap",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FakeRouterSwap>;
     getContractAt(
       name: "TestnetUSDC",
       address: string,

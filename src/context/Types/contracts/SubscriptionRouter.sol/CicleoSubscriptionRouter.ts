@@ -95,37 +95,153 @@ export type MinimifiedSubscriptionManagerStructStructOutput = [
   activeSubscriptionCount: BigNumber;
 };
 
+export type SwapDescriptionStruct = {
+  srcToken: PromiseOrValue<string>;
+  dstToken: PromiseOrValue<string>;
+  srcReceiver: PromiseOrValue<string>;
+  dstReceiver: PromiseOrValue<string>;
+  amount: PromiseOrValue<BigNumberish>;
+  minReturnAmount: PromiseOrValue<BigNumberish>;
+  guaranteedAmount: PromiseOrValue<BigNumberish>;
+  flags: PromiseOrValue<BigNumberish>;
+  referrer: PromiseOrValue<string>;
+  permit: PromiseOrValue<BytesLike>;
+};
+
+export type SwapDescriptionStructOutput = [
+  string,
+  string,
+  string,
+  string,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  string,
+  string
+] & {
+  srcToken: string;
+  dstToken: string;
+  srcReceiver: string;
+  dstReceiver: string;
+  amount: BigNumber;
+  minReturnAmount: BigNumber;
+  guaranteedAmount: BigNumber;
+  flags: BigNumber;
+  referrer: string;
+  permit: string;
+};
+
+export declare namespace IOpenOceanCaller {
+  export type CallDescriptionStruct = {
+    target: PromiseOrValue<BigNumberish>;
+    gasLimit: PromiseOrValue<BigNumberish>;
+    value: PromiseOrValue<BigNumberish>;
+    data: PromiseOrValue<BytesLike>;
+  };
+
+  export type CallDescriptionStructOutput = [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string
+  ] & {
+    target: BigNumber;
+    gasLimit: BigNumber;
+    value: BigNumber;
+    data: string;
+  };
+}
+
 export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   functions: {
+    "botAccount()": FunctionFragment;
+    "editSubscription(uint256,uint8,uint256,string,bool)": FunctionFragment;
     "factory()": FunctionFragment;
+    "getActiveSubscriptionCount(uint256)": FunctionFragment;
     "getSubscriptionManager(uint256)": FunctionFragment;
+    "getSubscriptions(uint256)": FunctionFragment;
     "getSubscriptionsManager(address)": FunctionFragment;
-    "initialize(address)": FunctionFragment;
+    "initialize(address,address,uint16,address)": FunctionFragment;
+    "newSubscription(uint256,uint256,string)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "security()": FunctionFragment;
+    "setBotAccount(address)": FunctionFragment;
     "setFactory(address)": FunctionFragment;
     "setSecurity(address)": FunctionFragment;
+    "setTax(address)": FunctionFragment;
+    "setTaxRate(uint16)": FunctionFragment;
+    "subscribe(uint256,uint8)": FunctionFragment;
+    "subscribeDynamicly(uint256,string,uint256)": FunctionFragment;
+    "subscribeDynamiclyWithSwap(uint256,string,uint256,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "subscribeWithSwap(uint256,uint8,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "subscriptionNumber(uint256)": FunctionFragment;
+    "subscriptionRenew(uint256,address)": FunctionFragment;
+    "subscriptionRenewWithSwap(uint256,address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "subscriptions(uint256,uint256)": FunctionFragment;
+    "taxAccount()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "users(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "botAccount"
+      | "editSubscription"
       | "factory"
+      | "getActiveSubscriptionCount"
       | "getSubscriptionManager"
+      | "getSubscriptions"
       | "getSubscriptionsManager"
       | "initialize"
+      | "newSubscription"
       | "owner"
       | "renounceOwnership"
       | "security"
+      | "setBotAccount"
       | "setFactory"
       | "setSecurity"
+      | "setTax"
+      | "setTaxRate"
+      | "subscribe"
+      | "subscribeDynamicly"
+      | "subscribeDynamiclyWithSwap"
+      | "subscribeWithSwap"
+      | "subscriptionNumber"
+      | "subscriptionRenew"
+      | "subscriptionRenewWithSwap"
+      | "subscriptions"
+      | "taxAccount"
       | "transferOwnership"
+      | "users"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "botAccount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "editSubscription",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<boolean>
+    ]
+  ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "getActiveSubscriptionCount",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getSubscriptionManager",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getSubscriptions",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
@@ -134,7 +250,20 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [PromiseOrValue<string>]
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "newSubscription",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>
+    ]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -142,6 +271,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "security", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "setBotAccount",
+    values: [PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(
     functionFragment: "setFactory",
     values: [PromiseOrValue<string>]
@@ -151,13 +284,97 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "setTax",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setTaxRate",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscribe",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscribeDynamicly",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscribeDynamiclyWithSwap",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscribeWithSwap",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptionNumber",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptionRenew",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptionRenewWithSwap",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "subscriptions",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "taxAccount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "users",
+    values: [PromiseOrValue<string>]
+  ): string;
 
+  decodeFunctionResult(functionFragment: "botAccount", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "editSubscription",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "getActiveSubscriptionCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getSubscriptionManager",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getSubscriptions",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -165,29 +382,82 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "newSubscription",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "security", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setBotAccount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "setFactory", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setSecurity",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setTax", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setTaxRate", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "subscribe", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "subscribeDynamicly",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscribeDynamiclyWithSwap",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscribeWithSwap",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptionNumber",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptionRenew",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptionRenewWithSwap",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "subscriptions",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "taxAccount", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "users", data: BytesLike): Result;
 
   events: {
     "Initialized(uint8)": EventFragment;
+    "NameEdited(address,string)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "PaymentSubscription(address,uint256,uint8,uint256)": EventFragment;
+    "SelectToken(address,address)": EventFragment;
+    "SubscriptionEdited(address,uint256,uint8,uint256,bool)": EventFragment;
+    "TreasuryEdited(address,address)": EventFragment;
+    "UserEdited(address,uint256,uint8,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NameEdited"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PaymentSubscription"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SelectToken"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SubscriptionEdited"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "TreasuryEdited"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UserEdited"): EventFragment;
 }
 
 export interface InitializedEventObject {
@@ -196,6 +466,17 @@ export interface InitializedEventObject {
 export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
 
 export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
+
+export interface NameEditedEventObject {
+  user: string;
+  newName: string;
+}
+export type NameEditedEvent = TypedEvent<
+  [string, string],
+  NameEditedEventObject
+>;
+
+export type NameEditedEventFilter = TypedEventFilter<NameEditedEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
@@ -208,6 +489,70 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface PaymentSubscriptionEventObject {
+  user: string;
+  subscrptionManagerId: BigNumber;
+  subscriptionId: number;
+  price: BigNumber;
+}
+export type PaymentSubscriptionEvent = TypedEvent<
+  [string, BigNumber, number, BigNumber],
+  PaymentSubscriptionEventObject
+>;
+
+export type PaymentSubscriptionEventFilter =
+  TypedEventFilter<PaymentSubscriptionEvent>;
+
+export interface SelectTokenEventObject {
+  user: string;
+  tokenAddress: string;
+}
+export type SelectTokenEvent = TypedEvent<
+  [string, string],
+  SelectTokenEventObject
+>;
+
+export type SelectTokenEventFilter = TypedEventFilter<SelectTokenEvent>;
+
+export interface SubscriptionEditedEventObject {
+  user: string;
+  subscrptionManagerId: BigNumber;
+  subscriptionId: number;
+  price: BigNumber;
+  isActive: boolean;
+}
+export type SubscriptionEditedEvent = TypedEvent<
+  [string, BigNumber, number, BigNumber, boolean],
+  SubscriptionEditedEventObject
+>;
+
+export type SubscriptionEditedEventFilter =
+  TypedEventFilter<SubscriptionEditedEvent>;
+
+export interface TreasuryEditedEventObject {
+  user: string;
+  newTreasury: string;
+}
+export type TreasuryEditedEvent = TypedEvent<
+  [string, string],
+  TreasuryEditedEventObject
+>;
+
+export type TreasuryEditedEventFilter = TypedEventFilter<TreasuryEditedEvent>;
+
+export interface UserEditedEventObject {
+  user: string;
+  subscrptionManagerId: BigNumber;
+  subscriptionId: number;
+  endDate: BigNumber;
+}
+export type UserEditedEvent = TypedEvent<
+  [string, BigNumber, number, BigNumber],
+  UserEditedEventObject
+>;
+
+export type UserEditedEventFilter = TypedEventFilter<UserEditedEvent>;
 
 export interface CicleoSubscriptionRouter extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -236,12 +581,33 @@ export interface CicleoSubscriptionRouter extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    botAccount(overrides?: CallOverrides): Promise<[string]>;
+
+    editSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      isActive: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     factory(overrides?: CallOverrides): Promise<[string]>;
+
+    getActiveSubscriptionCount(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { count: BigNumber }>;
 
     getSubscriptionManager(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[SubscriptionManagerStructStructOutput]>;
+
+    getSubscriptions(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[SubscriptionStructStructOutput[]]>;
 
     getSubscriptionsManager(
       user: PromiseOrValue<string>,
@@ -250,6 +616,16 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     initialize(
       _factory: PromiseOrValue<string>,
+      _taxAccount: PromiseOrValue<string>,
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      _botAccount: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    newSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -261,6 +637,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     security(overrides?: CallOverrides): Promise<[string]>;
 
+    setBotAccount(
+      _botAccount: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setFactory(
       _factory: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -271,18 +652,120 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setTax(
+      _tax: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setTaxRate(
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscribe(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscribeDynamicly(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscribeDynamiclyWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscribeWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionType: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscriptionNumber(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[number]>;
+
+    subscriptionRenew(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscriptionRenewWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, boolean, string] & {
+        price: BigNumber;
+        isActive: boolean;
+        name: string;
+      }
+    >;
+
+    taxAccount(overrides?: CallOverrides): Promise<[string]>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[string, BigNumber] & { name: string; price: BigNumber }>;
   };
 
+  botAccount(overrides?: CallOverrides): Promise<string>;
+
+  editSubscription(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    id: PromiseOrValue<BigNumberish>,
+    price: PromiseOrValue<BigNumberish>,
+    name: PromiseOrValue<string>,
+    isActive: PromiseOrValue<boolean>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   factory(overrides?: CallOverrides): Promise<string>;
+
+  getActiveSubscriptionCount(
+    id: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   getSubscriptionManager(
     id: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<SubscriptionManagerStructStructOutput>;
+
+  getSubscriptions(
+    id: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<SubscriptionStructStructOutput[]>;
 
   getSubscriptionsManager(
     user: PromiseOrValue<string>,
@@ -291,6 +774,16 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
   initialize(
     _factory: PromiseOrValue<string>,
+    _taxAccount: PromiseOrValue<string>,
+    _taxPercentage: PromiseOrValue<BigNumberish>,
+    _botAccount: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  newSubscription(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    price: PromiseOrValue<BigNumberish>,
+    name: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -302,6 +795,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
   security(overrides?: CallOverrides): Promise<string>;
 
+  setBotAccount(
+    _botAccount: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setFactory(
     _factory: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -312,18 +810,120 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setTax(
+    _tax: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setTaxRate(
+    _taxPercentage: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscribe(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    subscriptionId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscribeDynamicly(
+    subscriptionId: PromiseOrValue<BigNumberish>,
+    subscrptionName: PromiseOrValue<string>,
+    price: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscribeDynamiclyWithSwap(
+    subscriptionId: PromiseOrValue<BigNumberish>,
+    subscrptionName: PromiseOrValue<string>,
+    price: PromiseOrValue<BigNumberish>,
+    executor: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscribeWithSwap(
+    subscriptionId: PromiseOrValue<BigNumberish>,
+    subscrptionType: PromiseOrValue<BigNumberish>,
+    executor: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscriptionNumber(
+    arg0: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
+  subscriptionRenew(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    user: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscriptionRenewWithSwap(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    user: PromiseOrValue<string>,
+    executor: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  subscriptions(
+    arg0: PromiseOrValue<BigNumberish>,
+    arg1: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, boolean, string] & {
+      price: BigNumber;
+      isActive: boolean;
+      name: string;
+    }
+  >;
+
+  taxAccount(overrides?: CallOverrides): Promise<string>;
+
   transferOwnership(
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  users(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<[string, BigNumber] & { name: string; price: BigNumber }>;
+
   callStatic: {
+    botAccount(overrides?: CallOverrides): Promise<string>;
+
+    editSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      isActive: PromiseOrValue<boolean>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     factory(overrides?: CallOverrides): Promise<string>;
+
+    getActiveSubscriptionCount(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getSubscriptionManager(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<SubscriptionManagerStructStructOutput>;
+
+    getSubscriptions(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<SubscriptionStructStructOutput[]>;
 
     getSubscriptionsManager(
       user: PromiseOrValue<string>,
@@ -332,6 +932,16 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     initialize(
       _factory: PromiseOrValue<string>,
+      _taxAccount: PromiseOrValue<string>,
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      _botAccount: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    newSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -340,6 +950,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     security(overrides?: CallOverrides): Promise<string>;
+
+    setBotAccount(
+      _botAccount: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setFactory(
       _factory: PromiseOrValue<string>,
@@ -351,15 +966,105 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setTax(
+      _tax: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setTaxRate(
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscribe(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscribeDynamicly(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscribeDynamiclyWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscribeWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionType: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscriptionNumber(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
+    subscriptionRenew(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscriptionRenewWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, boolean, string] & {
+        price: BigNumber;
+        isActive: boolean;
+        name: string;
+      }
+    >;
+
+    taxAccount(overrides?: CallOverrides): Promise<string>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[string, BigNumber] & { name: string; price: BigNumber }>;
   };
 
   filters: {
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
+
+    "NameEdited(address,string)"(
+      user?: PromiseOrValue<string> | null,
+      newName?: null
+    ): NameEditedEventFilter;
+    NameEdited(
+      user?: PromiseOrValue<string> | null,
+      newName?: null
+    ): NameEditedEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
@@ -369,12 +1074,92 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       previousOwner?: PromiseOrValue<string> | null,
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
+
+    "PaymentSubscription(address,uint256,uint8,uint256)"(
+      user?: PromiseOrValue<string> | null,
+      subscrptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      subscriptionId?: PromiseOrValue<BigNumberish> | null,
+      price?: null
+    ): PaymentSubscriptionEventFilter;
+    PaymentSubscription(
+      user?: PromiseOrValue<string> | null,
+      subscrptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      subscriptionId?: PromiseOrValue<BigNumberish> | null,
+      price?: null
+    ): PaymentSubscriptionEventFilter;
+
+    "SelectToken(address,address)"(
+      user?: PromiseOrValue<string> | null,
+      tokenAddress?: PromiseOrValue<string> | null
+    ): SelectTokenEventFilter;
+    SelectToken(
+      user?: PromiseOrValue<string> | null,
+      tokenAddress?: PromiseOrValue<string> | null
+    ): SelectTokenEventFilter;
+
+    "SubscriptionEdited(address,uint256,uint8,uint256,bool)"(
+      user?: PromiseOrValue<string> | null,
+      subscrptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      subscriptionId?: PromiseOrValue<BigNumberish> | null,
+      price?: null,
+      isActive?: null
+    ): SubscriptionEditedEventFilter;
+    SubscriptionEdited(
+      user?: PromiseOrValue<string> | null,
+      subscrptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      subscriptionId?: PromiseOrValue<BigNumberish> | null,
+      price?: null,
+      isActive?: null
+    ): SubscriptionEditedEventFilter;
+
+    "TreasuryEdited(address,address)"(
+      user?: PromiseOrValue<string> | null,
+      newTreasury?: null
+    ): TreasuryEditedEventFilter;
+    TreasuryEdited(
+      user?: PromiseOrValue<string> | null,
+      newTreasury?: null
+    ): TreasuryEditedEventFilter;
+
+    "UserEdited(address,uint256,uint8,uint256)"(
+      user?: PromiseOrValue<string> | null,
+      subscrptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      subscriptionId?: PromiseOrValue<BigNumberish> | null,
+      endDate?: null
+    ): UserEditedEventFilter;
+    UserEdited(
+      user?: PromiseOrValue<string> | null,
+      subscrptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      subscriptionId?: PromiseOrValue<BigNumberish> | null,
+      endDate?: null
+    ): UserEditedEventFilter;
   };
 
   estimateGas: {
+    botAccount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    editSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      isActive: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     factory(overrides?: CallOverrides): Promise<BigNumber>;
 
+    getActiveSubscriptionCount(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getSubscriptionManager(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getSubscriptions(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -386,6 +1171,16 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     initialize(
       _factory: PromiseOrValue<string>,
+      _taxAccount: PromiseOrValue<string>,
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      _botAccount: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    newSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -397,6 +1192,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     security(overrides?: CallOverrides): Promise<BigNumber>;
 
+    setBotAccount(
+      _botAccount: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setFactory(
       _factory: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -407,16 +1207,112 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setTax(
+      _tax: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setTaxRate(
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscribe(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscribeDynamicly(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscribeDynamiclyWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscribeWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionType: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscriptionNumber(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    subscriptionRenew(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscriptionRenewWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    taxAccount(overrides?: CallOverrides): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    botAccount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    editSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      isActive: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    getActiveSubscriptionCount(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getSubscriptionManager(
+      id: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getSubscriptions(
       id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -428,6 +1324,16 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     initialize(
       _factory: PromiseOrValue<string>,
+      _taxAccount: PromiseOrValue<string>,
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      _botAccount: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    newSubscription(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      price: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -439,6 +1345,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     security(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    setBotAccount(
+      _botAccount: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     setFactory(
       _factory: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -449,9 +1360,84 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    setTax(
+      _tax: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setTaxRate(
+      _taxPercentage: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscribe(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscribeDynamicly(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscribeDynamiclyWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionName: PromiseOrValue<string>,
+      price: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscribeWithSwap(
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      subscrptionType: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscriptionNumber(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    subscriptionRenew(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscriptionRenewWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    subscriptions(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    taxAccount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

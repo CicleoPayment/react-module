@@ -29,31 +29,27 @@ import type {
 
 export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
   functions: {
-    "botAddress()": FunctionFragment;
-    "createSubscriptionManager(string,address,address)": FunctionFragment;
+    "createSubscriptionManager(string,address,address,uint256)": FunctionFragment;
     "idCount()": FunctionFragment;
     "ids(uint256)": FunctionFragment;
-    "initialize(address,uint256,address,address,address)": FunctionFragment;
+    "initialize(address)": FunctionFragment;
     "isSubscriptionManager(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "router()": FunctionFragment;
+    "routerSubscription()": FunctionFragment;
+    "routerSwap()": FunctionFragment;
     "security()": FunctionFragment;
-    "setBot(address)": FunctionFragment;
-    "setRouter(address)": FunctionFragment;
+    "setRouterSubscription(address)": FunctionFragment;
+    "setRouterSwap(address)": FunctionFragment;
     "setSecurityAddress(address)": FunctionFragment;
-    "setTaxAccount(address)": FunctionFragment;
-    "setTaxPercent(uint256)": FunctionFragment;
     "subscriptionManagerId(address)": FunctionFragment;
     "taxAccount()": FunctionFragment;
-    "taxPercent()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "verifyIfOwner(address,uint256)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "botAddress"
       | "createSubscriptionManager"
       | "idCount"
       | "ids"
@@ -61,30 +57,25 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
       | "isSubscriptionManager"
       | "owner"
       | "renounceOwnership"
-      | "router"
+      | "routerSubscription"
+      | "routerSwap"
       | "security"
-      | "setBot"
-      | "setRouter"
+      | "setRouterSubscription"
+      | "setRouterSwap"
       | "setSecurityAddress"
-      | "setTaxAccount"
-      | "setTaxPercent"
       | "subscriptionManagerId"
       | "taxAccount"
-      | "taxPercent"
       | "transferOwnership"
       | "verifyIfOwner"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "botAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "createSubscriptionManager",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<string>,
-      PromiseOrValue<string>
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>
     ]
   ): string;
   encodeFunctionData(functionFragment: "idCount", values?: undefined): string;
@@ -94,13 +85,7 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
-    ]
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "isSubscriptionManager",
@@ -111,14 +96,21 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "router", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "routerSubscription",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "routerSwap",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "security", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "setBot",
+    functionFragment: "setRouterSubscription",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setRouter",
+    functionFragment: "setRouterSwap",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -126,23 +118,11 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setTaxAccount",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setTaxPercent",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "subscriptionManagerId",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "taxAccount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "taxPercent",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -154,7 +134,6 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
 
-  decodeFunctionResult(functionFragment: "botAddress", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createSubscriptionManager",
     data: BytesLike
@@ -171,20 +150,22 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "router", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "routerSubscription",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "routerSwap", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "security", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "setBot", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "setRouter", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setRouterSubscription",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRouterSwap",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "setSecurityAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setTaxAccount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setTaxPercent",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -192,7 +173,6 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "taxAccount", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "taxPercent", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -271,12 +251,11 @@ export interface CicleoSubscriptionFactory extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    botAddress(overrides?: CallOverrides): Promise<[string]>;
-
     createSubscriptionManager(
       name: PromiseOrValue<string>,
       token: PromiseOrValue<string>,
       treasury: PromiseOrValue<string>,
+      timerange: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -288,10 +267,6 @@ export interface CicleoSubscriptionFactory extends BaseContract {
     ): Promise<[string]>;
 
     initialize(
-      _botAddress: PromiseOrValue<string>,
-      _taxPercent: PromiseOrValue<BigNumberish>,
-      _taxAccount: PromiseOrValue<string>,
-      _router: PromiseOrValue<string>,
       _security: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -307,32 +282,24 @@ export interface CicleoSubscriptionFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    router(overrides?: CallOverrides): Promise<[string]>;
+    routerSubscription(overrides?: CallOverrides): Promise<[string]>;
+
+    routerSwap(overrides?: CallOverrides): Promise<[string]>;
 
     security(overrides?: CallOverrides): Promise<[string]>;
 
-    setBot(
-      _botAddress: PromiseOrValue<string>,
+    setRouterSubscription(
+      _routerSubscription: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setRouter(
-      _router: PromiseOrValue<string>,
+    setRouterSwap(
+      _routerSwap: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     setSecurityAddress(
       _securityAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setTaxAccount(
-      _taxAccount: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setTaxPercent(
-      _taxPercent: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -343,26 +310,23 @@ export interface CicleoSubscriptionFactory extends BaseContract {
 
     taxAccount(overrides?: CallOverrides): Promise<[string]>;
 
-    taxPercent(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     verifyIfOwner(
-      _user: PromiseOrValue<string>,
-      _id: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
   };
-
-  botAddress(overrides?: CallOverrides): Promise<string>;
 
   createSubscriptionManager(
     name: PromiseOrValue<string>,
     token: PromiseOrValue<string>,
     treasury: PromiseOrValue<string>,
+    timerange: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -374,10 +338,6 @@ export interface CicleoSubscriptionFactory extends BaseContract {
   ): Promise<string>;
 
   initialize(
-    _botAddress: PromiseOrValue<string>,
-    _taxPercent: PromiseOrValue<BigNumberish>,
-    _taxAccount: PromiseOrValue<string>,
-    _router: PromiseOrValue<string>,
     _security: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -393,32 +353,24 @@ export interface CicleoSubscriptionFactory extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  router(overrides?: CallOverrides): Promise<string>;
+  routerSubscription(overrides?: CallOverrides): Promise<string>;
+
+  routerSwap(overrides?: CallOverrides): Promise<string>;
 
   security(overrides?: CallOverrides): Promise<string>;
 
-  setBot(
-    _botAddress: PromiseOrValue<string>,
+  setRouterSubscription(
+    _routerSubscription: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setRouter(
-    _router: PromiseOrValue<string>,
+  setRouterSwap(
+    _routerSwap: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   setSecurityAddress(
     _securityAddress: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setTaxAccount(
-    _taxAccount: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setTaxPercent(
-    _taxPercent: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -429,26 +381,23 @@ export interface CicleoSubscriptionFactory extends BaseContract {
 
   taxAccount(overrides?: CallOverrides): Promise<string>;
 
-  taxPercent(overrides?: CallOverrides): Promise<BigNumber>;
-
   transferOwnership(
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   verifyIfOwner(
-    _user: PromiseOrValue<string>,
-    _id: PromiseOrValue<BigNumberish>,
+    user: PromiseOrValue<string>,
+    id: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   callStatic: {
-    botAddress(overrides?: CallOverrides): Promise<string>;
-
     createSubscriptionManager(
       name: PromiseOrValue<string>,
       token: PromiseOrValue<string>,
       treasury: PromiseOrValue<string>,
+      timerange: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -460,10 +409,6 @@ export interface CicleoSubscriptionFactory extends BaseContract {
     ): Promise<string>;
 
     initialize(
-      _botAddress: PromiseOrValue<string>,
-      _taxPercent: PromiseOrValue<BigNumberish>,
-      _taxAccount: PromiseOrValue<string>,
-      _router: PromiseOrValue<string>,
       _security: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -477,32 +422,24 @@ export interface CicleoSubscriptionFactory extends BaseContract {
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    router(overrides?: CallOverrides): Promise<string>;
+    routerSubscription(overrides?: CallOverrides): Promise<string>;
+
+    routerSwap(overrides?: CallOverrides): Promise<string>;
 
     security(overrides?: CallOverrides): Promise<string>;
 
-    setBot(
-      _botAddress: PromiseOrValue<string>,
+    setRouterSubscription(
+      _routerSubscription: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setRouter(
-      _router: PromiseOrValue<string>,
+    setRouterSwap(
+      _routerSwap: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     setSecurityAddress(
       _securityAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setTaxAccount(
-      _taxAccount: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setTaxPercent(
-      _taxPercent: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -513,16 +450,14 @@ export interface CicleoSubscriptionFactory extends BaseContract {
 
     taxAccount(overrides?: CallOverrides): Promise<string>;
 
-    taxPercent(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     verifyIfOwner(
-      _user: PromiseOrValue<string>,
-      _id: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<boolean>;
   };
@@ -551,12 +486,11 @@ export interface CicleoSubscriptionFactory extends BaseContract {
   };
 
   estimateGas: {
-    botAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
     createSubscriptionManager(
       name: PromiseOrValue<string>,
       token: PromiseOrValue<string>,
       treasury: PromiseOrValue<string>,
+      timerange: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -568,10 +502,6 @@ export interface CicleoSubscriptionFactory extends BaseContract {
     ): Promise<BigNumber>;
 
     initialize(
-      _botAddress: PromiseOrValue<string>,
-      _taxPercent: PromiseOrValue<BigNumberish>,
-      _taxAccount: PromiseOrValue<string>,
-      _router: PromiseOrValue<string>,
       _security: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -587,32 +517,24 @@ export interface CicleoSubscriptionFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    router(overrides?: CallOverrides): Promise<BigNumber>;
+    routerSubscription(overrides?: CallOverrides): Promise<BigNumber>;
+
+    routerSwap(overrides?: CallOverrides): Promise<BigNumber>;
 
     security(overrides?: CallOverrides): Promise<BigNumber>;
 
-    setBot(
-      _botAddress: PromiseOrValue<string>,
+    setRouterSubscription(
+      _routerSubscription: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setRouter(
-      _router: PromiseOrValue<string>,
+    setRouterSwap(
+      _routerSwap: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     setSecurityAddress(
       _securityAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setTaxAccount(
-      _taxAccount: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setTaxPercent(
-      _taxPercent: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -623,27 +545,24 @@ export interface CicleoSubscriptionFactory extends BaseContract {
 
     taxAccount(overrides?: CallOverrides): Promise<BigNumber>;
 
-    taxPercent(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     verifyIfOwner(
-      _user: PromiseOrValue<string>,
-      _id: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    botAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     createSubscriptionManager(
       name: PromiseOrValue<string>,
       token: PromiseOrValue<string>,
       treasury: PromiseOrValue<string>,
+      timerange: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -655,10 +574,6 @@ export interface CicleoSubscriptionFactory extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     initialize(
-      _botAddress: PromiseOrValue<string>,
-      _taxPercent: PromiseOrValue<BigNumberish>,
-      _taxAccount: PromiseOrValue<string>,
-      _router: PromiseOrValue<string>,
       _security: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -674,32 +589,26 @@ export interface CicleoSubscriptionFactory extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    router(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    routerSubscription(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    routerSwap(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     security(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    setBot(
-      _botAddress: PromiseOrValue<string>,
+    setRouterSubscription(
+      _routerSubscription: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setRouter(
-      _router: PromiseOrValue<string>,
+    setRouterSwap(
+      _routerSwap: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     setSecurityAddress(
       _securityAddress: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setTaxAccount(
-      _taxAccount: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setTaxPercent(
-      _taxPercent: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -710,16 +619,14 @@ export interface CicleoSubscriptionFactory extends BaseContract {
 
     taxAccount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    taxPercent(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     verifyIfOwner(
-      _user: PromiseOrValue<string>,
-      _id: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

@@ -98,7 +98,13 @@ const PaymentButton: FC<PaymentButton> = ({
 
         const erc20 = await Contracts.ERC20(signer, coin.id);
 
+        const subscriptionRouterContract = await Contracts.SubscriptionRouter(
+            signer
+        );
+
         const address = await signer.getAddress();
+
+        const { chainId } = await signer.provider.getNetwork();
 
         if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
             let step = 1;
@@ -141,7 +147,7 @@ const PaymentButton: FC<PaymentButton> = ({
                     console.log(subscription.originalPrice);
                     await doTx(
                         () =>
-                            subManagerContract.approveSubscription(
+                            subManagerContract.changeSubscriptionLimit(
                                 subscription.originalPrice
                             ),
                         "Approve Subscription",
@@ -153,7 +159,11 @@ const PaymentButton: FC<PaymentButton> = ({
                 },
                 3: async () => {
                     await doTx(
-                        () => subManagerContract.payment(subscriptionId),
+                        () =>
+                            subscriptionRouterContract.subscribe(
+                                subManager.id,
+                                subscriptionId
+                            ),
                         "Subscribe",
                         () => setLoadingStep(3)
                     );
@@ -181,14 +191,14 @@ const PaymentButton: FC<PaymentButton> = ({
             let data = JSON.stringify({
                 tokenIn: coin.id,
                 tokenOut: subManager.tokenAddress,
-                price: subscription.originalUserPrice,
+                price: subscription.originalUserPrice.toString(),
                 fromAddress: subManager.address,
             });
 
             let config = {
                 method: "post",
                 maxBodyLength: Infinity,
-                url: "https://backend.cicleo.io/chain/56/getExactPrice/",
+                url: `https://backend.cicleo.io/chain/${chainId}/getExactPrice/`,
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -197,9 +207,9 @@ const PaymentButton: FC<PaymentButton> = ({
 
             const resp = await axios(config);
 
-            let step = 1;
+            console.log(resp.data);
 
-            
+            let step = 1;
 
             const allowance = await erc20.allowance(
                 address,
@@ -215,6 +225,8 @@ const PaymentButton: FC<PaymentButton> = ({
             }
 
             setStep(step);
+
+            console.log(subManager.address)
 
             setStepFunction({
                 1: async () => {
@@ -234,7 +246,7 @@ const PaymentButton: FC<PaymentButton> = ({
                 2: async () => {
                     await doTx(
                         () =>
-                            subManagerContract.approveSubscription(
+                            subManagerContract.changeSubscriptionLimit(
                                 subscription.originalPrice
                             ),
                         "Approve Subscription",
@@ -251,16 +263,17 @@ const PaymentButton: FC<PaymentButton> = ({
                             value: resp.data.data.value,
                         });
 
-                        console.log(decodedData);
+                        //console.log(decodedData)
 
                         await doTx(
                             () =>
-                                subManagerContract.paymentWithSwap(
+                                subscriptionRouterContract.subscribeWithSwap(
+                                    subManager.id,
                                     subscriptionId,
                                     decodedData.args.caller,
                                     decodedData.args.desc,
-                                    decodedData.args.calls
-                                    //{gasLimit: '1000000'}
+                                    decodedData.args.calls,
+                                    {gasLimit: '2000000'}
                                 ),
                             "Subscribe",
                             () => setLoadingStep(3)
@@ -336,20 +349,25 @@ const PaymentButton: FC<PaymentButton> = ({
                     treasury: _subManagerInfo.treasury,
                     tokenSymbol: _subManagerInfo.tokenSymbol,
                     subscriptions: _subManagerInfo.subscriptions,
-                    allowance: userInfo.approval,
+                    allowance: userInfo.subscriptionLimit,
                 });
 
-                const subscription = await _subManagerContract.subscriptions(
-                    subscriptionId
-                );
+                const subscription =
+                    await subscriptionRouterContract.subscriptions(
+                        Number(subManagerId),
+                        subscriptionId
+                    );
 
                 console.log(subscriptionId);
                 console.log(address);
 
-                const userPrice = await _subManagerContract.getSubscripionPrice(
+                /* const userPrice = await subscriptionRouterContract.getSubscripionPrice(
+                    Number(subManagerId),
                     address,
                     subscriptionId
-                );
+                ); */
+
+                const userPrice = [subscription.price];
 
                 let _subscription = {
                     isActive: subscription.isActive,
@@ -384,12 +402,10 @@ const PaymentButton: FC<PaymentButton> = ({
                     )
                 );
 
-               
-
                 //--------------------------------------------------------------
 
                 const coinList = await axios.get(
-                    `https://backend.cicleo.io/chain/56/getBalance/${address}/${_subManagerInfo.tokenAddress}/${userPrice[0]}`
+                    `https://backend.cicleo.io/chain/${chainId}/getBalance/${address}/${_subManagerInfo.tokenAddress}/${userPrice[0]}`
                 );
 
                 let coinData = coinList.data;
@@ -397,9 +413,9 @@ const PaymentButton: FC<PaymentButton> = ({
                 setCoinLists(coinData);
                 setIsLoaded(true);
                 setSubscription(_subscription);
-                
+
                 if (subscription.price.eq(BigNumber.from("0"))) {
-                    changeToken({id: _subManagerInfo.tokenAddress})
+                    changeToken({ id: _subManagerInfo.tokenAddress });
                 }
             } catch (error) {
                 console.log(error);
@@ -415,7 +431,6 @@ const PaymentButton: FC<PaymentButton> = ({
     }, [signer]);
 
     const updateModal = () => {
-        console.log("LIFHL");
         createContracts();
     };
 

@@ -36,6 +36,8 @@ export type { IERC20Metadata } from "./@openzeppelin/contracts/token/ERC20/exten
 export { IERC20Metadata__factory } from "./factories/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata__factory";
 export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
+export type { ICicleoSubscriptionRouter } from "./contracts/Interfaces/ICicleoSubscriptionRouter";
+export { ICicleoSubscriptionRouter__factory } from "./factories/contracts/Interfaces/ICicleoSubscriptionRouter__factory";
 export type { CicleoSubscriptionFactory } from "./contracts/SubscriptionFactory.sol/CicleoSubscriptionFactory";
 export { CicleoSubscriptionFactory__factory } from "./factories/contracts/SubscriptionFactory.sol/CicleoSubscriptionFactory__factory";
 export type { CicleoSubscriptionManager } from "./contracts/SubscriptionManager.sol/CicleoSubscriptionManager";
@@ -44,6 +46,8 @@ export type { CicleoSubscriptionRouter } from "./contracts/SubscriptionRouter.so
 export { CicleoSubscriptionRouter__factory } from "./factories/contracts/SubscriptionRouter.sol/CicleoSubscriptionRouter__factory";
 export type { CicleoSubscriptionSecurity } from "./contracts/SubscriptionSecurity.sol/CicleoSubscriptionSecurity";
 export { CicleoSubscriptionSecurity__factory } from "./factories/contracts/SubscriptionSecurity.sol/CicleoSubscriptionSecurity__factory";
+export type { FakeRouterSwap } from "./contracts/Test/FakeRouterSwap";
+export { FakeRouterSwap__factory } from "./factories/contracts/Test/FakeRouterSwap__factory";
 export type { TestnetUSDC } from "./contracts/Test/FakeUSDC.sol/TestnetUSDC";
 export { TestnetUSDC__factory } from "./factories/contracts/Test/FakeUSDC.sol/TestnetUSDC__factory";
 export type { IAggregationExecutor } from "./contracts/Types/CicleoTypes.sol/IAggregationExecutor";
