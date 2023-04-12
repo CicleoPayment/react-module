@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {ethers} from "ethers"
-import AccountBlock from './../components/AccountBlock';
+import AccountBlock from '../components/AccountBlock';
 
 type User = {
   name: string;

@@ -33,7 +33,7 @@ const ApprovalPart: FC<ApprovalPart> = ({ subManager, subscription }) => {
                 <span className="cap-text-gray-600">
                     {getDefaultValueInput(
                         subManager.tokenApproval,
-                        subManager.tokenDecimals
+                        subManager.decimals
                     )}
                 </span>
 
@@ -53,7 +53,7 @@ const ApprovalPart: FC<ApprovalPart> = ({ subManager, subscription }) => {
                         ? "Infinity"
                         : ethers.utils.formatUnits(
                               subManager.allowance,
-                              subManager.tokenDecimals
+                              subManager.decimals
                           )}{" "}
                     {subManager.tokenSymbol} per month
                 </span>

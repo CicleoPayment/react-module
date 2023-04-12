@@ -41,7 +41,7 @@ if (typeof window !== "undefined") {
     origin = window.location.origin;
 }
 
-const BACKEND_ADDR = "https://backend.cicleo.io";
+const BACKEND_ADDR = "https://backend-test.cicleo.io";
 
 async function createSiweMessage(address: string, statement: any) {
     const res = await axios.get(`${BACKEND_ADDR}/nonce`, {
@@ -288,22 +288,17 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     signer,
                     _subManagerInfo._address
                 );
-                
-                //setSubManagerContract(_subManagerContract);
 
                 const userInfo = await _subManagerContract.users(address);
                 
-                
                 const res = await fetch(
-                    `${BACKEND_ADDR}/chain/${chainId}/subscription/${_subManagerInfo._address}/${address}`,
+                    `${BACKEND_ADDR}/chain/${chainId}/subscription/${_subManagerInfo.id}/${address}`,
                     {
                         credentials: "same-origin",
                     }
                 );
 
                 const _resJson = await res.json();
-
-                console.log(_resJson.tokenPaymentAddress)
 
                 if (_resJson.tokenPaymentAddress == undefined) { 
                     console.log('okje')
@@ -317,9 +312,6 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     _subManagerInfo._address
                 );
                 
-
-                console.log("vvvv")
-                
                 setSubManager({
                     id: Number(subManagerId),
                     address: _subManagerInfo._address,
@@ -330,27 +322,21 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     treasury: _subManagerInfo.treasury,
                     tokenSymbol: _subManagerInfo.tokenSymbol,
                     subscriptions: _subManagerInfo.subscriptions,
-                    allowance: userInfo.approval,
+                    allowance: userInfo.subscriptionLimit,
                     tokenApproval: allowance,
                 });
 
-                console.log("drgdg")
-
-                
-
-                const subscriptionData = await _subManagerContract.getSubscriptionStatus(
+                const subscriptionData = await _subManagerContract.getUserSubscriptionStatus(
                     address
                 );
 
-                console.log(subManager);
-                console.log(subscriptionData);
-
-                const sub = await _subManagerContract.subscriptions(
+                const sub = await subscriptionRouterContract.subscriptions(
+                    Number(subManagerId),
                     subscriptionData.subscriptionId
                 );
 
                 let _subscription = {
-                    id: subscriptionData.subscriptionId.toNumber(),
+                    id: subscriptionData.subscriptionId,
                     isActive: sub.isActive,
                     name: sub.name,
                     price: ethers.utils.formatUnits(sub.price, Number(_subManagerInfo.tokenDecimals)),
@@ -467,14 +453,14 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         );
 
         await doTx(
-            () => _subManager.approveSubscription(amountToApprove),
+            () => _subManager.changeSubscriptionLimit(amountToApprove),
             "Approve Subscription",
             () => {
                 setIsTxSend(true);
             }
         );
         setIsTxSend(false);
-        document.getElementById("cicleo-edit-approval-subscribe")?.click();
+        document.getElementById("cicleo-edit-approval-subscription")?.click();
         setIsLoading(false);
         createContracts();
     };

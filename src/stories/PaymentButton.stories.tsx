@@ -1,10 +1,10 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
-import { Page } from './Account';
+import { Page } from './PaymentButton';
 
 export default {
-  title: 'Account Block',
+  title: 'PaymentButton',
   component: Page,
   parameters: {
     // More on Story layout: https://storybook.js.org/docs/react/configure/story-layout
@@ -14,4 +14,4 @@ export default {
 
 const Template: ComponentStory<typeof Page> = (args) => <Page {...args} />;
 
-export const AccountBlock = Template.bind({});
+export const PaymentButton = Template.bind({});

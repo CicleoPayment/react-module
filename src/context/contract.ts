@@ -32,7 +32,7 @@ let config: any
 
 const getConfig = async (networkId: number) => {
     if (config == undefined) {
-        const resp = await axios.get("https://backend.cicleo.io/chain")
+        const resp = await axios.get("https://backend-test.cicleo.io/chain")
         config = resp.data;
     }
 
