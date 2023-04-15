@@ -171,7 +171,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                     key={index}
                                     onClick={() => setSelectedCoin(coin)}
                                     disabled={BigNumber.from(
-                                        coin.raw_amount.toString()
+                                        coin.raw_amount_hex_str
                                     ).lt(coin.toPay.toString())}
                                     className={`cap-flex cap-space-x-5 cap-items-center cap-justify-between cap-rounded-xl cap-py-2 cap-px-5 cap-border-primary cap-bg-gray-600 hover:cap-border disabled:hover:cap-border-none disabled:cap-bg-base-200 ${
                                         (selectedCoin != undefined &&
@@ -194,7 +194,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                         <span
                                             className={
                                                 (BigNumber.from(
-                                                    coin.raw_amount.toString()
+                                                    coin.raw_amount_hex_str
                                                 ).lt(coin.toPay.toString())
                                                     ? "cap-text-gray-400"
                                                     : "") +
@@ -226,7 +226,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                                 coin.symbol}
                                         </span>
                                         {BigNumber.from(
-                                            coin.raw_amount.toString()
+                                            coin.raw_amount_hex_str
                                         ).lt(coin.toPay.toString()) && (
                                             <span className="cap-text-red-500 cap-ml-2 cap-text-sm">
                                                 Insufficient Balance
