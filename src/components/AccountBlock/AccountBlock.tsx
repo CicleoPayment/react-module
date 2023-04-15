@@ -127,7 +127,7 @@ const AccountModalContent: FC<AccountModalContent> = ({
                 </div>
             </div>
         );
-    
+
     if (isNotSubscribed)
         return (
             <div className="cap-p-4">
@@ -148,9 +148,11 @@ const AccountModalContent: FC<AccountModalContent> = ({
                         </svg>
                         <div className="cap-flex cap-flex-col">
                             <span>You currently dont have an subscription</span>
-                            <span>Close this page and click on "Pay with Cicleo" button to get started !</span>
+                            <span>
+                                Close this page and click on "Pay with Cicleo"
+                                button to get started !
+                            </span>
                         </div>
-                        
                     </div>
                 </div>
             </div>
@@ -215,7 +217,10 @@ const AccountModalContent: FC<AccountModalContent> = ({
 
                     <div className="cap-divider cap-divider-horizontal"></div>
 
-                    <ApprovalPart subManager={subManager} subscription={subscription} />
+                    <ApprovalPart
+                        subManager={subManager}
+                        subscription={subscription}
+                    />
 
                     <div className="cap-divider cap-divider-horizontal"></div>
 
@@ -282,7 +287,6 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     await subscriptionRouterContract.getSubscriptionManager(
                         subManagerId
                     );
-                
 
                 const _subManagerContract = await Contracts.SubscriptionManager(
                     signer,
@@ -290,7 +294,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                 );
 
                 const userInfo = await _subManagerContract.users(address);
-                
+
                 const res = await fetch(
                     `${BACKEND_ADDR}/chain/${chainId}/subscription/${_subManagerInfo.id}/${address}`,
                     {
@@ -300,18 +304,22 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
 
                 const _resJson = await res.json();
 
-                if (_resJson.tokenPaymentAddress == undefined) { 
-                    console.log('okje')
+                if (_resJson.tokenPaymentAddress == undefined) {
+                    console.log("okje");
                     setIsNotSubscribed(true);
-                    return
+                    return;
                 }
 
-                const erc20 = await Contracts.ERC20(signer, _resJson.tokenPaymentAddress.toLowerCase(), true);
+                const erc20 = await Contracts.ERC20(
+                    signer,
+                    _resJson.tokenPaymentAddress.toLowerCase(),
+                    true
+                );
                 const allowance = await erc20.allowance(
                     address,
                     _subManagerInfo._address
                 );
-                
+
                 setSubManager({
                     id: Number(subManagerId),
                     address: _subManagerInfo._address,
@@ -326,9 +334,10 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     tokenApproval: allowance,
                 });
 
-                const subscriptionData = await _subManagerContract.getUserSubscriptionStatus(
-                    address
-                );
+                const subscriptionData =
+                    await _subManagerContract.getUserSubscriptionStatus(
+                        address
+                    );
 
                 const sub = await subscriptionRouterContract.subscriptions(
                     Number(subManagerId),
@@ -339,16 +348,19 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     id: subscriptionData.subscriptionId,
                     isActive: sub.isActive,
                     name: sub.name,
-                    price: ethers.utils.formatUnits(sub.price, Number(_subManagerInfo.tokenDecimals)),
+                    price: ethers.utils.formatUnits(
+                        sub.price,
+                        Number(_subManagerInfo.tokenDecimals)
+                    ),
                     isCancelled:
                         !subscriptionData.isActive || _resJson.isCanceled,
                     isContractActive: subscriptionData.isActive,
                     subscriptionEndDate:
                         userInfo.subscriptionEndDate.toNumber(),
                     originalPrice: sub.price,
-                    userTokenAddress: _resJson.tokenPaymentAddress.toLowerCase(),
+                    userTokenAddress:
+                        _resJson.tokenPaymentAddress.toLowerCase(),
                     userTokenSymbol: _resJson.tokenPaymentSymbol,
-                    
                 };
 
                 setIsLoaded(true);
@@ -368,7 +380,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
-            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.address}/cancel`,
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.id}/cancel`,
             {},
             {
                 withCredentials: true,
@@ -384,7 +396,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
-            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.address}/renew`,
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.id}/renew`,
             {},
             {
                 withCredentials: true,
@@ -400,7 +412,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
-            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.address}/changeCoin`,
+            `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.id}/changeCoin`,
             {
                 tokenPaymentAddress: tokenAddress,
                 tokenPaymentSymbol: tokenSymbol,
@@ -477,7 +489,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         );
 
         await doTx(
-            () => _subManager.payment(subscriptionId),
+            () => _subManager.subscribe(subscriptionId),
             "Renew Subscription",
             () => {
                 setIsTxSend(true);
