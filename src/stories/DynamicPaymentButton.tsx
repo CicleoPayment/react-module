@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {ethers} from "ethers"
-import AccountBlock from '../components/AccountBlock';
+import {ethers, BigNumber} from "ethers"
+import { DynamicPaymentButton } from '..';
 
 type User = {
   name: string;
 };
 
 export const Page: React.FC = () => {
-
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | undefined>()
     
     const getSigner = async () => {
@@ -27,7 +26,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <AccountBlock config={{ 43113: 1, 250: 7 }} signer={signer} />
+            <DynamicPaymentButton config={{ 43113: 1, 250: 7 }} subscriptionName="Te" subscriptionPrice={BigNumber.from("1000000")} signer={signer} />
         </div>
-  );
+    );
 };

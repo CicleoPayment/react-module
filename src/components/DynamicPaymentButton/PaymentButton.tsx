@@ -14,8 +14,9 @@ import PaymentModalContent from "./PaymentModalContent";
 import SelectCoinModalContent from "./SelectCoinModalContent";
 import axios from "axios";
 
-type PaymentButton = {
-    subscriptionId: number;
+type DynamicPaymentButton = {
+    subscriptionName: string;
+    subscriptionPrice: BigNumber;
     signer: ethers.providers.JsonRpcSigner | undefined;
     config: { [key: number]: number };
 };
@@ -33,9 +34,10 @@ type SubManagerInfo = {
     allowance: BigNumber;
 };
 
-const PaymentButton: FC<PaymentButton> = ({
+const PaymentButton: FC<DynamicPaymentButton> = ({
     signer,
-    subscriptionId,
+    subscriptionName,
+    subscriptionPrice,
     config,
 }) => {
     const [isWrongNetwork, setIsWrongNetwork] = useState(false);
@@ -51,7 +53,6 @@ const PaymentButton: FC<PaymentButton> = ({
     const [step, setStep] = useState(1);
     const [balance, setBalance] = useState<string | number>("#");
     const [subscription, setSubscription] = useState({
-        isActive: true,
         name: "",
         price: "0",
         originalPrice: BigNumber.from("0"),
@@ -160,9 +161,10 @@ const PaymentButton: FC<PaymentButton> = ({
                 3: async () => {
                     await doTx(
                         () =>
-                            subscriptionRouterContract.subscribe(
+                            subscriptionRouterContract.subscribeDynamicly(
                                 subManager.id,
-                                subscriptionId
+                                subscriptionName,
+                                subscriptionPrice
                             ),
                         "Subscribe",
                         () => setLoadingStep(3)
@@ -267,9 +269,10 @@ const PaymentButton: FC<PaymentButton> = ({
 
                         await doTx(
                             () =>
-                                subscriptionRouterContract.subscribeWithSwap(
+                                subscriptionRouterContract.subscribeDynamiclyWithSwap(
                                     subManager.id,
-                                    subscriptionId,
+                                    subscriptionName,
+                                    subscriptionPrice,
                                     decodedData.args.caller,
                                     decodedData.args.desc,
                                     decodedData.args.calls
@@ -350,32 +353,24 @@ const PaymentButton: FC<PaymentButton> = ({
                     subscriptions: _subManagerInfo.subscriptions,
                     allowance: userInfo.subscriptionLimit,
                 });
-
-                const _subscriptionInfo =
-                    await subscriptionRouterContract.subscriptions(
-                        Number(subManagerId),
-                        subscriptionId
-                    );
-
-                console.log(subscriptionId);
-                console.log(address);
-
+                
                 /* const userPrice = await subscriptionRouterContract.getSubscripionPrice(
                     Number(subManagerId),
                     address,
                     subscriptionId
                 ); */
 
-                const userPrice = [_subscriptionInfo.price];
+                const userPrice = [subscriptionPrice];
+
+                console.log(subscriptionPrice)
 
                 let _subscription = {
-                    isActive: _subscriptionInfo.isActive,
-                    name: _subscriptionInfo.name,
+                    name: subscriptionName,
                     price: ethers.utils.formatUnits(
-                        _subscriptionInfo.price,
+                        subscriptionPrice,
                         Number(_subManagerInfo.tokenDecimals)
                     ),
-                    originalPrice: _subscriptionInfo.price,
+                    originalPrice: subscriptionPrice,
                     tokenSymbol: _subManagerInfo.tokenSymbol,
                     userPrice: ethers.utils.formatUnits(
                         userPrice[0],
@@ -384,7 +379,7 @@ const PaymentButton: FC<PaymentButton> = ({
                     originalUserPrice: userPrice[0],
                 };
 
-                console.log(_subscription);
+                console.log(subscription);
 
                 const erc20 = await Contracts.ERC20(
                     signer,
@@ -413,7 +408,8 @@ const PaymentButton: FC<PaymentButton> = ({
                 setIsLoaded(true);
                 setSubscription(_subscription);
 
-                if (_subscription.originalPrice.eq(0)) {
+                if (_subscription.originalPrice.eq(BigNumber.from("0"))) {
+                    console.log("kuefghekufgkuefga")
                     changeToken({ id: _subManagerInfo.tokenAddress });
                 }
             } catch (error) {
@@ -436,7 +432,7 @@ const PaymentButton: FC<PaymentButton> = ({
     return (
         <>
             <label
-                htmlFor={"cicleo-payment-modal-" + subscriptionId}
+                htmlFor={"cicleo-payment-modal-" + subscriptionName + subscriptionPrice}
                 className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
                 <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
@@ -446,7 +442,7 @@ const PaymentButton: FC<PaymentButton> = ({
 
             <input
                 type="checkbox"
-                id={"cicleo-payment-modal-" + subscriptionId}
+                id={"cicleo-payment-modal-" + subscriptionName + subscriptionPrice}
                 className="cap-modal-toggle"
                 onChange={updateModal}
             />
@@ -456,7 +452,7 @@ const PaymentButton: FC<PaymentButton> = ({
                         <img src={TextWhite} alt="" className="cap-h-10" />
                     </div>
                     <label
-                        htmlFor={"cicleo-payment-modal-" + subscriptionId}
+                        htmlFor={"cicleo-payment-modal-" + subscriptionName + subscriptionPrice}
                         className="cap-absolute cap-btn cap-btn-sm cap-btn-circle cap-right-2 cap-top-2"
                     >
                         ✕
