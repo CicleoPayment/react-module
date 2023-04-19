@@ -81,6 +81,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
+      name: "CicleoSubscriptionBridgeManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoSubscriptionBridgeManager__factory>;
+    getContractFactory(
       name: "CicleoSubscriptionFactory",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CicleoSubscriptionFactory__factory>;
@@ -202,6 +206,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "CicleoSubscriptionBridgeManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoSubscriptionBridgeManager>;
     getContractAt(
       name: "CicleoSubscriptionFactory",
       address: string,

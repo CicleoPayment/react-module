@@ -185,7 +185,7 @@ export interface CicleoSubscriptionFactoryInterface extends utils.Interface {
   events: {
     "Initialized(uint8)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
-    "SubscriptionManagerCreated(address,address)": EventFragment;
+    "SubscriptionManagerCreated(address,address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
@@ -214,10 +214,11 @@ export type OwnershipTransferredEventFilter =
 
 export interface SubscriptionManagerCreatedEventObject {
   creator: string;
-  subscriptionAddress: string;
+  subscriptionManagerAddress: string;
+  subscriptionManagerId: BigNumber;
 }
 export type SubscriptionManagerCreatedEvent = TypedEvent<
-  [string, string],
+  [string, string, BigNumber],
   SubscriptionManagerCreatedEventObject
 >;
 
@@ -475,13 +476,15 @@ export interface CicleoSubscriptionFactory extends BaseContract {
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
 
-    "SubscriptionManagerCreated(address,address)"(
+    "SubscriptionManagerCreated(address,address,uint256)"(
       creator?: null,
-      subscriptionAddress?: PromiseOrValue<string> | null
+      subscriptionManagerAddress?: PromiseOrValue<string> | null,
+      subscriptionManagerId?: PromiseOrValue<BigNumberish> | null
     ): SubscriptionManagerCreatedEventFilter;
     SubscriptionManagerCreated(
       creator?: null,
-      subscriptionAddress?: PromiseOrValue<string> | null
+      subscriptionManagerAddress?: PromiseOrValue<string> | null,
+      subscriptionManagerId?: PromiseOrValue<BigNumberish> | null
     ): SubscriptionManagerCreatedEventFilter;
   };
 

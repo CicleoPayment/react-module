@@ -26,7 +26,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <DynamicPaymentButton config={{ 43113: 1, 250: 7 }} subscriptionName="Te" subscriptionPrice={BigNumber.from("1000000")} signer={signer} />
+            <DynamicPaymentButton config={{ 43113: 1, 250: 1 }} subscriptionName="Te" subscriptionPrice={BigNumber.from("1000000")} signer={signer} />
         </div>
     );
 };

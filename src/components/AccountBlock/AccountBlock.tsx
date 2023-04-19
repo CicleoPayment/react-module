@@ -338,33 +338,63 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     await _subManagerContract.getUserSubscriptionStatus(
                         address
                     );
+                
+                if (subscriptionData.subscriptionId == 255) { 
 
-                const sub = await subscriptionRouterContract.subscriptions(
-                    Number(subManagerId),
-                    subscriptionData.subscriptionId
-                );
+                    const sub = await subscriptionRouterContract.users(
+                        Number(subManagerId),
+                        address
+                    )
 
-                let _subscription = {
-                    id: subscriptionData.subscriptionId,
-                    isActive: sub.isActive,
-                    name: sub.name,
-                    price: ethers.utils.formatUnits(
-                        sub.price,
-                        Number(_subManagerInfo.tokenDecimals)
-                    ),
-                    isCancelled:
-                        !subscriptionData.isActive || _resJson.isCanceled,
-                    isContractActive: subscriptionData.isActive,
-                    subscriptionEndDate:
-                        userInfo.subscriptionEndDate.toNumber(),
-                    originalPrice: sub.price,
-                    userTokenAddress:
-                        _resJson.tokenPaymentAddress.toLowerCase(),
-                    userTokenSymbol: _resJson.tokenPaymentSymbol,
-                };
-
+                    let _subscription = {
+                        id: subscriptionData.subscriptionId,
+                        isActive: true,
+                        name: sub.name,
+                        price: ethers.utils.formatUnits(
+                            sub.price,
+                            Number(_subManagerInfo.tokenDecimals)
+                        ),
+                        isCancelled:
+                            !subscriptionData.isActive || _resJson.isCanceled,
+                        isContractActive: subscriptionData.isActive,
+                        subscriptionEndDate:
+                            userInfo.subscriptionEndDate.toNumber(),
+                        originalPrice: sub.price,
+                        userTokenAddress:
+                            _resJson.tokenPaymentAddress.toLowerCase(),
+                        userTokenSymbol: _resJson.tokenPaymentSymbol,
+                    };
+    
+                    setSubscription(_subscription);
+                } else {
+                    const sub = await subscriptionRouterContract.subscriptions(
+                        Number(subManagerId),
+                        subscriptionData.subscriptionId
+                    );
+    
+                    let _subscription = {
+                        id: subscriptionData.subscriptionId,
+                        isActive: sub.isActive,
+                        name: sub.name,
+                        price: ethers.utils.formatUnits(
+                            sub.price,
+                            Number(_subManagerInfo.tokenDecimals)
+                        ),
+                        isCancelled:
+                            !subscriptionData.isActive || _resJson.isCanceled,
+                        isContractActive: subscriptionData.isActive,
+                        subscriptionEndDate:
+                            userInfo.subscriptionEndDate.toNumber(),
+                        originalPrice: sub.price,
+                        userTokenAddress:
+                            _resJson.tokenPaymentAddress.toLowerCase(),
+                        userTokenSymbol: _resJson.tokenPaymentSymbol,
+                    };
+    
+                    setSubscription(_subscription);
+                }
+                
                 setIsLoaded(true);
-                setSubscription(_subscription);
             } catch (e) {
                 console.log(e);
                 setIsWrongNetwork(true);
@@ -477,41 +507,10 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         createContracts();
     };
 
-    const renewSubscription = async (subscriptionId: number) => {
-        if (!signer) return;
-        setIsTxSend(false);
-        setIsLoading(true);
-
-        const _subManager = await Contracts.SubscriptionManager(
-            signer,
-            subManager.address,
-            true
-        );
-
-        await doTx(
-            () => _subManager.subscribe(subscriptionId),
-            "Renew Subscription",
-            () => {
-                setIsTxSend(true);
-            }
-        );
-        setIsTxSend(false);
-        setShowConfirmationModal(false);
-        setIsLoading(false);
-        createContracts();
-    };
-
     const handleConfirmationPage = () => {
         if (subscription.isCancelled) {
             if (subscription.isContractActive == false) {
-                return (
-                    <ConfirmationModal
-                        name="renew"
-                        confirmationMessageHeader={`Are you sure about restarting your subscription?`}
-                        confirmationMessage={`You will have to pay subscription price since your subscription expired.`}
-                        onConfirm={() => renewSubscription(subscription.id)}
-                    />
-                );
+                return (<></>)
             }
 
             return (

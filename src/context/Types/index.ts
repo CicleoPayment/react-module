@@ -38,6 +38,8 @@ export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
 export type { ICicleoSubscriptionRouter } from "./contracts/Interfaces/ICicleoSubscriptionRouter";
 export { ICicleoSubscriptionRouter__factory } from "./factories/contracts/Interfaces/ICicleoSubscriptionRouter__factory";
+export type { CicleoSubscriptionBridgeManager } from "./contracts/SubscriptionBridgeManager.sol/CicleoSubscriptionBridgeManager";
+export { CicleoSubscriptionBridgeManager__factory } from "./factories/contracts/SubscriptionBridgeManager.sol/CicleoSubscriptionBridgeManager__factory";
 export type { CicleoSubscriptionFactory } from "./contracts/SubscriptionFactory.sol/CicleoSubscriptionFactory";
 export { CicleoSubscriptionFactory__factory } from "./factories/contracts/SubscriptionFactory.sol/CicleoSubscriptionFactory__factory";
 export type { CicleoSubscriptionManager } from "./contracts/SubscriptionManager.sol/CicleoSubscriptionManager";

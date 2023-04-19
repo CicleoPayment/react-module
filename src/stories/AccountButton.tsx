@@ -27,7 +27,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <AccountBlock config={{ 43113: 1, 250: 7 }} signer={signer} />
+            <AccountBlock config={{ 43113: 1, 250: 1 }} signer={signer} />
         </div>
   );
 };

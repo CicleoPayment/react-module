@@ -39,6 +39,22 @@ Per exemple this configuration will config the button to use the **#5 Subscripti
 
 And there you go !
 
+## Usage of the Dynamic Subscription Button
+
+First import this on the top of your file who will use the Dynamic Payment Button
+
+    import  "@cicleo/react-module/dist/index.css";
+    import { DynamicPaymentButton } from  "@cicleo/react-module";
+
+Then integrate it as simply 
+
+    <DynamicPaymentButton
+		config={{56:  5}}
+		subscriptionName="Package name" //Name of the subscription
+        subscriptionPrice="1000000000000000000" //Price in wei into the subscription manager token
+		signer={signer as ethers.providers.JsonRpcSigner}
+	/>
+
 ## Usage of the Manage your Account Button
 
 
