@@ -26,7 +26,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <PaymentButton config={{ 43113: 1, 250: 6 }} subscriptionId={1} signer={signer} />
+            <PaymentButton config={{ 56: 1 }} subscriptionId={1} signer={signer} />
         </div>
     );
 };

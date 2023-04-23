@@ -41,7 +41,7 @@ if (typeof window !== "undefined") {
     origin = window.location.origin;
 }
 
-const BACKEND_ADDR = "https://backend-test.cicleo.io";
+const BACKEND_ADDR = "https://backend.cicleo.io";
 
 async function createSiweMessage(address: string, statement: any) {
     const res = await axios.get(`${BACKEND_ADDR}/nonce`, {
