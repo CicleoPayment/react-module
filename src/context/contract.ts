@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
-import { providers, Contract, ContractInterface, BigNumber, ethers } from "ethers";
+import {
+    providers,
+    Contract,
+    ContractInterface,
+    BigNumber,
+    ethers,
+} from "ethers";
 import {
     CicleoSubscriptionFactory,
     CicleoSubscriptionFactory__factory,
@@ -13,11 +19,23 @@ import {
 import axios from "axios";
 
 type Contracts = {
-    SubscriptionFactory: (signer: providers.JsonRpcSigner) => Promise<CicleoSubscriptionFactory>;
-    SubscriptionRouter: (signer: providers.JsonRpcSigner) => Promise<CicleoSubscriptionRouter>;
-    ERC20: (signer: providers.JsonRpcSigner, address: string, forceReload?:boolean) => Promise<ERC20>;
-    SubscriptionManager: (signer: providers.JsonRpcSigner, address: string, forceReload?:boolean) => Promise<CicleoSubscriptionManager>;
-}
+    SubscriptionFactory: (
+        signer: providers.JsonRpcSigner
+    ) => Promise<CicleoSubscriptionFactory>;
+    SubscriptionRouter: (
+        signer: providers.JsonRpcSigner
+    ) => Promise<CicleoSubscriptionRouter>;
+    ERC20: (
+        signer: providers.JsonRpcSigner,
+        address: string,
+        forceReload?: boolean
+    ) => Promise<ERC20>;
+    SubscriptionManager: (
+        signer: providers.JsonRpcSigner,
+        address: string,
+        forceReload?: boolean
+    ) => Promise<CicleoSubscriptionManager>;
+};
 
 interface IError {
     code: number;
@@ -27,12 +45,11 @@ interface ISavedContract {
     [key: string]: Contract;
 }
 
-let config: any
-
+let config: any;
 
 const getConfig = async (networkId: number) => {
     if (config == undefined) {
-        const resp = await axios.get("https://backend.cicleo.io/chain")
+        const resp = await axios.get("https://backend.cicleo.io/chain");
         config = resp.data;
     }
 
@@ -45,8 +62,8 @@ const reduceAddress = (address: string) => {
 
 let savedContract: ISavedContract = {};
 
-const isGoodNetwork = async(chainId: number) => {
-    return await getConfig(chainId) != null;
+const isGoodNetwork = async (chainId: number) => {
+    return (await getConfig(chainId)) != null;
 };
 
 const openOceanIface = new ethers.utils.Interface([
@@ -324,10 +341,10 @@ const openOceanIface = new ethers.utils.Interface([
 const doTx = async (func: () => any, nameTx: string, callback?: any) => {
     if (callback == undefined) callback = () => {};
     let tx, claimToast: any;
-    let _error
+    let _error;
     try {
         tx = await func();
-        console.log(nameTx + " is Pending...")
+        console.log(nameTx + " is Pending...");
     } catch (error: any) {
         console.log(error);
         _error = "An error occured !";
@@ -347,20 +364,17 @@ const doTx = async (func: () => any, nameTx: string, callback?: any) => {
         if (
             _error ==
                 "execution reverted: ERC20: transfer amount exceeds balance" ||
-                _error ==
+            _error ==
                 "execution reverted: BEP20: transfer amount exceeds balance"
         ) {
             _error = "Insufficient funds";
         }
 
-        console.log('ifnerifi')
-        
-        
-        
+        console.log("ifnerifi");
     }
 
-    console.log(_error)
-    
+    console.log(_error);
+
     if (_error != null) {
         throw new Error(_error);
     }
@@ -369,7 +383,7 @@ const doTx = async (func: () => any, nameTx: string, callback?: any) => {
 
     const result = await tx.wait();
 
-    console.log(nameTx + " is Completed!")
+    console.log(nameTx + " is Completed!");
 
     return result;
 };
@@ -388,62 +402,65 @@ let cachedContracts: any = {
     SF: {},
     ERC20: {},
     SM: {},
-    Router: {}
-}
+    Router: {},
+};
 
 const Contracts: Contracts = {
     SubscriptionFactory: async (signer: providers.JsonRpcSigner) => {
-        const { chainId } = await signer.provider.getNetwork()
+        const { chainId } = await signer.provider.getNetwork();
 
-        let _getConfig
+        let _getConfig;
 
-        while (_getConfig.subscriptionFactoryAddress == null) {
-            _getConfig = await getConfig(chainId)
+        while (
+            _getConfig == undefined ||
+            _getConfig.subscriptionFactoryAddress == null
+        ) {
+            _getConfig = await getConfig(chainId);
         }
 
-        if (cachedContracts["SF"][chainId] == undefined) {
-            cachedContracts["SF"][chainId] = CicleoSubscriptionFactory__factory.connect(
-                _getConfig.subscriptionFactoryAddress,
-                signer
-            );
-        }
-        return cachedContracts["SF"][chainId];
+        return CicleoSubscriptionFactory__factory.connect(
+            _getConfig.subscriptionFactoryAddress,
+            signer
+        );
     },
     SubscriptionRouter: async (signer: providers.JsonRpcSigner) => {
-        const { chainId } = await signer.provider.getNetwork()
+        const { chainId } = await signer.provider.getNetwork();
 
-        let _getConfig
+        let _getConfig;
 
-        while (_getConfig.subscriptionFactoryAddress == null) {
-            _getConfig = await getConfig(chainId)
+        while (
+            _getConfig == undefined ||
+            _getConfig.subscriptionFactoryAddress == null
+        ) {
+            _getConfig = await getConfig(chainId);
         }
 
-        if (cachedContracts["Router"][chainId] == undefined) {
-            cachedContracts["Router"][chainId] = CicleoSubscriptionRouter__factory.connect(
-                _getConfig.subscriptionRouterAddress,
-                signer
-            );
-        }
-        return cachedContracts["Router"][chainId];
+        return CicleoSubscriptionRouter__factory.connect(
+            _getConfig.subscriptionRouterAddress,
+            signer
+        );
     },
-    ERC20: async (signer: providers.JsonRpcSigner, address: string, force?: boolean) => {
-        if (cachedContracts["ERC20"][address] == null || force) {
-            cachedContracts["ERC20"][address] = ERC20__factory.connect(
-                address,
-                signer
-            );
-        }
-        return cachedContracts["ERC20"][address];
+    ERC20: async (
+        signer: providers.JsonRpcSigner,
+        address: string,
+        force?: boolean
+    ) => {
+        return ERC20__factory.connect(address, signer);
     },
-    SubscriptionManager: async (signer: providers.JsonRpcSigner, address: string, force?: boolean) => {
-        if (cachedContracts["SM"][address] == null || force) {
-            cachedContracts["SM"][address] = CicleoSubscriptionManager__factory.connect(
-                address,
-                signer
-            );
-        }
-        return cachedContracts["SM"][address];
+    SubscriptionManager: async (
+        signer: providers.JsonRpcSigner,
+        address: string,
+        force?: boolean
+    ) => {
+        return CicleoSubscriptionManager__factory.connect(address, signer);
     },
 };
 
-export { Contracts, isGoodNetwork, doTx, reduceAddress, formatNumber, openOceanIface }
+export {
+    Contracts,
+    isGoodNetwork,
+    doTx,
+    reduceAddress,
+    formatNumber,
+    openOceanIface,
+};
