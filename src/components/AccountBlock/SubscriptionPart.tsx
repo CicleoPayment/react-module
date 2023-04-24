@@ -3,11 +3,19 @@ import React, { FC } from "react";
 type SubscriptionPart = {
     subscription: any;
     symbol: string;
+    duration: number;
 };
+
+const getDurationPeriod = (duration: number) => {
+    if (duration == 30 * 86400) return "month";
+    if (duration == 7 * 86400) return "week";
+    if (duration == 86400) return "day";
+}
 
 const SubscriptionPart: FC<SubscriptionPart> = ({
     subscription,
     symbol,
+    duration
 }) => {
     if (subscription.isCancelled) {
         return (
@@ -23,7 +31,7 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
                         {subscription.name} Package
                     </span>
                     <span className="cap-text-sm cap-text-gray-500">
-                        {subscription.price} {symbol} per month
+                        {subscription.price} {symbol} per {getDurationPeriod(duration)}
                     </span>
                 </div>
 
@@ -52,7 +60,7 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
                             {subscription.name}
                         </span>
                         <span className="cap-text-sm cap-text-gray-500">
-                            {subscription.price} {symbol} per month
+                            {Number(subscription.price) == 0 ? "Free" : subscription.price + " " + symbol + " per " + getDurationPeriod(duration)}
                         </span>
                     </div>
 

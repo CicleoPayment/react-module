@@ -26,37 +26,44 @@ const SubscriptionInfo: FC<SubscriptionInfo> = ({ endCycleDate }) => {
                     <div>
                         in{" "}
                         <span className="cap-font-mono cap-text-2xl cap-countdown">
-                            <span
-                                style={{
-                                    // @ts-ignore
-                                    "--value": Math.floor(
-                                        (endCycleDate.getTime() - Date.now()) /
-                                            (1000 * 3600 * 24)
-                                    ),
-                                }}
-                            ></span>
+                            {endCycleDate.getTime() == 9999999999000 ? (
+                                "∞"
+                            ) : (
+                                <span
+                                    style={{
+                                        // @ts-ignore
+                                        "--value": Math.floor(
+                                            (endCycleDate.getTime() -
+                                                Date.now()) /
+                                                (1000 * 3600 * 24)
+                                        ),
+                                    }}
+                                ></span>
+                            )}
                         </span>{" "}
                         days
                     </div>
-                    <span className="cap-text-gray-600">
-                        {capitalizeFirstLetter(
-                            endCycleDate.toLocaleString(
-                                window.navigator.language,
-                                {
-                                    weekday: "long",
-                                }
-                            )
-                        )}{" "}
-                        {endCycleDate.getDay()}{" "}
-                        {capitalizeFirstLetter(
-                            endCycleDate.toLocaleString(
-                                window.navigator.language,
-                                {
-                                    month: "long",
-                                }
-                            )
-                        )}
-                    </span>
+                    {endCycleDate.getTime() != 9999999999000 && (
+                        <span className="cap-text-gray-600">
+                            {capitalizeFirstLetter(
+                                endCycleDate.toLocaleString(
+                                    window.navigator.language,
+                                    {
+                                        weekday: "long",
+                                    }
+                                )
+                            )}{" "}
+                            {endCycleDate.getDay()}{" "}
+                            {capitalizeFirstLetter(
+                                endCycleDate.toLocaleString(
+                                    window.navigator.language,
+                                    {
+                                        month: "long",
+                                    }
+                                )
+                            )}
+                        </span>
+                    )}
                 </div>
             </div>
         </div>

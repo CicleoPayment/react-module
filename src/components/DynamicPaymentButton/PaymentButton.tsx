@@ -19,6 +19,7 @@ type DynamicPaymentButton = {
     subscriptionPrice: BigNumber;
     signer: ethers.providers.JsonRpcSigner | undefined;
     config: { [key: number]: number };
+    referral?: string;
 };
 
 type SubManagerInfo = {
@@ -39,6 +40,7 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
     subscriptionName,
     subscriptionPrice,
     config,
+    referral,
 }) => {
     const [isWrongNetwork, setIsWrongNetwork] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -164,7 +166,10 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
                             subscriptionRouterContract.subscribeDynamicly(
                                 subManager.id,
                                 subscriptionName,
-                                subscriptionPrice
+                                subscriptionPrice,
+                                referral != undefined
+                                    ? referral
+                                    : ethers.constants.AddressZero
                             ),
                         "Subscribe",
                         () => setLoadingStep(3)
@@ -228,7 +233,7 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
 
             setStep(step);
 
-            console.log(subManager.address)
+            console.log(subManager.address);
 
             setStepFunction({
                 1: async () => {
@@ -273,6 +278,9 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
                                     subManager.id,
                                     subscriptionName,
                                     subscriptionPrice,
+                                    referral != undefined
+                                        ? referral
+                                        : ethers.constants.AddressZero,
                                     decodedData.args.caller,
                                     decodedData.args.desc,
                                     decodedData.args.calls
@@ -353,7 +361,7 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
                     subscriptions: _subManagerInfo.subscriptions,
                     allowance: userInfo.subscriptionLimit,
                 });
-                
+
                 /* const userPrice = await subscriptionRouterContract.getSubscripionPrice(
                     Number(subManagerId),
                     address,
@@ -362,7 +370,7 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
 
                 const userPrice = [subscriptionPrice];
 
-                console.log(subscriptionPrice)
+                console.log(subscriptionPrice);
 
                 let _subscription = {
                     name: subscriptionName,
@@ -409,7 +417,7 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
                 setSubscription(_subscription);
 
                 if (_subscription.originalPrice.eq(BigNumber.from("0"))) {
-                    console.log("kuefghekufgkuefga")
+                    console.log("kuefghekufgkuefga");
                     changeToken({ id: _subManagerInfo.tokenAddress });
                 }
             } catch (error) {
@@ -432,7 +440,11 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
     return (
         <>
             <label
-                htmlFor={"cicleo-payment-modal-" + subscriptionName + subscriptionPrice}
+                htmlFor={
+                    "cicleo-payment-modal-" +
+                    subscriptionName +
+                    subscriptionPrice
+                }
                 className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
                 <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
@@ -442,7 +454,11 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
 
             <input
                 type="checkbox"
-                id={"cicleo-payment-modal-" + subscriptionName + subscriptionPrice}
+                id={
+                    "cicleo-payment-modal-" +
+                    subscriptionName +
+                    subscriptionPrice
+                }
                 className="cap-modal-toggle"
                 onChange={updateModal}
             />
@@ -452,7 +468,11 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
                         <img src={TextWhite} alt="" className="cap-h-10" />
                     </div>
                     <label
-                        htmlFor={"cicleo-payment-modal-" + subscriptionName + subscriptionPrice}
+                        htmlFor={
+                            "cicleo-payment-modal-" +
+                            subscriptionName +
+                            subscriptionPrice
+                        }
                         className="cap-absolute cap-btn cap-btn-sm cap-btn-circle cap-right-2 cap-top-2"
                     >
                         ✕

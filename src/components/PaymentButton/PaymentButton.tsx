@@ -18,6 +18,7 @@ type PaymentButton = {
     subscriptionId: number;
     signer: ethers.providers.JsonRpcSigner | undefined;
     config: { [key: number]: number };
+    referral?: string;
 };
 
 type SubManagerInfo = {
@@ -31,12 +32,14 @@ type SubManagerInfo = {
     tokenSymbol: string;
     subscriptions: any;
     allowance: BigNumber;
+    duration: number;
 };
 
 const PaymentButton: FC<PaymentButton> = ({
     signer,
     subscriptionId,
     config,
+    referral
 }) => {
     const [isWrongNetwork, setIsWrongNetwork] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -95,6 +98,8 @@ const PaymentButton: FC<PaymentButton> = ({
     const getSwap = async () => {
         if (!signer) return;
         if (!coin) return;
+
+        console.log("Get swap")
 
         const erc20 = await Contracts.ERC20(signer, coin.id);
 
@@ -162,7 +167,8 @@ const PaymentButton: FC<PaymentButton> = ({
                         () =>
                             subscriptionRouterContract.subscribe(
                                 subManager.id,
-                                subscriptionId
+                                subscriptionId,
+                                referral != undefined ? referral : ethers.constants.AddressZero
                             ),
                         "Subscribe",
                         () => setLoadingStep(3)
@@ -270,6 +276,7 @@ const PaymentButton: FC<PaymentButton> = ({
                                 subscriptionRouterContract.subscribeWithSwap(
                                     subManager.id,
                                     subscriptionId,
+                                    referral != undefined ? referral : ethers.constants.AddressZero,
                                     decodedData.args.caller,
                                     decodedData.args.desc,
                                     decodedData.args.calls
@@ -292,6 +299,7 @@ const PaymentButton: FC<PaymentButton> = ({
     };
 
     useEffect(() => {
+
         getSwap();
         console.log(coin);
     }, [coin]);
@@ -321,6 +329,7 @@ const PaymentButton: FC<PaymentButton> = ({
 
             // @ts-ignore
             try {
+                console.log(subManagerId)
                 let subscriptionManagerInfo =
                     await subscriptionRouterContract.getSubscriptionManager(
                         subManagerId
@@ -349,6 +358,7 @@ const PaymentButton: FC<PaymentButton> = ({
                     tokenSymbol: _subManagerInfo.tokenSymbol,
                     subscriptions: _subManagerInfo.subscriptions,
                     allowance: userInfo.subscriptionLimit,
+                    duration: Number(_subManagerInfo.subscriptionDuration),
                 });
 
                 const _subscriptionInfo =
@@ -487,7 +497,8 @@ const PaymentButton: FC<PaymentButton> = ({
                             errorMessage={errorMessage}
                             balance={balance}
                             swapInfo={swapInfo}
-                            isPurchased={isPurchased}
+                                isPurchased={isPurchased}
+                            duration={subManager.duration}
                         />
                     )}
                 </div>

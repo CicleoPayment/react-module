@@ -6,6 +6,12 @@ type ApprovalPart = {
     subscription: any;
 };
 
+const getDurationPeriod = (duration: number) => {
+    if (duration == 30 * 86400) return "month";
+    if (duration == 7 * 86400) return "week";
+    if (duration == 86400) return "day";
+}
+
 const ApprovalPart: FC<ApprovalPart> = ({ subManager, subscription }) => {
     const getDefaultValueInput = (approval: any, decimals: number) => {
         if (approval == undefined) return;
@@ -55,7 +61,7 @@ const ApprovalPart: FC<ApprovalPart> = ({ subManager, subscription }) => {
                               subManager.allowance,
                               subManager.decimals
                           )}{" "}
-                    {subManager.tokenSymbol} per month
+                    {subManager.tokenSymbol} per {getDurationPeriod(subManager.duration)}
                 </span>
 
                 <label

@@ -100,6 +100,19 @@ const Step2: FC<Step> = ({
     );
 };
 
+const formatPrice = (price: any, decimals: number, symbol: string) => {
+    if (price == 0) {
+        return "Free";
+    }
+
+    return `${Number(
+        utils.formatUnits(
+            price,
+            decimals
+        )
+    ).toFixed(2)} ${symbol}`
+}
+
 const Step3: FC<Step> = ({
     onClick,
     subscription,
@@ -111,14 +124,7 @@ const Step3: FC<Step> = ({
         <div className="cap-text-left cap-space-y-10">
             <div className="cap-px-8">
                 <h3 className="cap-font-medium">
-                    Subscribe for{" "}
-                    {Number(
-                        utils.formatUnits(
-                            swapInfo.inAmount,
-                            swapInfo.inToken.decimals
-                        )
-                    ).toFixed(2)}{" "}
-                    {swapInfo.outToken.symbol}
+                    Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
                 </h3>
                 <p className="cap-text-sm">
                     Begin your Cicleo transaction-free payment plan now!
@@ -134,14 +140,7 @@ const Step3: FC<Step> = ({
                     onClick={onClick}
                 >
                     <span>
-                        Subscribe for{" "}
-                        {Number(
-                            utils.formatUnits(
-                                swapInfo.inAmount,
-                                swapInfo.inToken.decimals
-                            )
-                        ).toFixed(2)}{" "}
-                        {swapInfo.outToken.symbol}
+                    Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
                     </span>
                     {isLoading && <ClipLoader color={"#fff"} size={20} />}
                 </button>
@@ -167,6 +166,15 @@ type PaymentModalContent = {
     balance: number | string;
     swapInfo: any;
     isPurchased: boolean;
+    duration: number;
+};
+
+const getDurationPeriod = (duration: number) => {
+    if (duration == 30 * 86400) return "month";
+
+    if (duration == 7 * 86400) return "week";
+
+    if (duration == 86400) return "day";
 };
 
 const PaymentModalContent: FC<PaymentModalContent> = ({
@@ -180,6 +188,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
     balance,
     swapInfo,
     isPurchased,
+    duration,
 }) => {
     if (isPurchased) {
         return (
@@ -231,8 +240,11 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                             {subscription.name}
                         </span>
                         <span className="cap-text-lg cap-font-medium">
-                            {subscription.price} {subscription.tokenSymbol} per
-                            month
+                            {Number(subscription.price) == 0
+                                ? "Free"
+                                : `${subscription.price} ${
+                                      subscription.tokenSymbol
+                                  } per ${getDurationPeriod(duration)}`}
                         </span>
                     </div>
                 </div>

@@ -14,6 +14,10 @@ export const Page: React.FC = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         await provider.send("eth_requestAccounts", []);
 
+        provider.on("accountsChanged", (accounts) => {
+            getSigner()
+        })
+
         const signer = provider.getSigner() 
 
         setSigner(signer)

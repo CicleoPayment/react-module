@@ -32,6 +32,7 @@ type SubManagerInfo = {
     subscriptions: any;
     allowance: BigNumber;
     tokenApproval: BigNumber;
+    duration: number;
 };
 
 let domain = "";
@@ -213,6 +214,7 @@ const AccountModalContent: FC<AccountModalContent> = ({
                     <SubscriptionPart
                         subscription={subscription}
                         symbol={subManager.tokenSymbol}
+                        duration={subManager.duration}
                     />
 
                     <div className="cap-divider cap-divider-horizontal"></div>
@@ -332,19 +334,19 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                     subscriptions: _subManagerInfo.subscriptions,
                     allowance: userInfo.subscriptionLimit,
                     tokenApproval: allowance,
+                    duration: Number(_subManagerInfo.subscriptionDuration),
                 });
 
                 const subscriptionData =
                     await _subManagerContract.getUserSubscriptionStatus(
                         address
                     );
-                
-                if (subscriptionData.subscriptionId == 255) { 
 
+                if (subscriptionData.subscriptionId == 255) {
                     const sub = await subscriptionRouterContract.users(
                         Number(subManagerId),
                         address
-                    )
+                    );
 
                     let _subscription = {
                         id: subscriptionData.subscriptionId,
@@ -364,14 +366,14 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                             _resJson.tokenPaymentAddress.toLowerCase(),
                         userTokenSymbol: _resJson.tokenPaymentSymbol,
                     };
-    
+
                     setSubscription(_subscription);
                 } else {
                     const sub = await subscriptionRouterContract.subscriptions(
                         Number(subManagerId),
                         subscriptionData.subscriptionId
                     );
-    
+
                     let _subscription = {
                         id: subscriptionData.subscriptionId,
                         isActive: sub.isActive,
@@ -390,10 +392,10 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                             _resJson.tokenPaymentAddress.toLowerCase(),
                         userTokenSymbol: _resJson.tokenPaymentSymbol,
                     };
-    
+
                     setSubscription(_subscription);
                 }
-                
+
                 setIsLoaded(true);
             } catch (e) {
                 console.log(e);
@@ -510,7 +512,7 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
     const handleConfirmationPage = () => {
         if (subscription.isCancelled) {
             if (subscription.isContractActive == false) {
-                return (<></>)
+                return <></>;
             }
 
             return (

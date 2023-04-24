@@ -101,6 +101,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     "payFunctionWithSubToken(address,uint8,uint256,uint256)": FunctionFragment;
     "payFunctionWithSwap(address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[],uint8,uint256,uint256)": FunctionFragment;
     "setName(string)": FunctionFragment;
+    "setToken(address)": FunctionFragment;
     "setTreasury(address)": FunctionFragment;
     "subscriptionDuration()": FunctionFragment;
     "subscriptionNumber()": FunctionFragment;
@@ -128,6 +129,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
       | "payFunctionWithSubToken"
       | "payFunctionWithSwap"
       | "setName"
+      | "setToken"
       | "setTreasury"
       | "subscriptionDuration"
       | "subscriptionNumber"
@@ -218,6 +220,10 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "setToken",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setTreasury",
     values: [PromiseOrValue<string>]
   ): string;
@@ -289,6 +295,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setName", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setToken", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setTreasury",
     data: BytesLike
@@ -485,6 +492,11 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setToken(
+      _token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setTreasury(
       _treasury: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -599,6 +611,11 @@ export interface CicleoSubscriptionManager extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setToken(
+    _token: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setTreasury(
     _treasury: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -708,6 +725,11 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
     setName(
       _name: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setToken(
+      _token: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -864,6 +886,11 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setToken(
+      _token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setTreasury(
       _treasury: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -968,6 +995,11 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
     setName(
       _name: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setToken(
+      _token: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

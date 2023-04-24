@@ -172,27 +172,30 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     "initialize(address,address,uint16,address)": FunctionFragment;
     "newSubscription(uint256,uint256,string)": FunctionFragment;
     "owner()": FunctionFragment;
+    "referralPercent(uint256)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "security()": FunctionFragment;
     "setBotAccount(address)": FunctionFragment;
     "setBridgeExectuor(address)": FunctionFragment;
     "setFactory(address)": FunctionFragment;
     "setName(uint256,string)": FunctionFragment;
+    "setReferralPercent(uint256,uint16)": FunctionFragment;
     "setSecurity(address)": FunctionFragment;
     "setTax(address)": FunctionFragment;
     "setTaxRate(uint16)": FunctionFragment;
+    "setToken(uint256,address)": FunctionFragment;
     "setTreasury(uint256,address)": FunctionFragment;
-    "subscribe(uint256,uint8)": FunctionFragment;
-    "subscribeDynamicly(uint256,string,uint256)": FunctionFragment;
-    "subscribeDynamiclyWithSwap(uint256,string,uint256,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
-    "subscribeWithBridge(address,uint256,uint8)": FunctionFragment;
-    "subscribeWithSwap(uint256,uint8,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "subscribe(uint256,uint8,address)": FunctionFragment;
+    "subscribeDynamicly(uint256,string,uint256,address)": FunctionFragment;
+    "subscribeDynamiclyWithSwap(uint256,string,uint256,address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "subscribeWithSwap(uint256,uint8,address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
     "subscriptionNumber(uint256)": FunctionFragment;
     "subscriptionRenew(uint256,address)": FunctionFragment;
     "subscriptionRenewWithSwap(uint256,address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
     "subscriptions(uint256,uint256)": FunctionFragment;
     "taxAccount()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "userReferral(uint256,address)": FunctionFragment;
     "users(uint256,address)": FunctionFragment;
   };
 
@@ -212,20 +215,22 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
       | "initialize"
       | "newSubscription"
       | "owner"
+      | "referralPercent"
       | "renounceOwnership"
       | "security"
       | "setBotAccount"
       | "setBridgeExectuor"
       | "setFactory"
       | "setName"
+      | "setReferralPercent"
       | "setSecurity"
       | "setTax"
       | "setTaxRate"
+      | "setToken"
       | "setTreasury"
       | "subscribe"
       | "subscribeDynamicly"
       | "subscribeDynamiclyWithSwap"
-      | "subscribeWithBridge"
       | "subscribeWithSwap"
       | "subscriptionNumber"
       | "subscriptionRenew"
@@ -233,6 +238,7 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
       | "subscriptions"
       | "taxAccount"
       | "transferOwnership"
+      | "userReferral"
       | "users"
   ): FunctionFragment;
 
@@ -311,6 +317,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "referralPercent",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
@@ -332,6 +342,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "setReferralPercent",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setSecurity",
     values: [PromiseOrValue<string>]
   ): string;
@@ -344,19 +358,28 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "setToken",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setTreasury",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "subscribe",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "subscribeDynamicly",
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>
     ]
   ): string;
   encodeFunctionData(
@@ -366,16 +389,9 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
+      PromiseOrValue<string>,
       SwapDescriptionStruct,
       IOpenOceanCaller.CallDescriptionStruct[]
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "subscribeWithBridge",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
     ]
   ): string;
   encodeFunctionData(
@@ -383,6 +399,7 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
       PromiseOrValue<string>,
       SwapDescriptionStruct,
       IOpenOceanCaller.CallDescriptionStruct[]
@@ -417,6 +434,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "userReferral",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "users",
@@ -468,6 +489,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "referralPercent",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
@@ -483,11 +508,16 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "setFactory", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setName", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "setReferralPercent",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setSecurity",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "setTax", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "setTaxRate", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setToken", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setTreasury",
     data: BytesLike
@@ -499,10 +529,6 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "subscribeDynamiclyWithSwap",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "subscribeWithBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -530,6 +556,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "userReferral",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "users", data: BytesLike): Result;
 
   events: {
@@ -537,8 +567,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     "NameEdited(uint256,address,string)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "PaymentSubscription(uint256,address,uint8,uint256)": EventFragment;
+    "ReferralPercentEdited(uint256,address,uint16)": EventFragment;
     "SelectToken(uint256,address,address)": EventFragment;
     "SubscriptionEdited(uint256,address,uint8,uint256,bool)": EventFragment;
+    "TokenEdited(uint256,address,address)": EventFragment;
     "TreasuryEdited(uint256,address,address)": EventFragment;
     "UserEdited(uint256,address,uint8,uint256)": EventFragment;
   };
@@ -547,8 +579,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "NameEdited"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "PaymentSubscription"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ReferralPercentEdited"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SelectToken"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SubscriptionEdited"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "TokenEdited"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TreasuryEdited"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserEdited"): EventFragment;
 }
@@ -598,6 +632,19 @@ export type PaymentSubscriptionEvent = TypedEvent<
 export type PaymentSubscriptionEventFilter =
   TypedEventFilter<PaymentSubscriptionEvent>;
 
+export interface ReferralPercentEditedEventObject {
+  SubscriptionManagerId: BigNumber;
+  user: string;
+  percent: number;
+}
+export type ReferralPercentEditedEvent = TypedEvent<
+  [BigNumber, string, number],
+  ReferralPercentEditedEventObject
+>;
+
+export type ReferralPercentEditedEventFilter =
+  TypedEventFilter<ReferralPercentEditedEvent>;
+
 export interface SelectTokenEventObject {
   SubscriptionManagerId: BigNumber;
   user: string;
@@ -624,6 +671,18 @@ export type SubscriptionEditedEvent = TypedEvent<
 
 export type SubscriptionEditedEventFilter =
   TypedEventFilter<SubscriptionEditedEvent>;
+
+export interface TokenEditedEventObject {
+  SubscriptionManagerId: BigNumber;
+  token: string;
+  newTreasury: string;
+}
+export type TokenEditedEvent = TypedEvent<
+  [BigNumber, string, string],
+  TokenEditedEventObject
+>;
+
+export type TokenEditedEventFilter = TypedEventFilter<TokenEditedEvent>;
 
 export interface TreasuryEditedEventObject {
   SubscriptionManagerId: BigNumber;
@@ -750,6 +809,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
+    referralPercent(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[number]>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -777,6 +841,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setReferralPercent(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      referralTaxPercent: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setSecurity(
       _security: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -792,6 +862,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setToken(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setTreasury(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       treasury: PromiseOrValue<string>,
@@ -801,6 +877,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     subscribe(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -808,6 +885,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -815,22 +893,17 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    subscribeWithBridge(
-      user: PromiseOrValue<string>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     subscribeWithSwap(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
@@ -875,6 +948,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    userReferral(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     users(
       arg0: PromiseOrValue<BigNumberish>,
@@ -956,6 +1035,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
+  referralPercent(
+    arg0: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
   renounceOwnership(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -983,6 +1067,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setReferralPercent(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    referralTaxPercent: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setSecurity(
     _security: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -998,6 +1088,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setToken(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    token: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setTreasury(
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
     treasury: PromiseOrValue<string>,
@@ -1007,6 +1103,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
   subscribe(
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
     subscriptionId: PromiseOrValue<BigNumberish>,
+    referral: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1014,6 +1111,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
     subscriptionName: PromiseOrValue<string>,
     price: PromiseOrValue<BigNumberish>,
+    referral: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1021,22 +1119,17 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
     subscriptionName: PromiseOrValue<string>,
     price: PromiseOrValue<BigNumberish>,
+    referral: PromiseOrValue<string>,
     executor: PromiseOrValue<string>,
     desc: SwapDescriptionStruct,
     calls: IOpenOceanCaller.CallDescriptionStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  subscribeWithBridge(
-    user: PromiseOrValue<string>,
-    subscriptionManagerId: PromiseOrValue<BigNumberish>,
-    subscriptionId: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   subscribeWithSwap(
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
     subscriptionId: PromiseOrValue<BigNumberish>,
+    referral: PromiseOrValue<string>,
     executor: PromiseOrValue<string>,
     desc: SwapDescriptionStruct,
     calls: IOpenOceanCaller.CallDescriptionStruct[],
@@ -1081,6 +1174,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  userReferral(
+    arg0: PromiseOrValue<BigNumberish>,
+    arg1: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   users(
     arg0: PromiseOrValue<BigNumberish>,
@@ -1162,6 +1261,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
+    referralPercent(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
     security(overrides?: CallOverrides): Promise<string>;
@@ -1187,6 +1291,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setReferralPercent(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      referralTaxPercent: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setSecurity(
       _security: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -1202,6 +1312,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setToken(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      token: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setTreasury(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       treasury: PromiseOrValue<string>,
@@ -1211,6 +1327,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     subscribe(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1218,6 +1335,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1225,22 +1343,17 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    subscribeWithBridge(
-      user: PromiseOrValue<string>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     subscribeWithSwap(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
@@ -1286,6 +1399,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    userReferral(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     users(
       arg0: PromiseOrValue<BigNumberish>,
       arg1: PromiseOrValue<string>,
@@ -1330,6 +1449,17 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       price?: null
     ): PaymentSubscriptionEventFilter;
 
+    "ReferralPercentEdited(uint256,address,uint16)"(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      percent?: null
+    ): ReferralPercentEditedEventFilter;
+    ReferralPercentEdited(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      percent?: null
+    ): ReferralPercentEditedEventFilter;
+
     "SelectToken(uint256,address,address)"(
       SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
       user?: PromiseOrValue<string> | null,
@@ -1355,6 +1485,17 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       price?: null,
       isActive?: null
     ): SubscriptionEditedEventFilter;
+
+    "TokenEdited(uint256,address,address)"(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      token?: PromiseOrValue<string> | null,
+      newTreasury?: null
+    ): TokenEditedEventFilter;
+    TokenEdited(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      token?: PromiseOrValue<string> | null,
+      newTreasury?: null
+    ): TokenEditedEventFilter;
 
     "TreasuryEdited(uint256,address,address)"(
       SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
@@ -1455,6 +1596,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
+    referralPercent(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1482,6 +1628,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setReferralPercent(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      referralTaxPercent: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setSecurity(
       _security: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1497,6 +1649,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setToken(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setTreasury(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       treasury: PromiseOrValue<string>,
@@ -1506,6 +1664,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     subscribe(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1513,6 +1672,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1520,22 +1680,17 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    subscribeWithBridge(
-      user: PromiseOrValue<string>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     subscribeWithSwap(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
@@ -1573,6 +1728,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    userReferral(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     users(
@@ -1656,6 +1817,11 @@ export interface CicleoSubscriptionRouter extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    referralPercent(
+      arg0: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     renounceOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1683,6 +1849,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    setReferralPercent(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      referralTaxPercent: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     setSecurity(
       _security: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1698,6 +1870,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    setToken(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      token: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     setTreasury(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       treasury: PromiseOrValue<string>,
@@ -1707,6 +1885,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     subscribe(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1714,6 +1893,7 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1721,22 +1901,17 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionName: PromiseOrValue<string>,
       price: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    subscribeWithBridge(
-      user: PromiseOrValue<string>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     subscribeWithSwap(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       subscriptionId: PromiseOrValue<BigNumberish>,
+      referral: PromiseOrValue<string>,
       executor: PromiseOrValue<string>,
       desc: SwapDescriptionStruct,
       calls: IOpenOceanCaller.CallDescriptionStruct[],
@@ -1774,6 +1949,12 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    userReferral(
+      arg0: PromiseOrValue<BigNumberish>,
+      arg1: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     users(
