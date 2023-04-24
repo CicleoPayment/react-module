@@ -395,9 +395,15 @@ const Contracts: Contracts = {
     SubscriptionFactory: async (signer: providers.JsonRpcSigner) => {
         const { chainId } = await signer.provider.getNetwork()
 
+        let _getConfig
+
+        while (_getConfig.subscriptionFactoryAddress == null) {
+            _getConfig = await getConfig(chainId)
+        }
+
         if (cachedContracts["SF"][chainId] == undefined) {
             cachedContracts["SF"][chainId] = CicleoSubscriptionFactory__factory.connect(
-                (await getConfig(chainId)).subscriptionFactoryAddress || "0x0",
+                _getConfig.subscriptionFactoryAddress,
                 signer
             );
         }
@@ -406,9 +412,15 @@ const Contracts: Contracts = {
     SubscriptionRouter: async (signer: providers.JsonRpcSigner) => {
         const { chainId } = await signer.provider.getNetwork()
 
+        let _getConfig
+
+        while (_getConfig.subscriptionFactoryAddress == null) {
+            _getConfig = await getConfig(chainId)
+        }
+
         if (cachedContracts["Router"][chainId] == undefined) {
             cachedContracts["Router"][chainId] = CicleoSubscriptionRouter__factory.connect(
-                (await getConfig(chainId)).subscriptionRouterAddress || "0x0",
+                _getConfig.subscriptionRouterAddress,
                 signer
             );
         }
