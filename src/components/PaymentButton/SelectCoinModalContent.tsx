@@ -1,3 +1,4 @@
+import { token } from "@context/Types/@openzeppelin/contracts";
 import { formatNumber } from "@context/contract";
 import { BigNumber, utils } from "ethers";
 import React, { FC } from "react";
@@ -21,9 +22,11 @@ type PaymentModalContent = {
     isLoaded: boolean;
     BUSD: string;
     subscription: any;
+    oldSubscription: any;
     balance: number | string;
     coinLists: any[];
     setCoin: (coin: string) => void;
+    subManager: any;
 };
 
 const PaymentModalContent: FC<PaymentModalContent> = ({
@@ -32,11 +35,19 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
     isLoaded,
     BUSD,
     subscription,
+    oldSubscription,
     balance,
     coinLists,
     setCoin,
+    subManager
 }) => {
     const [selectedCoin, setSelectedCoin] = React.useState<any>(null);
+    console.log(subManager)
+    console.log("---------------")
+    console.log(subscription);
+    console.log(oldSubscription);
+
+
 
     if (isWrongNetwork)
         return (
@@ -74,29 +85,62 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
 
     return (
         <>
-            <div className="cap-flex cap-justify-between cap-py-2 cap-bg-base-100">
-                <div className="cap-flex cap-flex-row cap-items-center cap-px-5 cap-space-x-3">
-                    <img
-                        src={tokenOutImage == "" ? BUSD : tokenOutImage}
-                        alt=""
-                        className="cap-h-fit"
-                        width={40}
-                        height={40}
-                    />
-                    <div className="cap-flex cap-flex-col cap-justify-center">
-                        <span className="cap-text-xl cap-font-semibold">
-                            {subscription.name}
-                        </span>
-                        <span className="cap-text-lg cap-font-medium">
-                            {subscription.price} {subscription.tokenSymbol} per
-                            month
-                        </span>
+            {subscription.id != oldSubscription.id ? (
+                <div className="cap-flex cap-flex-col cap-content-center cap-flex-wrap cap-justify-between cap-py-2 cap-bg-base-100">
+                    <div className="cap-indicator cap-w-[400px] cap-flex cap-space-x-2 cap-py-2 cap-px-3 cap-border-primary cap-bg-gray-800 cap-rounded-xl">
+                        <img
+                            src={tokenOutImage == "" ? BUSD : tokenOutImage}
+                            alt=""
+                            className="cap-h-fit"
+                            width={40}
+                            height={40}
+                        />
+                        <div className="cap-flex cap-flex-col cap-justify-center">
+                            <span className="cap-text-xl cap-font-semibold">
+                                {oldSubscription.name}
+                            </span>
+                            <span className="cap-text-lg cap-font-medium">
+                                {oldSubscription.price} {oldSubscription.tokenSymbol} per
+                                month
+                            </span>
+                        </div>
+                    </div>
+                    <div className="cap-divider cap-w-[100px] cap-self-center">TO</div>
+                    <div className="cap-indicator cap-w-[400px] cap-flex cap-space-x-2 cap-py-2 cap-px-3 cap-border-primary cap-bg-gray-800 cap-rounded-xl">
+                        <span className="cap-indicator-item cap-badge cap-badge-primary">new</span>
+                        <img
+                            src={tokenOutImage == "" ? BUSD : tokenOutImage}
+                            alt=""
+                            className="cap-h-fit"
+                            width={40}
+                            height={40}
+                        />
+                        <div className="cap-flex cap-flex-col cap-justify-center">
+                            <span className="cap-text-xl cap-font-semibold">
+                                {subscription.name}
+                            </span>
+                            <span className="cap-text-lg cap-font-medium">
+                                {subscription.price} {subscription.tokenSymbol} per
+                                month
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            ) : (
+                <div className="cap-p-5 cap-flex">
+                    <div className="cap-shadow-lg cap-alert cap-alert-warning cap-justify-center">
+                        <div>
+                            <span>
+                                You are already subscribed !
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="cap-divider"></div>
-            {subscription.price != subscription.userPrice && (
+
+            {subscription.price != oldSubscription.price && (
                 <div className="cap-px-4">
                     <div className="cap-shadow-lg cap-alert cap-alert-info ">
                         <div>
@@ -115,12 +159,8 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                             </svg>
                             <span>
                                 You will pay less for this subscription cycle
-                                since you are already subscribed (-
-                                {Number(subscription.price) -
-                                    Number(subscription.userPrice) +
-                                    " " +
-                                    subscription.tokenSymbol}
-                                )
+                                since you are already subscribed
+                                ( {subscription.userPrice} {subscription.tokenSymbol})
                             </span>
                         </div>
                     </div>
@@ -173,12 +213,11 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                     disabled={BigNumber.from(
                                         coin.raw_amount_hex_str
                                     ).lt(coin.toPay.toString())}
-                                    className={`cap-flex cap-space-x-5 cap-items-center cap-justify-between cap-rounded-xl cap-py-2 cap-px-5 cap-border-primary cap-bg-gray-600 hover:cap-border disabled:hover:cap-border-none disabled:cap-bg-base-200 ${
-                                        (selectedCoin != undefined &&
-                                            selectedCoin.id == coin.id &&
-                                            "!cap-bg-primary") ||
+                                    className={`cap-flex cap-space-x-5 cap-items-center cap-justify-between cap-rounded-xl cap-py-2 cap-px-5 cap-border-primary cap-bg-gray-600 hover:cap-border disabled:hover:cap-border-none disabled:cap-bg-base-200 ${(selectedCoin != undefined &&
+                                        selectedCoin.id == coin.id &&
+                                        "!cap-bg-primary") ||
                                         ""
-                                    } cap-cursor-pointer disabled:cap-cursor-default cap-w-full`}
+                                        } cap-cursor-pointer disabled:cap-cursor-default cap-w-full`}
                                 >
                                     <div className="cap-flex cap-space-x-5 cap-items-center">
                                         <img
@@ -200,7 +239,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                                     : "") +
                                                 " " +
                                                 (selectedCoin != undefined &&
-                                                selectedCoin.id == coin.id
+                                                    selectedCoin.id == coin.id
                                                     ? "cap-text-white"
                                                     : "")
                                             }
@@ -211,7 +250,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                             className={
                                                 "cap-text-gray-500 " +
                                                 (selectedCoin != undefined &&
-                                                selectedCoin.id == coin.id
+                                                    selectedCoin.id == coin.id
                                                     ? "!cap-text-gray-400"
                                                     : "")
                                             }
@@ -228,10 +267,10 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                         {BigNumber.from(
                                             coin.raw_amount_hex_str
                                         ).lt(coin.toPay.toString()) && (
-                                            <span className="cap-text-red-500 cap-ml-2 cap-text-sm">
-                                                Insufficient Balance
-                                            </span>
-                                        )}
+                                                <span className="cap-text-red-500 cap-ml-2 cap-text-sm">
+                                                    Insufficient Balance
+                                                </span>
+                                            )}
                                     </div>
                                 </button>
                             ))}

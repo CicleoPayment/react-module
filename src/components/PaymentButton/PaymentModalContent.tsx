@@ -160,6 +160,7 @@ type PaymentModalContent = {
     inToken: Coin;
     step: number;
     subscription: any;
+    oldSubscription: any;
     stepFunction: StepFunction;
     loadingStep: number;
     errorMessage: string;
@@ -182,6 +183,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
     inToken,
     step,
     subscription,
+    oldSubscription,
     stepFunction,
     loadingStep,
     errorMessage,
@@ -230,7 +232,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                 <progress className="cap-w-56 cap-progress"></progress>
             </div>
         );
-
+    console.log(`Old subId = ${subscription.subscriptionId}`);
     return (
         <>
             <div className="cap-flex cap-justify-between cap-py-2 cap-px-5">
@@ -297,23 +299,20 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                         <>
                             <ul className="cap-steps cap-steps-vertical lg:cap-steps-horizontal">
                                 <li
-                                    className={`cap-step ${
-                                        step >= 1 && "cap-step-primary"
-                                    }`}
+                                    className={`cap-step ${step >= 1 && "cap-step-primary"
+                                        }`}
                                 >
                                     Approve {swapInfo.inToken.symbol}
                                 </li>
                                 <li
-                                    className={`cap-step ${
-                                        step >= 2 && "cap-step-primary"
-                                    }`}
+                                    className={`cap-step ${step >= 2 && "cap-step-primary"
+                                        }`}
                                 >
                                     Subscription Limit
                                 </li>
                                 <li
-                                    className={`cap-step ${
-                                        step == 3 && "cap-step-primary"
-                                    }`}
+                                    className={`cap-step ${step == 3 && "cap-step-primary"
+                                        }`}
                                 >
                                     Subscribe
                                 </li>
