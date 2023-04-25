@@ -414,16 +414,6 @@ const PaymentButton: FC<PaymentButton> = ({
                     userInfo.subscriptionId
                 );
 
-                const res = await fetch(
-                    `${BACKEND_ADDR}/chain/${chainId}/subscription/${_subManagerInfo.id}/${address}`,
-                    {
-                        credentials: "same-origin",
-                    }
-                );
-
-                const _resJson = await res.json();
-
-
                 setOldSubscription({
                     id: userInfo.subscriptionId,
                     name: sub.name,
