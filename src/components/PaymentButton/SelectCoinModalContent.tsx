@@ -192,6 +192,9 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                         </div>
                     </div>
                 </div>
+            ) : (subscription.id == oldSubscription.id) ? (
+                <>
+                </>
             ) : (
                 <div className="cap-flex cap-flex-col cap-p-3 cap-px-6 cap-font-medium cap-space-y-6">
                     <span className="cap-font-semibold ">
@@ -286,7 +289,8 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            })
         </>
     );
 };

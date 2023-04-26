@@ -307,9 +307,8 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                 const _resJson = await res.json();
 
                 if (_resJson.tokenPaymentAddress == undefined) {
+                    _resJson.tokenPaymentAddress = await _subManagerContract.token();
                     console.log("okje");
-                    setIsNotSubscribed(true);
-                    return;
                 }
 
                 const erc20 = await Contracts.ERC20(

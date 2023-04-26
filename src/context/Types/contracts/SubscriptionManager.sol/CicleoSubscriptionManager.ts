@@ -90,6 +90,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     "cancel()": FunctionFragment;
     "changeSubscription(address,uint256,uint256,uint8)": FunctionFragment;
     "changeSubscriptionLimit(uint256)": FunctionFragment;
+    "changeSubscriptionWithSwap(address,uint256,uint256,uint8,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
     "deleteSubManager()": FunctionFragment;
     "editAccount(address,uint256,uint8)": FunctionFragment;
     "factory()": FunctionFragment;
@@ -118,6 +119,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
       | "cancel"
       | "changeSubscription"
       | "changeSubscriptionLimit"
+      | "changeSubscriptionWithSwap"
       | "deleteSubManager"
       | "editAccount"
       | "factory"
@@ -154,6 +156,18 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "changeSubscriptionLimit",
     values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeSubscriptionWithSwap",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "deleteSubManager",
@@ -261,6 +275,10 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "changeSubscriptionLimit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeSubscriptionWithSwap",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -426,6 +444,17 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    changeSubscriptionWithSwap(
+      user: PromiseOrValue<string>,
+      oldPrice: PromiseOrValue<BigNumberish>,
+      newPrice: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     deleteSubManager(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -547,6 +576,17 @@ export interface CicleoSubscriptionManager extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  changeSubscriptionWithSwap(
+    user: PromiseOrValue<string>,
+    oldPrice: PromiseOrValue<BigNumberish>,
+    newPrice: PromiseOrValue<BigNumberish>,
+    subscriptionId: PromiseOrValue<BigNumberish>,
+    executor: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   deleteSubManager(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -663,6 +703,17 @@ export interface CicleoSubscriptionManager extends BaseContract {
       amountMaxPerPeriod: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    changeSubscriptionWithSwap(
+      user: PromiseOrValue<string>,
+      oldPrice: PromiseOrValue<BigNumberish>,
+      newPrice: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     deleteSubManager(overrides?: CallOverrides): Promise<void>;
 
@@ -822,6 +873,17 @@ export interface CicleoSubscriptionManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    changeSubscriptionWithSwap(
+      user: PromiseOrValue<string>,
+      oldPrice: PromiseOrValue<BigNumberish>,
+      newPrice: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     deleteSubManager(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -931,6 +993,17 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
     changeSubscriptionLimit(
       amountMaxPerPeriod: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    changeSubscriptionWithSwap(
+      user: PromiseOrValue<string>,
+      oldPrice: PromiseOrValue<BigNumberish>,
+      newPrice: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

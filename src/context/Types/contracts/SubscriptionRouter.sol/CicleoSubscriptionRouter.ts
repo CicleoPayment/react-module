@@ -27,6 +27,43 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export type SwapDescriptionStruct = {
+  srcToken: PromiseOrValue<string>;
+  dstToken: PromiseOrValue<string>;
+  srcReceiver: PromiseOrValue<string>;
+  dstReceiver: PromiseOrValue<string>;
+  amount: PromiseOrValue<BigNumberish>;
+  minReturnAmount: PromiseOrValue<BigNumberish>;
+  guaranteedAmount: PromiseOrValue<BigNumberish>;
+  flags: PromiseOrValue<BigNumberish>;
+  referrer: PromiseOrValue<string>;
+  permit: PromiseOrValue<BytesLike>;
+};
+
+export type SwapDescriptionStructOutput = [
+  string,
+  string,
+  string,
+  string,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  string,
+  string
+] & {
+  srcToken: string;
+  dstToken: string;
+  srcReceiver: string;
+  dstReceiver: string;
+  amount: BigNumber;
+  minReturnAmount: BigNumber;
+  guaranteedAmount: BigNumber;
+  flags: BigNumber;
+  referrer: string;
+  permit: string;
+};
+
 export type SubscriptionStructStruct = {
   price: PromiseOrValue<BigNumberish>;
   isActive: PromiseOrValue<boolean>;
@@ -98,43 +135,6 @@ export type MinimifiedSubscriptionManagerStructStructOutput = [
   activeSubscriptionCount: BigNumber;
 };
 
-export type SwapDescriptionStruct = {
-  srcToken: PromiseOrValue<string>;
-  dstToken: PromiseOrValue<string>;
-  srcReceiver: PromiseOrValue<string>;
-  dstReceiver: PromiseOrValue<string>;
-  amount: PromiseOrValue<BigNumberish>;
-  minReturnAmount: PromiseOrValue<BigNumberish>;
-  guaranteedAmount: PromiseOrValue<BigNumberish>;
-  flags: PromiseOrValue<BigNumberish>;
-  referrer: PromiseOrValue<string>;
-  permit: PromiseOrValue<BytesLike>;
-};
-
-export type SwapDescriptionStructOutput = [
-  string,
-  string,
-  string,
-  string,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  string,
-  string
-] & {
-  srcToken: string;
-  dstToken: string;
-  srcReceiver: string;
-  dstReceiver: string;
-  amount: BigNumber;
-  minReturnAmount: BigNumber;
-  guaranteedAmount: BigNumber;
-  flags: BigNumber;
-  referrer: string;
-  permit: string;
-};
-
 export declare namespace IOpenOceanCaller {
   export type CallDescriptionStruct = {
     target: PromiseOrValue<BigNumberish>;
@@ -161,6 +161,7 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
     "botAccount()": FunctionFragment;
     "bridgeExecutor()": FunctionFragment;
     "changeSubscription(uint256,uint8)": FunctionFragment;
+    "changeSubscriptionWithSwap(uint256,uint8,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
     "editAccount(uint256,address,uint256,uint8)": FunctionFragment;
     "editSubscription(uint256,uint8,uint256,string,bool)": FunctionFragment;
     "factory()": FunctionFragment;
@@ -204,6 +205,7 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
       | "botAccount"
       | "bridgeExecutor"
       | "changeSubscription"
+      | "changeSubscriptionWithSwap"
       | "editAccount"
       | "editSubscription"
       | "factory"
@@ -253,6 +255,16 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "changeSubscription",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeSubscriptionWithSwap",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      SwapDescriptionStruct,
+      IOpenOceanCaller.CallDescriptionStruct[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "editAccount",
@@ -451,6 +463,10 @@ export interface CicleoSubscriptionRouterInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "changeSubscription",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeSubscriptionWithSwap",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -746,6 +762,15 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    changeSubscriptionWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     editAccount(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       user: PromiseOrValue<string>,
@@ -972,6 +997,15 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  changeSubscriptionWithSwap(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    newSubscriptionId: PromiseOrValue<BigNumberish>,
+    executor: PromiseOrValue<string>,
+    desc: SwapDescriptionStruct,
+    calls: IOpenOceanCaller.CallDescriptionStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   editAccount(
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
     user: PromiseOrValue<string>,
@@ -1195,6 +1229,15 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     changeSubscription(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       newSubscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    changeSubscriptionWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1533,6 +1576,15 @@ export interface CicleoSubscriptionRouter extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    changeSubscriptionWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     editAccount(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       user: PromiseOrValue<string>,
@@ -1751,6 +1803,15 @@ export interface CicleoSubscriptionRouter extends BaseContract {
     changeSubscription(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
       newSubscriptionId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    changeSubscriptionWithSwap(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
+      executor: PromiseOrValue<string>,
+      desc: SwapDescriptionStruct,
+      calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import {ethers} from "ethers"
+import { ethers } from "ethers"
 import AccountBlock from '../components/AccountBlock';
 
 type User = {
-  name: string;
+    name: string;
 };
 
 export const Page: React.FC = () => {
 
     const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | undefined>()
-    
+
     const getSigner = async () => {
         //@ts-ignore
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         await provider.send("eth_requestAccounts", []);
 
-        const signer = provider.getSigner() 
+        const signer = provider.getSigner()
 
         setSigner(signer)
     }
@@ -23,11 +23,11 @@ export const Page: React.FC = () => {
     useEffect(() => {
         getSigner()
     }, [])
-    
+
 
     return (
         <div>
-            <AccountBlock config={{ 56: 1 }} signer={signer} />
+            <AccountBlock config={{ 56: 1, 250: 2 }} signer={signer} />
         </div>
-  );
+    );
 };

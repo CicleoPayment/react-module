@@ -174,19 +174,37 @@ const PaymentButton: FC<PaymentButton> = ({
                     setStep(3);
                 },
                 3: async () => {
-                    await doTx(
-                        () =>
-                            subscriptionRouterContract.subscribe(
-                                subManager.id,
-                                subscriptionId,
-                                referral != undefined ? referral : ethers.constants.AddressZero
-                            ),
-                        "Subscribe",
-                        () => setLoadingStep(3)
-                    );
+                    if (subscription.id != oldSubscription.id && subscription.id != 0) {
+                        console.log("subscription.id != oldSubscription.id");
+                        await doTx(
+                            () =>
+                                subscriptionRouterContract.changeSubscription(
+                                    subManager.id,
+                                    subscriptionId
+                                ),
+                            "Change Subscribtion",
+                            () => setLoadingStep(3)
+                        );
 
-                    setLoadingStep(0);
-                    setIsPurchased(true);
+                        setLoadingStep(0);
+                        setIsPurchased(true);
+                    } else {
+                        console.log("else");
+
+                        await doTx(
+                            () =>
+                                subscriptionRouterContract.subscribe(
+                                    subManager.id,
+                                    subscriptionId,
+                                    referral != undefined ? referral : ethers.constants.AddressZero
+                                ),
+                            "Subscribe",
+                            () => setLoadingStep(3)
+                        );
+
+                        setLoadingStep(0);
+                        setIsPurchased(true);
+                    }
                 },
             });
 
@@ -280,27 +298,51 @@ const PaymentButton: FC<PaymentButton> = ({
                             value: resp.data.data.value,
                         });
 
-                        //console.log(decodedData)
+                        console.log("decodeddata");
 
-                        await doTx(
-                            () =>
-                                subscriptionRouterContract.subscribeWithSwap(
-                                    subManager.id,
-                                    subscriptionId,
-                                    referral != undefined ? referral : ethers.constants.AddressZero,
-                                    decodedData.args.caller,
-                                    decodedData.args.desc,
-                                    decodedData.args.calls
-                                ),
-                            "Subscribe",
-                            () => setLoadingStep(3)
-                        );
+                        console.log(decodedData)
+
+                        if (subscription.id != oldSubscription.id && subscription.id != 0) {
+
+                            await doTx(
+                                () =>
+                                    // uint256 subscriptionManagerId,
+                                    // uint8 newSubscriptionId,
+                                    // IOpenOceanCaller executor,
+                                    // SwapDescription memory desc,
+                                    // IOpenOceanCaller.CallDescription[] calldata calls
+                                    subscriptionRouterContract.changeSubscriptionWithSwap(
+                                        subManager.id,
+                                        subscriptionId,
+                                        decodedData.args.caller,
+                                        decodedData.args.desc,
+                                        decodedData.args.calls
+                                    ),
+                                "Subscribe",
+                                () => setLoadingStep(3)
+                            );
+                        } else {
+                            await doTx(
+                                () =>
+                                    subscriptionRouterContract.subscribeWithSwap(
+                                        subManager.id,
+                                        subscriptionId,
+                                        referral != undefined ? referral : ethers.constants.AddressZero,
+                                        decodedData.args.caller,
+                                        decodedData.args.desc,
+                                        decodedData.args.calls
+                                    ),
+                                "Subscribe",
+                                () => setLoadingStep(3)
+                            );
+                        }
 
                         setLoadingStep(0);
                         setIsPurchased(true);
                     } catch (error: any) {
                         console.log(error);
                         setErrorMessage(error.message);
+                        setStep(1);
                     }
                 },
             });

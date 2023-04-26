@@ -5,6 +5,7 @@ import { ClipLoader } from "react-spinners";
 type Step = {
     onClick: () => void;
     subscription: any;
+    oldSubscription: any;
     isLoading: boolean;
     errorMessage: string;
     swapInfo: any;
@@ -32,6 +33,7 @@ type StepFunction = {
 const Step1: FC<Step> = ({
     onClick,
     subscription,
+    oldSubscription,
     isLoading,
     errorMessage,
     swapInfo,
@@ -71,6 +73,7 @@ const Step1: FC<Step> = ({
 const Step2: FC<Step> = ({
     onClick,
     subscription,
+    oldSubscription,
     isLoading,
     errorMessage,
 }) => {
@@ -116,36 +119,75 @@ const formatPrice = (price: any, decimals: number, symbol: string) => {
 const Step3: FC<Step> = ({
     onClick,
     subscription,
+    oldSubscription,
     isLoading,
     errorMessage,
     swapInfo,
 }) => {
-    return (
-        <div className="cap-text-left cap-space-y-10">
-            <div className="cap-px-8">
-                <h3 className="cap-font-medium">
-                    Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
-                </h3>
-                <p className="cap-text-sm">
-                    Begin your Cicleo transaction-free payment plan now!
-                </p>
-                <span className="cap-font-normal cap-text-red-400">
-                    {errorMessage}
-                </span>
-            </div>
+    console.log("PMC");
+    console.log(formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol));
+    console.log(subscription.userPrice);
 
-            <div className="cap-modal-action">
-                <button
-                    className="cap-space-x-3 cap-btn cap-btn-primary"
-                    onClick={onClick}
-                >
-                    <span>
-                    Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
-                    </span>
-                    {isLoading && <ClipLoader color={"#fff"} size={20} />}
-                </button>
-            </div>
-        </div>
+
+    return (
+        <>
+            {subscription.id != oldSubscription.id ? (
+                <div className="cap-text-left cap-space-y-10">
+                    <div className="cap-px-8">
+                        <h3 className="cap-font-medium">
+                            Subscribe for{" "}{subscription.userPrice} {swapInfo.outToken.symbol}
+                        </h3>
+                        <p className="cap-text-sm">
+                            Begin your Cicleo transaction-free payment plan now!
+                        </p>
+                        <span className="cap-font-normal cap-text-red-400">
+                            {errorMessage}
+                        </span>
+                    </div>
+
+                    <div className="cap-modal-action">
+                        <button
+                            className="cap-space-x-3 cap-btn cap-btn-primary"
+                            onClick={onClick}
+                        >
+                            <span>
+                                Subscribe for{" "}{subscription.userPrice} {swapInfo.outToken.symbol}
+                            </span>
+                            {isLoading && <ClipLoader color={"#fff"} size={20} />}
+                        </button>
+                    </div>
+                </div>
+            ) : (
+
+                <div className="cap-text-left cap-space-y-10">
+                    <div className="cap-px-8">
+                        <h3 className="cap-font-medium">
+                            Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
+                        </h3>
+                        <p className="cap-text-sm">
+                            Begin your Cicleo transaction-free payment plan now!
+                        </p>
+                        <span className="cap-font-normal cap-text-red-400">
+                            {errorMessage}
+                        </span>
+                    </div>
+
+                    <div className="cap-modal-action">
+                        <button
+                            className="cap-space-x-3 cap-btn cap-btn-primary"
+                            onClick={onClick}
+                        >
+                            <span>
+                                Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
+                            </span>
+                            {isLoading && <ClipLoader color={"#fff"} size={20} />}
+                        </button>
+                    </div>
+                </div>
+            )
+            }
+
+        </>
     );
 };
 
@@ -244,9 +286,8 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                         <span className="cap-text-lg cap-font-medium">
                             {Number(subscription.price) == 0
                                 ? "Free"
-                                : `${subscription.price} ${
-                                      subscription.tokenSymbol
-                                  } per ${getDurationPeriod(duration)}`}
+                                : `${subscription.price} ${subscription.tokenSymbol
+                                } per ${getDurationPeriod(duration)}`}
                         </span>
                     </div>
                 </div>
@@ -323,6 +364,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                     <Step1
                                         onClick={() => stepFunction[1]()}
                                         subscription={subscription}
+                                        oldSubscription={oldSubscription}
                                         isLoading={loadingStep == 1}
                                         errorMessage={errorMessage}
                                         swapInfo={swapInfo}
@@ -333,6 +375,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                     <Step2
                                         onClick={() => stepFunction[2]()}
                                         subscription={subscription}
+                                        oldSubscription={oldSubscription}
                                         isLoading={loadingStep == 2}
                                         errorMessage={errorMessage}
                                         swapInfo={swapInfo}
@@ -343,6 +386,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                                     <Step3
                                         onClick={() => stepFunction[3]()}
                                         subscription={subscription}
+                                        oldSubscription={oldSubscription}
                                         isLoading={loadingStep == 3}
                                         errorMessage={errorMessage}
                                         swapInfo={swapInfo}
