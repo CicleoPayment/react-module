@@ -5,6 +5,7 @@ import {
     ContractInterface,
     BigNumber,
     ethers,
+    Signer,
 } from "ethers";
 import {
     CicleoSubscriptionFactory,
@@ -406,8 +407,9 @@ let cachedContracts: any = {
 };
 
 const Contracts: Contracts = {
-    SubscriptionFactory: async (signer: providers.JsonRpcSigner) => {
-        const { chainId } = await signer.provider.getNetwork();
+    SubscriptionFactory: async (signer: Signer) => {
+        //@ts-ignore
+        const { chainId } = await signer.provider?.getNetwork();
 
         let _getConfig;
 
@@ -423,8 +425,9 @@ const Contracts: Contracts = {
             signer
         );
     },
-    SubscriptionRouter: async (signer: providers.JsonRpcSigner) => {
-        const { chainId } = await signer.provider.getNetwork();
+    SubscriptionRouter: async (signer: Signer) => {
+        //@ts-ignore
+        const { chainId } = await signer.provider?.getNetwork();
 
         let _getConfig;
 

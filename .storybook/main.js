@@ -1,4 +1,5 @@
 const path = require("path")
+const webpack = require("webpack")
 
 module.exports = {
     stories: [
@@ -25,7 +26,17 @@ module.exports = {
             "@context": path.resolve(__dirname, "./../src/context"),
         };
 
+        config.plugins.push(
+            new webpack.ProvidePlugin({
+                Buffer: ['buffer', 'Buffer'],
+            })
+        );
+
         return config;
     },
     framework: "@storybook/react",
+    core: {
+        builder: 'webpack5',
+    },
+   
 };

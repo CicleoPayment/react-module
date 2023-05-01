@@ -32,8 +32,6 @@ type StepFunction = {
 
 const Step1: FC<Step> = ({
     onClick,
-    subscription,
-    oldSubscription,
     isLoading,
     errorMessage,
     swapInfo,
@@ -73,7 +71,6 @@ const Step1: FC<Step> = ({
 const Step2: FC<Step> = ({
     onClick,
     subscription,
-    oldSubscription,
     isLoading,
     errorMessage,
 }) => {
@@ -124,11 +121,6 @@ const Step3: FC<Step> = ({
     errorMessage,
     swapInfo,
 }) => {
-    console.log("PMC");
-    console.log(formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol));
-    console.log(subscription.userPrice);
-
-
     return (
         <>
             {subscription.id != oldSubscription.id ? (

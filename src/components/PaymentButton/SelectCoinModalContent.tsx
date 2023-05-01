@@ -3,53 +3,28 @@ import { formatNumber } from "@context/contract";
 import { BigNumber, utils } from "ethers";
 import React, { FC } from "react";
 
-type SubManagerInfo = {
-    id: number;
-    address: string;
-    name: string;
-    owner: string;
-    decimals: number;
-    tokenAddress: string;
-    treasury: string;
-    tokenSymbol: string;
-    subscriptions: any;
-    allowance: BigNumber;
-};
-
 type PaymentModalContent = {
     tokenOutImage: string;
-    isWrongNetwork: boolean;
     isLoaded: boolean;
     BUSD: string;
     subscription: any;
     oldSubscription: any;
-    balance: number | string;
     coinLists: any[];
     setCoin: (coin: string) => void;
-    subManager: any;
 };
 
 const PaymentModalContent: FC<PaymentModalContent> = ({
     tokenOutImage,
-    isWrongNetwork,
     isLoaded,
     BUSD,
     subscription,
     oldSubscription,
-    balance,
     coinLists,
     setCoin,
-    subManager
 }) => {
     const [selectedCoin, setSelectedCoin] = React.useState<any>(null);
-    console.log(subManager)
-    console.log("---------------")
-    console.log(subscription);
-    console.log(oldSubscription);
 
-
-
-    if (isWrongNetwork)
+    /* if (isWrongNetwork)
         return (
             <div className="cap-p-4">
                 <div className="cap-alert cap-alert-error cap-shadow-lg">
@@ -71,7 +46,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                     </div>
                 </div>
             </div>
-        );
+        ); */
 
     if (isLoaded == false)
         return (

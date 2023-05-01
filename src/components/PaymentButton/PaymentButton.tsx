@@ -1,5 +1,5 @@
 import React, { useState, FC, useEffect } from "react";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, Signer, ethers, providers } from "ethers";
 import "./PaymentButton.css";
 import TextWhite from "@assets/logo_text_white.svg";
 import PayImage from "@assets/pay.svg";
@@ -12,11 +12,14 @@ import {
 } from "@context/contract";
 import PaymentModalContent from "./PaymentModalContent";
 import SelectCoinModalContent from "./SelectCoinModalContent";
+import SelectNetwork from "./SelectNetwork";
 import axios from "axios";
+import { getNetwork, fetchSigner } from '@wagmi/core'
+import { getAccount } from '@wagmi/core'
+
 
 type PaymentButton = {
     subscriptionId: number;
-    signer: ethers.providers.JsonRpcSigner | undefined;
     config: { [key: number]: number };
     referral?: string;
 };
@@ -36,12 +39,12 @@ type SubManagerInfo = {
 };
 
 const PaymentButton: FC<PaymentButton> = ({
-    signer,
     subscriptionId,
     config,
     referral
 }) => {
-    const [isWrongNetwork, setIsWrongNetwork] = useState(false);
+    const [networkSelected, setNetworkSelected] = useState(false);
+
     const [isLoaded, setIsLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [subManager, setSubManager] = useState<SubManagerInfo>(
@@ -80,12 +83,13 @@ const PaymentButton: FC<PaymentButton> = ({
     const [isPurchased, setIsPurchased] = useState(false);
 
     const BACKEND_ADDR = "https://backend-test.cicleo.io";
-
+    
+    const signer = undefined;
 
     const changeToken = async (coin: any) => {
         if (!signer) return;
 
-        const address = await signer.getAddress();
+        const address = ""//await signer.getAddress();
         const erc20 = await Contracts.ERC20(signer, coin.id);
 
         const decimals = await erc20.decimals();
@@ -118,9 +122,10 @@ const PaymentButton: FC<PaymentButton> = ({
             signer
         );
 
-        const address = await signer.getAddress();
+        const address = ""//await signer.getAddress();
 
-        const { chainId } = await signer.provider.getNetwork();
+        //const { chainId } = await signer.provider.getNetwork();
+        const chainId = 250
 
         if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
             let step = 1;
@@ -360,25 +365,26 @@ const PaymentButton: FC<PaymentButton> = ({
 
     const createContracts = async () => {
         setIsLoaded(false);
-        setIsWrongNetwork(false);
+
+        const signer = await fetchSigner()
 
         if (!signer) return;
 
         try {
-            const { chainId } = await signer.provider.getNetwork();
+            const { chain, chains } = getNetwork()
+            if (!chain) return;
+            const chainId = chain.id;
 
-            const address = await signer.getAddress();
+            //const address = await signer.getAddress();
+            const account = getAccount()
+            const address = account.address
+
+            if (!address) return;
 
             const subManagerId = config[chainId];
 
-            if (!(await isGoodNetwork(chainId)) || subManagerId == undefined) {
-                setIsWrongNetwork(true);
-                console.log("Wrong network");
-                return;
-            }
-
             const subscriptionRouterContract =
-                await Contracts.SubscriptionRouter(signer);
+                await Contracts.SubscriptionRouter(signer as providers.JsonRpcSigner);
             if (subscriptionRouterContract == null) return;
 
             // @ts-ignore
@@ -390,7 +396,7 @@ const PaymentButton: FC<PaymentButton> = ({
                     );
 
                 const _subManagerContract = await Contracts.SubscriptionManager(
-                    signer,
+                    signer as providers.JsonRpcSigner,
                     subscriptionManagerInfo._address
                 );
                 setSubManagerContract(_subManagerContract);
@@ -420,13 +426,6 @@ const PaymentButton: FC<PaymentButton> = ({
                         Number(subManagerId),
                         subscriptionId
                     );
-
-                console.log("-----------PB");
-
-                console.log(Number(subManagerId));
-                console.log(address);
-                console.log(subscriptionId);
-
 
                 const userPrice = await subscriptionRouterContract.getChangeSubscriptionPrice(
                     Number(subManagerId),
@@ -468,7 +467,7 @@ const PaymentButton: FC<PaymentButton> = ({
                 });
 
                 const erc20 = await Contracts.ERC20(
-                    signer,
+                    signer as providers.JsonRpcSigner,
                     _subManagerInfo.tokenAddress,
                     true
                 );
@@ -506,11 +505,11 @@ const PaymentButton: FC<PaymentButton> = ({
 
     useEffect(() => {
         createContracts();
-    }, [signer]);
+    }, [networkSelected]);
 
-    const updateModal = () => {
-        createContracts();
-    };
+    const handleSelectNetwork = (network: number) => { 
+        setNetworkSelected(true);
+    }
 
     return (
         <>
@@ -527,7 +526,6 @@ const PaymentButton: FC<PaymentButton> = ({
                 type="checkbox"
                 id={"cicleo-payment-modal-" + subscriptionId}
                 className="cap-modal-toggle"
-                onChange={updateModal}
             />
             <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
                 <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
@@ -540,7 +538,46 @@ const PaymentButton: FC<PaymentButton> = ({
                     >
                         ✕
                     </label>
-                    {coin == null ? (
+
+                    {networkSelected ? (() => {
+                        if (coin == null) {
+                            return <SelectCoinModalContent
+                                tokenOutImage={tokenOutImage}
+                                isLoaded={isLoaded}
+                                BUSD={TOKEN_IMG}
+                                subscription={subscription}
+                                oldSubscription={oldSubscription}
+                                coinLists={coinLists}
+                                setCoin={changeToken}
+                            />
+                        } else {
+                            return <PaymentModalContent
+                                isLoaded={isLoaded}
+                                inToken={{
+                                    image: coin.logo_url,
+                                    symbol: coin.symbol,
+                                    balance: coin.balance,
+                                }}
+                                subscription={subscription}
+                                oldSubscription={oldSubscription}
+                                step={step}
+                                stepFunction={stepFunction}
+                                loadingStep={loadingStep}
+                                errorMessage={errorMessage}
+                                balance={balance}
+                                swapInfo={swapInfo}
+                                isPurchased={isPurchased}
+                                duration={subManager.duration}
+                            />
+                        }
+                    })()
+                    :
+                    <SelectNetwork handleSelectNetwork={handleSelectNetwork} />
+                }
+                    
+                    
+
+                    {/* {coin == null ? (
                         <SelectCoinModalContent
                             tokenOutImage={tokenOutImage}
                             isWrongNetwork={isWrongNetwork}
@@ -548,10 +585,8 @@ const PaymentButton: FC<PaymentButton> = ({
                             BUSD={TOKEN_IMG}
                             subscription={subscription}
                             oldSubscription={oldSubscription}
-                            balance={balance}
                             coinLists={coinLists}
                             setCoin={changeToken}
-                            subManager={subManager}
                         />
                     ) : (
                         <PaymentModalContent
@@ -572,7 +607,7 @@ const PaymentButton: FC<PaymentButton> = ({
                             isPurchased={isPurchased}
                             duration={subManager.duration}
                         />
-                    )}
+                    )} */}
                 </div>
             </div>
         </>
