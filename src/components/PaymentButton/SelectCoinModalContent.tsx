@@ -83,90 +83,22 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
             </div>
         );
 
+    if (subscription.id == oldSubscription.id)
+        return (<div className="cap-p-5 cap-flex">
+            <div className="cap-shadow-lg cap-alert cap-alert-warning cap-justify-center">
+                <div>
+                    <span>
+                        You are already subscribed !
+                    </span>
+                </div>
+            </div>
+        </div>)
+
     return (
         <>
-            {subscription.id != oldSubscription.id ? (
-                <>
-                    {
-                        oldSubscription.id == 0 ? (
-                            <div className="cap-flex cap-flex-col cap-content-center cap-flex-wrap cap-justify-between cap-py-2 cap-bg-base-100">
-                                <div className="cap-indicator cap-w-[400px] cap-flex cap-space-x-2 cap-py-2 cap-px-3 cap-border-primary cap-bg-gray-800 cap-rounded-xl">
-                                    <span className="cap-indicator-item cap-badge cap-badge-primary">new</span>
-                                    <img
-                                        src={tokenOutImage == "" ? BUSD : tokenOutImage}
-                                        alt=""
-                                        className="cap-h-fit"
-                                        width={40}
-                                        height={40}
-                                    />
-                                    <div className="cap-flex cap-flex-col cap-justify-center">
-                                        <span className="cap-text-xl cap-font-semibold">
-                                            {subscription.name}
-                                        </span>
-                                        <span className="cap-text-lg cap-font-medium">
-                                            {subscription.price} {subscription.tokenSymbol} per
-                                            month
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            < div className="cap-flex cap-flex-col cap-content-center cap-flex-wrap cap-justify-between cap-py-2 cap-bg-base-100">
-                                <div className="cap-indicator cap-w-[400px] cap-flex cap-space-x-2 cap-py-2 cap-px-3 cap-border-primary cap-bg-gray-800 cap-rounded-xl">
-                                    <img
-                                        src={tokenOutImage == "" ? BUSD : tokenOutImage}
-                                        alt=""
-                                        className="cap-h-fit"
-                                        width={40}
-                                        height={40}
-                                    />
-                                    <div className="cap-flex cap-flex-col cap-justify-center">
-                                        <span className="cap-text-xl cap-font-semibold">
-                                            {oldSubscription.name}
-                                        </span>
-                                        <span className="cap-text-lg cap-font-medium">
-                                            {oldSubscription.price} {oldSubscription.tokenSymbol} per
-                                            month
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="cap-divider cap-w-[100px] cap-self-center">TO</div>
-                                <div className="cap-indicator cap-w-[400px] cap-flex cap-space-x-2 cap-py-2 cap-px-3 cap-border-primary cap-bg-gray-800 cap-rounded-xl">
-                                    <span className="cap-indicator-item cap-badge cap-badge-primary">new</span>
-                                    <img
-                                        src={tokenOutImage == "" ? BUSD : tokenOutImage}
-                                        alt=""
-                                        className="cap-h-fit"
-                                        width={40}
-                                        height={40}
-                                    />
-                                    <div className="cap-flex cap-flex-col cap-justify-center">
-                                        <span className="cap-text-xl cap-font-semibold">
-                                            {subscription.name}
-                                        </span>
-                                        <span className="cap-text-lg cap-font-medium">
-                                            {subscription.price} {subscription.tokenSymbol} per
-                                            month
-                                        </span>
-                                    </div>
-                                </div>
-                            </div >
-                        )
-                    }
-                </>
-            ) : (
-                <div className="cap-p-5 cap-flex">
-                    <div className="cap-shadow-lg cap-alert cap-alert-warning cap-justify-center">
-                        <div>
-                            <span>
-                                You are already subscribed !
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <HeaderPaymentModal oldSubscription={oldSubscription} subscription={subscription} BUSD={BUSD} />
 
-            <div className="cap-divider"></div>
+            <div className="cap-divider cap-my-0"></div>
 
             {
                 subscription.price != oldSubscription.price && oldSubscription.id != 0 && (
@@ -324,3 +256,76 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
 };
 
 export default PaymentModalContent;
+
+type HeaderPaymentModal = {
+    subscription: any;
+    oldSubscription: any;
+    BUSD: string;
+}
+
+const HeaderPaymentModal: FC<HeaderPaymentModal> = ({ subscription, oldSubscription, BUSD }) => {
+    //In case of no actual subscription
+    if (oldSubscription.id == 0) return (
+        <div className="cap-flex cap-flex-wrap cap-py-3 cap-w-full cap-space-x-2 cap-gap-2 cap-items-center cap-px-4 cap-justify-start cap-border-primary">
+            <img
+                src={BUSD}
+                alt=""
+                className="cap-h-fit"
+                width={40}
+                height={40}
+            />
+            <div className="cap-flex cap-flex-col cap-justify-center">
+                <span className="cap-text-xl cap-font-semibold">
+                    {subscription.name}
+                </span>
+                <span className="cap-text-lg cap-font-medium">
+                    {subscription.price} {subscription.tokenSymbol} per
+                    month
+                </span>
+            </div>
+        </div>
+    )
+
+
+    //When the user already have a asubscription (so upgrade subscription)
+    return (<div className="cap-flex cap-flex-col cap-content-center cap-flex-wrap cap-justify-between cap-py-2 cap-bg-base-100">
+        <div className="cap-indicator cap-w-[400px] cap-flex cap-space-x-2 cap-py-2 cap-px-3 cap-border-primary cap-bg-gray-800 cap-rounded-xl">
+            <img
+                src={BUSD}
+                alt=""
+                className="cap-h-fit"
+                width={40}
+                height={40}
+            />
+            <div className="cap-flex cap-flex-col cap-justify-center">
+                <span className="cap-text-xl cap-font-semibold">
+                    {oldSubscription.name}
+                </span>
+                <span className="cap-text-lg cap-font-medium">
+                    {oldSubscription.price} {oldSubscription.tokenSymbol} per
+                    month
+                </span>
+            </div>
+        </div>
+        <div className="cap-divider cap-w-[100px] cap-self-center">TO</div>
+        <div className="cap-indicator cap-w-[400px] cap-flex cap-space-x-2 cap-py-2 cap-px-3 cap-border-primary cap-bg-gray-800 cap-rounded-xl">
+            <span className="cap-indicator-item cap-badge cap-badge-primary">new</span>
+            <img
+                src={BUSD}
+                alt=""
+                className="cap-h-fit"
+                width={40}
+                height={40}
+            />
+            <div className="cap-flex cap-flex-col cap-justify-center">
+                <span className="cap-text-xl cap-font-semibold">
+                    {subscription.name}
+                </span>
+                <span className="cap-text-lg cap-font-medium">
+                    {subscription.price} {subscription.tokenSymbol} per
+                    month
+                </span>
+            </div>
+        </div>
+    </div >)
+}

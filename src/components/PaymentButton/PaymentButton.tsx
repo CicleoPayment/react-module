@@ -531,7 +531,7 @@ const PaymentButton: FC<PaymentButton> = ({
             />
             <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
                 <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
-                    <div className="cap-mb-4 cap-px-4 cap-py-3 cap-bg-base-300">
+                    <div className="cap-px-4 cap-py-3 cap-bg-base-300">
                         <img src={TextWhite} alt="" className="cap-h-10" />
                     </div>
                     <label
