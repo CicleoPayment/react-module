@@ -30,7 +30,7 @@ export const Page: React.FC = () => {
 
     return (
         <div>
-            <PaymentButton config={{ 56: 3, 250: 2 }} subscriptionId={2} signer={signer} />
+            <PaymentButton config={{ 56: 3, 250: 2 }} subscriptionId={1} signer={signer} />
         </div>
     );
 };

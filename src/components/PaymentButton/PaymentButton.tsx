@@ -174,7 +174,7 @@ const PaymentButton: FC<PaymentButton> = ({
                     setStep(3);
                 },
                 3: async () => {
-                    if (subscription.id != oldSubscription.id && subscription.id != 0) {
+                    if (subscription.id != oldSubscription.id && oldSubscription.id != 0) {
                         console.log("subscription.id != oldSubscription.id");
                         await doTx(
                             () =>
@@ -298,11 +298,7 @@ const PaymentButton: FC<PaymentButton> = ({
                             value: resp.data.data.value,
                         });
 
-                        console.log("decodeddata");
-
-                        console.log(decodedData)
-
-                        if (subscription.id != oldSubscription.id && subscription.id != 0) {
+                        if (subscription.id != oldSubscription.id && oldSubscription.id != 0) {
 
                             await doTx(
                                 () =>
