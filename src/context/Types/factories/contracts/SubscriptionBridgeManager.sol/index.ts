@@ -2,3 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { CicleoSubscriptionBridgeManager__factory } from "./CicleoSubscriptionBridgeManager__factory";
+export { ICicleoRouter__factory } from "./ICicleoRouter__factory";
+export { ILiFiDiamond__factory } from "./ILiFiDiamond__factory";

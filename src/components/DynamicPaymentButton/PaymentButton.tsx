@@ -205,7 +205,7 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
             let config = {
                 method: "post",
                 maxBodyLength: Infinity,
-                url: `https://backend.cicleo.io/chain/${chainId}/getExactPrice/`,
+                url: `https://backend-test.cicleo.io/chain/${chainId}/getExactPrice/`,
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -407,7 +407,7 @@ const PaymentButton: FC<DynamicPaymentButton> = ({
                 //--------------------------------------------------------------
 
                 const coinList = await axios.get(
-                    `https://backend.cicleo.io/chain/${chainId}/getBalance/${address}/${_subManagerInfo.tokenAddress}/${userPrice[0]}`
+                    `https://backend-test.cicleo.io/chain/${chainId}/getBalance/${address}/${_subManagerInfo.tokenAddress}/${userPrice[0]}`
                 );
 
                 let coinData = coinList.data;

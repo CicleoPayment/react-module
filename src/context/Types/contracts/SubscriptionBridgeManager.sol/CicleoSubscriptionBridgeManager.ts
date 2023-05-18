@@ -28,23 +28,126 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export type StargateDataStruct = {
+  dstPoolId: PromiseOrValue<BigNumberish>;
+  minAmountLD: PromiseOrValue<BigNumberish>;
+  dstGasForCall: PromiseOrValue<BigNumberish>;
+  lzFee: PromiseOrValue<BigNumberish>;
+  refundAddress: PromiseOrValue<string>;
+  callTo: PromiseOrValue<BytesLike>;
+  callData: PromiseOrValue<BytesLike>;
+};
+
+export type StargateDataStructOutput = [
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  string,
+  string,
+  string
+] & {
+  dstPoolId: BigNumber;
+  minAmountLD: BigNumber;
+  dstGasForCall: BigNumber;
+  lzFee: BigNumber;
+  refundAddress: string;
+  callTo: string;
+  callData: string;
+};
+
+export declare namespace ILiFi {
+  export type BridgeDataStruct = {
+    transactionId: PromiseOrValue<BytesLike>;
+    bridge: PromiseOrValue<string>;
+    integrator: PromiseOrValue<string>;
+    referrer: PromiseOrValue<string>;
+    sendingAssetId: PromiseOrValue<string>;
+    receiver: PromiseOrValue<string>;
+    minAmount: PromiseOrValue<BigNumberish>;
+    destinationChainId: PromiseOrValue<BigNumberish>;
+    hasSourceSwaps: PromiseOrValue<boolean>;
+    hasDestinationCall: PromiseOrValue<boolean>;
+  };
+
+  export type BridgeDataStructOutput = [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    BigNumber,
+    BigNumber,
+    boolean,
+    boolean
+  ] & {
+    transactionId: string;
+    bridge: string;
+    integrator: string;
+    referrer: string;
+    sendingAssetId: string;
+    receiver: string;
+    minAmount: BigNumber;
+    destinationChainId: BigNumber;
+    hasSourceSwaps: boolean;
+    hasDestinationCall: boolean;
+  };
+}
+
+export declare namespace LibSwap {
+  export type SwapDataStruct = {
+    callTo: PromiseOrValue<string>;
+    approveTo: PromiseOrValue<string>;
+    sendingAssetId: PromiseOrValue<string>;
+    receivingAssetId: PromiseOrValue<string>;
+    fromAmount: PromiseOrValue<BigNumberish>;
+    callData: PromiseOrValue<BytesLike>;
+    requiresDeposit: PromiseOrValue<boolean>;
+  };
+
+  export type SwapDataStructOutput = [
+    string,
+    string,
+    string,
+    string,
+    BigNumber,
+    string,
+    boolean
+  ] & {
+    callTo: string;
+    approveTo: string;
+    sendingAssetId: string;
+    receivingAssetId: string;
+    fromAmount: BigNumber;
+    callData: string;
+    requiresDeposit: boolean;
+  };
+}
+
 export interface CicleoSubscriptionBridgeManagerInterface
   extends utils.Interface {
   functions: {
+    "changeDestinationCalldata(bytes,bytes)": FunctionFragment;
     "changeSubscriptionLimit(uint256,uint256,uint256)": FunctionFragment;
-    "payFunctionWithBridge(uint256,uint256,uint256,address,address,bytes)": FunctionFragment;
-    "renewFunctionWithBridge(uint256,uint256,uint256,address,address,bytes)": FunctionFragment;
+    "lifi()": FunctionFragment;
+    "payFunctionWithBridge(uint256,uint256,uint8,uint256,address,(bytes32,string,string,address,address,address,uint256,uint256,bool,bool),(address,address,address,address,uint256,bytes,bool)[],(uint256,uint256,uint256,uint256,address,bytes,bytes),bytes)": FunctionFragment;
     "usersSubscriptionLimit(uint256,uint256,address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "changeDestinationCalldata"
       | "changeSubscriptionLimit"
+      | "lifi"
       | "payFunctionWithBridge"
-      | "renewFunctionWithBridge"
       | "usersSubscriptionLimit"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "changeDestinationCalldata",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
+  ): string;
   encodeFunctionData(
     functionFragment: "changeSubscriptionLimit",
     values: [
@@ -53,25 +156,18 @@ export interface CicleoSubscriptionBridgeManagerInterface
       PromiseOrValue<BigNumberish>
     ]
   ): string;
+  encodeFunctionData(functionFragment: "lifi", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "payFunctionWithBridge",
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renewFunctionWithBridge",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
-      PromiseOrValue<string>,
+      ILiFi.BridgeDataStruct,
+      LibSwap.SwapDataStruct[],
+      StargateDataStruct,
       PromiseOrValue<BytesLike>
     ]
   ): string;
@@ -85,15 +181,16 @@ export interface CicleoSubscriptionBridgeManagerInterface
   ): string;
 
   decodeFunctionResult(
+    functionFragment: "changeDestinationCalldata",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "changeSubscriptionLimit",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "lifi", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "payFunctionWithBridge",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renewFunctionWithBridge",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -149,6 +246,12 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    changeDestinationCalldata(
+      originalCalldata: PromiseOrValue<BytesLike>,
+      dstCalldata: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string] & { finalCallData: string }>;
+
     changeSubscriptionLimit(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
@@ -156,23 +259,18 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    lifi(overrides?: CallOverrides): Promise<[string]>;
+
     payFunctionWithBridge(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
       price: PromiseOrValue<BigNumberish>,
       _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    renewFunctionWithBridge(
-      chainId: PromiseOrValue<BigNumberish>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
+      _bridgeData: ILiFi.BridgeDataStruct,
+      _swapData: LibSwap.SwapDataStruct[],
+      _stargateData: StargateDataStruct,
+      signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -184,6 +282,12 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
     ): Promise<[BigNumber]>;
   };
 
+  changeDestinationCalldata(
+    originalCalldata: PromiseOrValue<BytesLike>,
+    dstCalldata: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   changeSubscriptionLimit(
     chainId: PromiseOrValue<BigNumberish>,
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
@@ -191,23 +295,18 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  lifi(overrides?: CallOverrides): Promise<string>;
+
   payFunctionWithBridge(
     chainId: PromiseOrValue<BigNumberish>,
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    subscriptionId: PromiseOrValue<BigNumberish>,
     price: PromiseOrValue<BigNumberish>,
     _token: PromiseOrValue<string>,
-    bridge: PromiseOrValue<string>,
-    data: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  renewFunctionWithBridge(
-    chainId: PromiseOrValue<BigNumberish>,
-    subscriptionManagerId: PromiseOrValue<BigNumberish>,
-    price: PromiseOrValue<BigNumberish>,
-    _token: PromiseOrValue<string>,
-    bridge: PromiseOrValue<string>,
-    data: PromiseOrValue<BytesLike>,
+    _bridgeData: ILiFi.BridgeDataStruct,
+    _swapData: LibSwap.SwapDataStruct[],
+    _stargateData: StargateDataStruct,
+    signature: PromiseOrValue<BytesLike>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -219,6 +318,12 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
   ): Promise<BigNumber>;
 
   callStatic: {
+    changeDestinationCalldata(
+      originalCalldata: PromiseOrValue<BytesLike>,
+      dstCalldata: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     changeSubscriptionLimit(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
@@ -226,23 +331,18 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    lifi(overrides?: CallOverrides): Promise<string>;
+
     payFunctionWithBridge(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
       price: PromiseOrValue<BigNumberish>,
       _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    renewFunctionWithBridge(
-      chainId: PromiseOrValue<BigNumberish>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
+      _bridgeData: ILiFi.BridgeDataStruct,
+      _swapData: LibSwap.SwapDataStruct[],
+      _stargateData: StargateDataStruct,
+      signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -270,6 +370,12 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
   };
 
   estimateGas: {
+    changeDestinationCalldata(
+      originalCalldata: PromiseOrValue<BytesLike>,
+      dstCalldata: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     changeSubscriptionLimit(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
@@ -277,23 +383,18 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    lifi(overrides?: CallOverrides): Promise<BigNumber>;
+
     payFunctionWithBridge(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
       price: PromiseOrValue<BigNumberish>,
       _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    renewFunctionWithBridge(
-      chainId: PromiseOrValue<BigNumberish>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
+      _bridgeData: ILiFi.BridgeDataStruct,
+      _swapData: LibSwap.SwapDataStruct[],
+      _stargateData: StargateDataStruct,
+      signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -306,6 +407,12 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
   };
 
   populateTransaction: {
+    changeDestinationCalldata(
+      originalCalldata: PromiseOrValue<BytesLike>,
+      dstCalldata: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     changeSubscriptionLimit(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
@@ -313,23 +420,18 @@ export interface CicleoSubscriptionBridgeManager extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    lifi(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     payFunctionWithBridge(
       chainId: PromiseOrValue<BigNumberish>,
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
       price: PromiseOrValue<BigNumberish>,
       _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    renewFunctionWithBridge(
-      chainId: PromiseOrValue<BigNumberish>,
-      subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      price: PromiseOrValue<BigNumberish>,
-      _token: PromiseOrValue<string>,
-      bridge: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
+      _bridgeData: ILiFi.BridgeDataStruct,
+      _swapData: LibSwap.SwapDataStruct[],
+      _stargateData: StargateDataStruct,
+      signature: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -1,3 +1,4 @@
+import LoadingState from "./../LoadingState";
 import { formatNumber } from "@context/contract";
 import { BigNumber, ethers, utils } from "ethers";
 import React, { FC } from "react";
@@ -214,12 +215,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
 
     if (isLoaded == false)
         return (
-            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20 cap-flex-col">
-                <span className="cap-font-medium">
-                    Finding the best way to swap your tokens
-                </span>
-                <progress className="cap-w-56 cap-progress"></progress>
-            </div>
+            <LoadingState text="Finding the best way to swap your tokens..." />
         );
 
     return (
@@ -340,12 +336,7 @@ const PaymentModalContent: FC<PaymentModalContent> = ({
                             </div>
                         </>
                     ) : (
-                        <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-py-10 cap-px-4 cap-flex-col cap-space-y-4">
-                            <span className="cap-text-center cap-font-medium cap-text-2xl">
-                                Finding best path to pay subscripiton...
-                            </span>
-                            <progress className="cap-w-56 cap-progress"></progress>
-                        </div>
+                        <LoadingState text="Finding best path to pay subscripiton..." />
                     )}
                 </div>
             </div>

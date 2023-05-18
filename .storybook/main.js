@@ -1,6 +1,5 @@
-const path = require("path")
-const webpack = require("webpack")
-
+const path = require("path");
+const webpack = require("webpack");
 module.exports = {
     stories: [
         "../src/**/*.stories.mdx",
@@ -18,6 +17,7 @@ module.exports = {
                 },
             },
         },
+        "@storybook/addon-mdx-gfm",
     ],
     webpackFinal: async (config, { configType }) => {
         config.resolve.alias = {
@@ -25,18 +25,18 @@ module.exports = {
             "@assets": path.resolve(__dirname, "./../src/assets"),
             "@context": path.resolve(__dirname, "./../src/context"),
         };
-
         config.plugins.push(
             new webpack.ProvidePlugin({
-                Buffer: ['buffer', 'Buffer'],
+                Buffer: ["buffer", "Buffer"],
             })
         );
-
         return config;
     },
-    framework: "@storybook/react",
-    core: {
-        builder: 'webpack5',
+    framework: {
+        name: "@storybook/react-webpack5",
+        options: {},
     },
-   
+    docs: {
+        autodocs: true,
+    },
 };

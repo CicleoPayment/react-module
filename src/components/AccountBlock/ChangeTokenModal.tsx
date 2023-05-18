@@ -25,7 +25,7 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({
         console.log(subscription);
 
         const coinList = await axios.get(
-            `https://backend.cicleo.io/chain/250/getBalance/${address}/${subManager.tokenAddress}/${subscription.originalPrice}`
+            `https://backend-test.cicleo.io/chain/250/getBalance/${address}/${subManager.tokenAddress}/${subscription.originalPrice}`
         );
 
         let coinData = coinList.data;

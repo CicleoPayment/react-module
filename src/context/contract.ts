@@ -7,36 +7,7 @@ import {
     ethers,
     Signer,
 } from "ethers";
-import {
-    CicleoSubscriptionFactory,
-    CicleoSubscriptionFactory__factory,
-    CicleoSubscriptionManager,
-    CicleoSubscriptionManager__factory,
-    CicleoSubscriptionRouter,
-    CicleoSubscriptionRouter__factory,
-    ERC20,
-    ERC20__factory,
-} from "@context/Types";
 import axios from "axios";
-
-type Contracts = {
-    SubscriptionFactory: (
-        signer: providers.JsonRpcSigner
-    ) => Promise<CicleoSubscriptionFactory>;
-    SubscriptionRouter: (
-        signer: providers.JsonRpcSigner
-    ) => Promise<CicleoSubscriptionRouter>;
-    ERC20: (
-        signer: providers.JsonRpcSigner,
-        address: string,
-        forceReload?: boolean
-    ) => Promise<ERC20>;
-    SubscriptionManager: (
-        signer: providers.JsonRpcSigner,
-        address: string,
-        forceReload?: boolean
-    ) => Promise<CicleoSubscriptionManager>;
-};
 
 interface IError {
     code: number;
@@ -49,19 +20,14 @@ interface ISavedContract {
 let config: any;
 
 const getConfig = async (networkId: number) => {
-    if (config == undefined) {
-        const resp = await axios.get("https://backend.cicleo.io/chain");
-        config = resp.data;
-    }
+    const resp = await axios.get("https://backend-test.cicleo.io/chain");
+    console.log(resp.data)
+    return resp.data[networkId];
 
-    return config[networkId];
 };
-
 const reduceAddress = (address: string) => {
     return address.slice(0, 6) + "..." + address.slice(address.length - 4);
 };
-
-let savedContract: ISavedContract = {};
 
 const isGoodNetwork = async (chainId: number) => {
     return (await getConfig(chainId)) != null;
@@ -406,64 +372,11 @@ let cachedContracts: any = {
     Router: {},
 };
 
-const Contracts: Contracts = {
-    SubscriptionFactory: async (signer: Signer) => {
-        //@ts-ignore
-        const { chainId } = await signer.provider?.getNetwork();
-
-        let _getConfig;
-
-        while (
-            _getConfig == undefined ||
-            _getConfig.subscriptionFactoryAddress == null
-        ) {
-            _getConfig = await getConfig(chainId);
-        }
-
-        return CicleoSubscriptionFactory__factory.connect(
-            _getConfig.subscriptionFactoryAddress,
-            signer
-        );
-    },
-    SubscriptionRouter: async (signer: Signer) => {
-        //@ts-ignore
-        const { chainId } = await signer.provider?.getNetwork();
-
-        let _getConfig;
-
-        while (
-            _getConfig == undefined ||
-            _getConfig.subscriptionFactoryAddress == null
-        ) {
-            _getConfig = await getConfig(chainId);
-        }
-
-        return CicleoSubscriptionRouter__factory.connect(
-            _getConfig.subscriptionRouterAddress,
-            signer
-        );
-    },
-    ERC20: async (
-        signer: providers.JsonRpcSigner,
-        address: string,
-        force?: boolean
-    ) => {
-        return ERC20__factory.connect(address, signer);
-    },
-    SubscriptionManager: async (
-        signer: providers.JsonRpcSigner,
-        address: string,
-        force?: boolean
-    ) => {
-        return CicleoSubscriptionManager__factory.connect(address, signer);
-    },
-};
-
 export {
-    Contracts,
     isGoodNetwork,
     doTx,
     reduceAddress,
     formatNumber,
     openOceanIface,
+    getConfig
 };

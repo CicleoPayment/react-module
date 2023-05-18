@@ -3,24 +3,26 @@ import { BigNumber, Signer, ethers, providers } from "ethers";
 import "./PaymentButton.css";
 import TextWhite from "@assets/logo_text_white.svg";
 import PayImage from "@assets/pay.svg";
-import TOKEN_IMG from "@assets/token.svg";
+import { getConfig, doTx, reduceAddress, openOceanIface } from "@context/contract";
 import {
-    Contracts,
-    isGoodNetwork,
-    doTx,
-    openOceanIface,
-} from "@context/contract";
-import PaymentModalContent from "./PaymentModalContent";
-import SelectCoinModalContent from "./SelectCoinModalContent";
-import SelectNetwork from "./SelectNetwork";
+    Payment,
+    SelectCoin,
+    SelectNetwork,
+    Login,
+    HeaderSubscriptionInfo,
+} from "./components";
 import axios from "axios";
-import { getNetwork, fetchSigner } from '@wagmi/core'
-import { getAccount } from '@wagmi/core'
-
+import { getNetwork, fetchSigner, getContract, readContract, erc20ABI, readContracts, signMessage, prepareWriteContract, writeContract, getAccount} from "@wagmi/core";
+import LoadingState from "./../LoadingState";
+import {
+    CicleoSubscriptionBridgeManager__factory, CicleoSubscriptionManager__factory, PaymentFacet__factory
+} from "@context/Types";
+import { useNetwork } from "wagmi";
 
 type PaymentButton = {
     subscriptionId: number;
-    config: { [key: number]: number };
+    chainId: number;
+    subManagerId: number;
     referral?: string;
 };
 
@@ -38,13 +40,56 @@ type SubManagerInfo = {
     duration: number;
 };
 
+type Network = {
+    name: string,
+    chainId: number,
+    rpcUrls: string,
+    image: string,
+}
+
+type coin = {
+    logo_url: string,
+    symbol: string,
+    id: string,
+    balance: number,
+    decimals: number,
+    toPay: string,
+    _bridgeData: any[],
+    _swapData: any[],
+    _stargateData: any[],
+    value: string,
+}
+
+let _chains: Network[] = [
+    {
+        name: "Fantom",
+        chainId: 250,
+        rpcUrls: "https://rpc.ftm.tools/",
+        image: "https://cryptologos.cc/logos/fantom-ftm-logo.png?v=013",
+    }, {
+        name: "Polygon",
+        chainId: 137,
+        rpcUrls: "https://rpc-mainnet.maticvigil.com/",
+        image: "https://cryptologos.cc/logos/polygon-matic-logo.png?v=013",
+    }
+]
+
 const PaymentButton: FC<PaymentButton> = ({
     subscriptionId,
-    config,
-    referral
+    subManagerId,
+    chainId,
+    referral,
 }) => {
+    const [account, setAccount] = useState<string | null>(null);
+
+    const [isBridged, setIsBridged] = useState(false)
+
+    const [subscriptionInfoIsFetched, setSubscriptionInfoIsFetched] =
+        useState(false);
     const [networkSelected, setNetworkSelected] = useState(false);
 
+    const [userInfoLoaded, setUserInfoLoaded] =
+        useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [subManager, setSubManager] = useState<SubManagerInfo>(
@@ -52,9 +97,9 @@ const PaymentButton: FC<PaymentButton> = ({
     );
     const [subManagerContract, setSubManagerContract] = useState<any>(null);
     const [swapInfo, setSwapInfo] = useState<any>(null);
-    const [coin, setCoin] = useState<any>(null);
+    const [coin, setCoin] = useState<coin>({} as coin);
     const [coinLists, setCoinLists] = useState([]);
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(0);
     const [balance, setBalance] = useState<string | number>("#");
     const [subscription, setSubscription] = useState({
         id: subscriptionId,
@@ -70,64 +115,543 @@ const PaymentButton: FC<PaymentButton> = ({
         id: 0,
         name: "",
         price: "0",
-        originalPrice: BigNumber.from("0"),
-        tokenSymbol: ""
+        isActive: false,
     });
     const [loadingStep, setLoadingStep] = useState(0);
     const [stepFunction, setStepFunction] = useState({
-        1: () => { },
-        2: () => { },
-        3: () => { },
+        1: (isInfinity: boolean, approvalToken: number) => {},
+        2: (isInfinity: boolean, approvalSubscription: number) => {},
+        3: () => {},
     });
-    const [tokenOutImage, setTokenOutImage] = useState("");
     const [isPurchased, setIsPurchased] = useState(false);
 
-    const BACKEND_ADDR = "https://backend-test.cicleo.io";
-    
-    const signer = undefined;
+    const [isInfinityToken, setIsInfinityToken] = useState(true);
+    const [approvalToken, setApprovalToken] = useState(0)
+
+    const [isInfinitySubscription, setIsInfinitySubscription] = useState(false);
+    const [approvalSubscription, setApprovalSubscription] = useState(0)
 
     const changeToken = async (coin: any) => {
-        if (!signer) return;
+        if (!account) return;
 
-        const address = ""//await signer.getAddress();
-        const erc20 = await Contracts.ERC20(signer, coin.id);
+        const erc20Contract = {
+            address: coin.id,
+            abi: erc20ABI,
+          }
 
-        const decimals = await erc20.decimals();
+        const balance = await readContract({
+            ...erc20Contract,
+            functionName: 'balanceOf',
+            // @ts-ignore
+            args: [account]
+        })
 
         let _coin = coin;
-
+        
         _coin.balance = Number(
             ethers.utils
                 .formatUnits(
-                    (await erc20.balanceOf(address)).toString(),
-                    decimals
+                    balance,
+                    coin.decimals
                 )
                 .toString()
         );
-
-        console.log(_coin);
-
+        
         setCoin(_coin);
     };
 
     const getSwap = async () => {
-        if (!signer) return;
+        console.log("Get swap");
         if (!coin) return;
+        if (!account) return;
+        if (coin.id == undefined) return
 
-        console.log("Get swap")
+        console.log(coin);
+        console.log(account)
+        console.log(subManager.address)
 
-        const erc20 = await Contracts.ERC20(signer, coin.id);
+        
+        const data = await readContracts({
+            contracts: [
+                {
+                    // @ts-ignore
+                    address: coin.id,
+                    abi: erc20ABI,
+                    functionName: 'allowance',
+                    // @ts-ignore
+                    args: [account, subManager.address],
+                }
+            ] 
+        })
+
+        console.log("Get swap");
+        console.log(data);
+
+
+
+        /* const erc20 = await Contracts.ERC20(signer, coin.id);
 
         const subscriptionRouterContract = await Contracts.SubscriptionRouter(
             signer
-        );
+        ); */
 
-        const address = ""//await signer.getAddress();
+        const { chain, chains } = getNetwork();
+        if (!chain) return;
+        const paymentChainId = chain.id;
 
-        //const { chainId } = await signer.provider.getNetwork();
-        const chainId = 250
+        setStep(1);
+        setIsLoaded(true)
+        
+        const config = await getConfig(paymentChainId);
+        const router = config.subscriptionRouterAddress;
+        const bridge = config.subscriptionBridgeAddress;
+    
+        if (isBridged) {
+            setSwapInfo({
+                inToken: {
+                    address: coin.id,
+                    symbol: coin.symbol,
+                    decimals: coin.decimals
+                },
+                inAmount: coin.toPay,
+                outToken: {
+                    address: subManager.tokenAddress,
+                    symbol: subManager.tokenSymbol,
+                    decimals: subManager.decimals,
+                },
+                outAmount: subscription.originalUserPrice.toString(),
+            });
 
+            const approval = await readContract({
+                // @ts-ignore
+                address: coin.id,
+                abi: erc20ABI,
+                functionName: 'allowance',
+                // @ts-ignore
+                args: [account, bridge],
+            })
+            
+            const subApproval = await readContract({
+                // @ts-ignore
+                address: bridge,
+                abi: CicleoSubscriptionBridgeManager__factory.abi,
+                functionName: 'usersSubscriptionLimit',
+                // @ts-ignore
+                args: [chainId, subManagerId, account],
+            })
+
+            if (approval.gte(ethers.utils.parseUnits(coin.toPay, coin.decimals))) {
+                setStep(2);
+                
+                if (subApproval.gte(coin.toPay)) {
+                    setStep(3);
+                }
+
+                console.log(subApproval)
+            }
+
+            setSubscription({
+                ...subscription,
+                originalPrice: BigNumber.from(coin.toPay),
+                price: ethers.utils.formatUnits(coin.toPay, coin.decimals),
+            });
+
+            setApprovalSubscription(Number(ethers.utils.formatUnits(coin.toPay, coin.decimals)));
+
+            setStepFunction({
+                1: async (isInfinityToken, approvalToken) => {
+                    if (isInfinityToken == false) { 
+                        if (approvalToken < Number(subscription.userPrice)) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
+                    
+                    try {
+                        const { hash, wait } = await writeContract({
+                            // @ts-ignore
+                            address: coin.id,
+                            abi: erc20ABI,
+                            functionName: 'approve',
+                            args: [bridge, isInfinityToken ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalToken.toString(), subManager.decimals)],
+                        })
+
+                        setLoadingStep(1);
+
+                        await wait()
+
+                        setErrorMessage("");
+                        setStep(2);
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+
+                    if (subApproval.gte(coin.toPay)) {
+                        setStep(3);
+                    }
+                },
+                2: async (isInfinitySubscription, approvalSubscription) => {
+                    if (isInfinitySubscription == false) { 
+                        console.log(approvalSubscription);
+                        console.log(Number(ethers.utils.formatUnits(coin.toPay, coin.decimals)));
+                        
+                        if (approvalSubscription < Number(ethers.utils.formatUnits(coin.toPay, coin.decimals))) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
+
+                    try {
+                        // @ts-ignore
+                        const { hash, wait } = await writeContract({
+                            // @ts-ignore
+                            address: bridge,
+                            abi: CicleoSubscriptionBridgeManager__factory.abi,
+                            functionName: 'changeSubscriptionLimit',
+                            args: [chainId, subManagerId, isInfinitySubscription ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalSubscription.toString(), subManager.decimals)],
+                        })
+
+                        setLoadingStep(2);
+                        
+                        await wait();
+                        
+                        setErrorMessage("");
+                        setStep(3);
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+                },
+                3: async () => {
+                    console.log("subscription.id != oldSubscription.id");
+                    try {
+                        const message = ethers.utils.toUtf8Bytes('Cicleo Bridged Subscription\n\n'
+                        + 'Chain: ' + chainId + '\n'
+                        + 'User: ' + account.toLowerCase() + '\n'
+                        + 'SubManager: ' + subManagerId + '\n'
+                        + 'Subscription: ' + subscriptionId + '\n'
+                        + 'Price: ' + subscription.originalUserPrice.toString() + '\n'
+                            + 'Nonce: ' + 0)
+                        
+                        console.log(ethers.utils.keccak256(message))
+
+                        let signature = await signMessage({
+                            message: message
+                        })
+
+                        function _adjustV(v: number): number {
+                            if (v === 0) {
+                              return 27
+                            } else if (v === 1) {
+                              return 28
+                            } else {
+                              return v
+                            }
+                        }
+
+                        const { v, r, s } = ethers.utils.splitSignature(signature)
+                        const adjustedV = _adjustV(v)
+                        signature = ethers.utils.joinSignature({ r, s, v: adjustedV }) as any
+                        
+                        // @ts-ignore
+                        const nativePrice = BigNumber.from(coin._stargateData[3].hex).mul(12).div(10)
+
+                        let starGate: any = coin._stargateData
+                        starGate[3] = nativePrice.toString() as any
+
+                        const signer = await fetchSigner()
+            
+                        const _bridge = getContract({address: bridge, abi: CicleoSubscriptionBridgeManager__factory.abi, signerOrProvider: signer as Signer})
+
+                        // @ts-ignore
+                        const tx = await _bridge.payFunctionWithBridge(chainId, subManagerId, subscriptionId, coin.toPay, coin.id, coin._bridgeData, coin._swapData, starGate, signature, { value: nativePrice })
+                
+                        setLoadingStep(3);
+
+                        const transac = await tx.wait()
+
+                        console.log(transac)
+
+                        setErrorMessage("");
+                        setIsPurchased(true);
+                    } catch (error: any) {  
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+                },
+            });
+
+            return
+        }
+
+        const approval = await readContract({
+            // @ts-ignore
+            address: coin.id,
+            abi: erc20ABI,
+            functionName: 'allowance',
+            // @ts-ignore
+            args: [account, subManager.address],
+        })
+        
+        const users = await readContract({
+            // @ts-ignore
+            address: subManager.address,
+            abi: CicleoSubscriptionManager__factory.abi,
+            functionName: 'users',
+            // @ts-ignore
+            args: [account],
+        })
+
+        const subApproval = users.subscriptionLimit
+
+        if (approval.gte(ethers.utils.parseUnits(coin.toPay, coin.decimals))) {
+            setStep(2);
+            
+            if (subApproval.gte(subscription.originalUserPrice)) {
+                setStep(3);
+            }
+
+            console.log(subApproval)
+        }
+
+        const approvalSub = Number(ethers.utils.formatUnits(subscription.originalPrice, subManager.decimals))
+    
+
+
+        //If same coin payment as submanager
         if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
+            setSwapInfo({
+                inToken: {
+                    address: subManager.tokenAddress,
+                    symbol: subManager.tokenSymbol,
+                    decimals: subManager.decimals,
+                },
+                inAmount: subscription.originalUserPrice.toString(),
+                outToken: {
+                    address: subManager.tokenAddress,
+                    symbol: subManager.tokenSymbol,
+                    decimals: subManager.decimals,
+                },
+                outAmount: subscription.originalUserPrice.toString(),
+            });
+
+            setStepFunction({
+                1: async (isInfinityToken, approvalToken) => {
+                    if (isInfinityToken == false) { 
+                        if (approvalToken < Number(subscription.userPrice)) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
+                    
+                    try {
+                        const { hash, wait } = await writeContract({
+                            // @ts-ignore
+                            address: coin.id,
+                            abi: erc20ABI,
+                            functionName: 'approve',
+                            args: [subManager.address, isInfinityToken ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalToken.toString(), subManager.decimals)],
+                        })
+
+                        setLoadingStep(1);
+
+                        await wait()
+                        
+                        setErrorMessage("");
+                        setStep(2);
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+
+                    if (subApproval.gte(subscription.originalUserPrice)) {
+                        setStep(3);
+                    }
+                },
+                2: async (isInfinitySubscription, approvalSubscription) => {
+                    if (isInfinitySubscription == false) { 
+                        console.log(approvalSubscription);
+                        console.log(Number(ethers.utils.formatUnits(coin.toPay, coin.decimals)));
+                        
+                        if (approvalSubscription < Number(ethers.utils.formatUnits(coin.toPay, coin.decimals))) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
+
+                    try {
+                        // @ts-ignore
+                        const { hash, wait } = await writeContract({
+                            // @ts-ignore
+                            address: subManager.address,
+                            abi: CicleoSubscriptionManager__factory.abi,
+                            functionName: "changeSubscriptionLimit",
+                           // @ts-ignore
+                            args: [isInfinitySubscription ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalSubscription.toString(), subManager.decimals)],
+                        })
+
+                        setLoadingStep(2);
+
+                        await wait()
+                        
+                        setErrorMessage("");
+                        setStep(3);
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+                },
+                3: async () => {
+                    try {
+                        // @ts-ignore
+                        const { wait } = await writeContract({
+                            // @ts-ignore
+                            address: router,
+                            abi: PaymentFacet__factory.abi,
+                            functionName: "subscribe",
+                            args: [subManagerId, subscriptionId, referral != undefined ? referral : ethers.constants.AddressZero]
+                        })
+
+                        setLoadingStep(3);
+
+                        await wait()
+
+                        setErrorMessage("");
+                        setIsPurchased(true);
+                    } catch (error: any) {  
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+                },
+            });
+
+        //For swap things on same network
+        } else { 
+            let data = JSON.stringify({
+                tokenIn: coin.id,
+                tokenOut: subManager.tokenAddress,
+                price: subscription.originalUserPrice.toString(),
+                fromAddress: subManager.address,
+            });
+
+            let config = {
+                method: "post",
+                maxBodyLength: Infinity,
+                url: `https://backend-test.cicleo.io/chain/${chainId}/getExactPrice/`,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                data: data,
+            };
+
+            const resp = await axios(config);
+
+            setSwapInfo(resp.data.data);
+
+            setStepFunction({
+                1: async (isInfinity: boolean, approvalToken: number) => {
+                    if (isInfinityToken == false) { 
+                        if (approvalToken < Number(subscription.userPrice)) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
+                    
+                    try {
+                        const { hash, wait } = await writeContract({
+                            // @ts-ignore
+                            address: coin.id,
+                            abi: erc20ABI,
+                            functionName: 'approve',
+                            args: [subManager.address, isInfinityToken ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalToken.toString(), subManager.decimals)],
+                        })
+
+                        setLoadingStep(1);
+
+                        await wait()
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+
+                    if (subApproval.gte(subscription.originalUserPrice)) {
+                        setStep(3);
+                    }
+                    
+                    setStep(2);
+                },
+                2: async (isInfinity: boolean, approvalSubscription: number) => {
+                    if (isInfinitySubscription == false) { 
+                        if (approvalSubscription < Number(subscription.price)) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
+
+                    try {
+                        // @ts-ignore
+                        const { hash, wait } = await writeContract({
+                            // @ts-ignore
+                            address: subManager.address,
+                            abi: CicleoSubscriptionManager__factory.abi,
+                            functionName: "changeSubscriptionLimit",
+                            args: [isInfinitySubscription ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalSubscription.toString(), subManager.decimals)],
+                        })
+
+                        setLoadingStep(2);
+
+                        await wait()
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        return
+                    }
+
+                    setErrorMessage("");
+                    setStep(3);
+                },
+                3: async () => {
+                    try {
+                        let decodedData = openOceanIface.parseTransaction({
+                            data: resp.data.data.data,
+                            value: resp.data.data.value,
+                        });
+
+                        console.log("decodeddata");
+                        console.log(decodedData);
+
+                        // @ts-ignore
+                        const { wait } = writeContract({
+                            // @ts-ignore
+                            address: router,
+                            abi: PaymentFacet__factory.abi,
+                            functionName: "subscribeWithSwap",
+                            args: [subManagerId, subscriptionId, referral != undefined ? referral : ethers.constants.AddressZero, decodedData.args.caller, decodedData.args.desc, decodedData.args.calls]
+                        })
+                        
+                        setLoadingStep(3)
+
+                        await wait()
+
+                        setLoadingStep(0);
+                        setIsPurchased(true);
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        setStep(1);
+                    }
+
+                },
+            });
+
+            setApprovalSubscription(Number(ethers.utils.formatUnits(subscription.originalPrice, subManager.decimals)));
+        }
+
+
+        //If payment token is the same as the subscription token
+       /*  if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
             let step = 1;
 
             const allowance = await erc20.allowance(
@@ -179,7 +703,10 @@ const PaymentButton: FC<PaymentButton> = ({
                     setStep(3);
                 },
                 3: async () => {
-                    if (subscription.id != oldSubscription.id && subscription.id != 0) {
+                    if (
+                        subscription.id != oldSubscription.id &&
+                        subscription.id != 0
+                    ) {
                         console.log("subscription.id != oldSubscription.id");
                         await doTx(
                             () =>
@@ -201,7 +728,9 @@ const PaymentButton: FC<PaymentButton> = ({
                                 subscriptionRouterContract.subscribe(
                                     subManager.id,
                                     subscriptionId,
-                                    referral != undefined ? referral : ethers.constants.AddressZero
+                                    referral != undefined
+                                        ? referral
+                                        : ethers.constants.AddressZero
                                 ),
                             "Subscribe",
                             () => setLoadingStep(3)
@@ -238,7 +767,7 @@ const PaymentButton: FC<PaymentButton> = ({
             let config = {
                 method: "post",
                 maxBodyLength: Infinity,
-                url: `https://backend.cicleo.io/chain/${chainId}/getExactPrice/`,
+                url: `https://backend-test.cicleo.io/chain/${chainId}/getExactPrice/`,
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -266,250 +795,101 @@ const PaymentButton: FC<PaymentButton> = ({
 
             setStep(step);
 
-            console.log(subManager.address)
+            console.log(subManager.address);
 
-            setStepFunction({
-                1: async () => {
-                    await doTx(
-                        () =>
-                            erc20.approve(
-                                subManager.address,
-                                ethers.constants.MaxUint256
-                            ),
-                        `Approve ${resp.data.data.inToken.symbol}`,
-                        () => setLoadingStep(1)
-                    );
-
-                    setLoadingStep(0);
-                    setStep(2);
-                },
-                2: async () => {
-                    await doTx(
-                        () =>
-                            subManagerContract.changeSubscriptionLimit(
-                                subscription.originalPrice
-                            ),
-                        "Approve Subscription",
-                        () => setLoadingStep(2)
-                    );
-
-                    setLoadingStep(0);
-                    setStep(3);
-                },
-                3: async () => {
-                    try {
-                        let decodedData = openOceanIface.parseTransaction({
-                            data: resp.data.data.data,
-                            value: resp.data.data.value,
-                        });
-
-                        console.log("decodeddata");
-
-                        console.log(decodedData)
-
-                        if (subscription.id != oldSubscription.id && subscription.id != 0) {
-
-                            await doTx(
-                                () =>
-                                    // uint256 subscriptionManagerId,
-                                    // uint8 newSubscriptionId,
-                                    // IOpenOceanCaller executor,
-                                    // SwapDescription memory desc,
-                                    // IOpenOceanCaller.CallDescription[] calldata calls
-                                    subscriptionRouterContract.changeSubscriptionWithSwap(
-                                        subManager.id,
-                                        subscriptionId,
-                                        decodedData.args.caller,
-                                        decodedData.args.desc,
-                                        decodedData.args.calls
-                                    ),
-                                "Subscribe",
-                                () => setLoadingStep(3)
-                            );
-                        } else {
-                            await doTx(
-                                () =>
-                                    subscriptionRouterContract.subscribeWithSwap(
-                                        subManager.id,
-                                        subscriptionId,
-                                        referral != undefined ? referral : ethers.constants.AddressZero,
-                                        decodedData.args.caller,
-                                        decodedData.args.desc,
-                                        decodedData.args.calls
-                                    ),
-                                "Subscribe",
-                                () => setLoadingStep(3)
-                            );
-                        }
-
-                        setLoadingStep(0);
-                        setIsPurchased(true);
-                    } catch (error: any) {
-                        console.log(error);
-                        setErrorMessage(error.message);
-                        setStep(1);
-                    }
-                },
-            });
+            
 
             setSwapInfo(resp.data.data);
-        }
+        } */
     };
 
     useEffect(() => {
-
         getSwap();
         console.log(coin);
     }, [coin]);
 
+    //Function to fetch the subscription info from the backend
+    //Called when modal is opened
+    const fetchSubscriptionInfo = async () => {
+        const subscriptionInfo = await axios.get(
+            `https://backend-test.cicleo.io/chain/${chainId}/getSubscriptionInfo/${subManagerId}/${subscriptionId}`
+        );
 
-    const createContracts = async () => {
-        setIsLoaded(false);
+        console.log(subscriptionInfo.data);
 
-        const signer = await fetchSigner()
+        const _subManager = subscriptionInfo.data.subManager as SubManagerInfo;
 
-        if (!signer) return;
+        console.log(_subManager)
+        setSubManager(_subManager);
+        setSubscription(subscriptionInfo.data.subscription);
 
-        try {
-            const { chain, chains } = getNetwork()
-            if (!chain) return;
-            const chainId = chain.id;
+        setSubscriptionInfoIsFetched(true);
+    };
 
-            //const address = await signer.getAddress();
-            const account = getAccount()
-            const address = account.address
+    const getUserTokenList = async () => {
+        const { chain, chains } = getNetwork();
+        if (!chain) return;
+        const sourceChainId = chain.id;
 
-            if (!address) return;
+        const account = getAccount();
+        const address = account.address;
 
-            const subManagerId = config[chainId];
+        if (!address) return;
 
-            const subscriptionRouterContract =
-                await Contracts.SubscriptionRouter(signer as providers.JsonRpcSigner);
-            if (subscriptionRouterContract == null) return;
+        const userInfo = await axios.get(
+            `https://backend-test.cicleo.io/chain/${chainId}/getUserInfo/${subManagerId}/${subscriptionId}/${address}/${sourceChainId}`
+        );
 
-            // @ts-ignore
-            try {
-                console.log(subManagerId)
-                let subscriptionManagerInfo =
-                    await subscriptionRouterContract.getSubscriptionManager(
-                        subManagerId
-                    );
+        setCoinLists(userInfo.data.coinList);
+        setIsLoaded(true);
+        //setCoinLists(userInfo.data.coinList);
+    };
 
-                const _subManagerContract = await Contracts.SubscriptionManager(
-                    signer as providers.JsonRpcSigner,
-                    subscriptionManagerInfo._address
-                );
-                setSubManagerContract(_subManagerContract);
+    const getUserSub = async (address: string) => {
+        console.log("Get user info");
+        if (!address) return;
 
-                console.log(_subManagerContract);
+        const userInfo = await axios.get(
+            `https://backend-test.cicleo.io/chain/${chainId}/getUserSub/${subManagerId}/${subscriptionId}/${address}/`
+        );
 
-                let _subManagerInfo = subscriptionManagerInfo;
+        console.log(userInfo.data);
 
-                const userInfo = await _subManagerContract.users(address);
+        setOldSubscription({
+            id: userInfo.data.id,
+            name: userInfo.data.name,
+            price: ethers.utils.formatUnits(userInfo.data.price, subManager.decimals),
+            isActive: userInfo.data.isActive,
+        });
 
-                setSubManager({
-                    id: Number(subManagerId),
-                    address: _subManagerInfo._address,
-                    name: _subManagerInfo.name,
-                    owner: _subManagerInfo.owners[0],
-                    decimals: Number(_subManagerInfo.tokenDecimals),
-                    tokenAddress: _subManagerInfo.tokenAddress,
-                    treasury: _subManagerInfo.treasury,
-                    tokenSymbol: _subManagerInfo.tokenSymbol,
-                    subscriptions: _subManagerInfo.subscriptions,
-                    allowance: userInfo.subscriptionLimit,
-                    duration: Number(_subManagerInfo.subscriptionDuration),
-                });
+        let _subscription = subscription;
 
-                const _subscriptionInfo =
-                    await subscriptionRouterContract.subscriptions(
-                        Number(subManagerId),
-                        subscriptionId
-                    );
-
-                const userPrice = await subscriptionRouterContract.getChangeSubscriptionPrice(
-                    Number(subManagerId),
-                    address,
-                    subscriptionId
-                );
-
-                let _subscription = {
-                    id: subscriptionId,
-                    isActive: _subscriptionInfo.isActive,
-                    name: _subscriptionInfo.name,
-                    price: ethers.utils.formatUnits(
-                        _subscriptionInfo.price,
-                        Number(_subManagerInfo.tokenDecimals)
-                    ),
-                    originalPrice: _subscriptionInfo.price,
-                    tokenSymbol: _subManagerInfo.tokenSymbol,
-                    userPrice: ethers.utils.formatUnits(
-                        userPrice,
-                        Number(_subManagerInfo.tokenDecimals)
-                    ),
-                    originalUserPrice: userPrice,
-                };
-
-                const sub = await subscriptionRouterContract.subscriptions(
-                    Number(subManagerId),
-                    userInfo.subscriptionId
-                );
-
-                setOldSubscription({
-                    id: userInfo.subscriptionId,
-                    name: sub.name,
-                    price: ethers.utils.formatUnits(
-                        sub.price,
-                        Number(_subManagerInfo.tokenDecimals)
-                    ),
-                    originalPrice: sub.price,
-                    tokenSymbol: _subManagerInfo.tokenSymbol
-                });
-
-                const erc20 = await Contracts.ERC20(
-                    signer as providers.JsonRpcSigner,
-                    _subManagerInfo.tokenAddress,
-                    true
-                );
-
-                setBalance(
-                    Number(
-                        ethers.utils.formatUnits(
-                            await erc20.balanceOf(address),
-                            Number(_subManagerInfo.tokenDecimals)
-                        )
-                    )
-                );
-
-                const coinList = await axios.get(
-                    `https://backend.cicleo.io/chain/${chainId}/getBalance/${address}/${_subManagerInfo.tokenAddress}/${userPrice.toString()}`
-                );
-
-                let coinData = coinList.data;
-
-                setCoinLists(coinData);
-                setIsLoaded(true);
-                setSubscription(_subscription);
-
-                if (_subscription.originalPrice.eq(0)) {
-                    changeToken({ id: _subManagerInfo.tokenAddress });
-                }
-            } catch (error) {
-                console.log(error);
-                return;
-            }
-        } catch (error: any) {
-            console.log(error);
-        }
+        console.log(userInfo.data.userPrice);
+        console.log(subManager)
+        setSubscription({
+            ..._subscription,
+            originalUserPrice: BigNumber.from(userInfo.data.userPrice),
+            userPrice: ethers.utils.formatUnits(userInfo.data.userPrice, subManager.decimals),
+        });
+        
+        setUserInfoLoaded(true);
     };
 
     useEffect(() => {
-        createContracts();
+        if (account && subManager.decimals != null) {
+            getUserSub(account);
+        }
+     }, [account, subManager]);
+
+    useEffect(() => {
+        //createContracts();
+        getUserTokenList();
     }, [networkSelected]);
 
-    const handleSelectNetwork = (network: number) => { 
+    const handleSelectNetwork = (_chainId: number) => {
         setNetworkSelected(true);
-    }
+        setIsBridged(_chainId != chainId)
+    };
 
     return (
         <>
@@ -526,88 +906,135 @@ const PaymentButton: FC<PaymentButton> = ({
                 type="checkbox"
                 id={"cicleo-payment-modal-" + subscriptionId}
                 className="cap-modal-toggle"
+                onChange={fetchSubscriptionInfo}
             />
             <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
                 <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
-                    <div className="cap-mb-4 cap-px-4 cap-py-3 cap-bg-base-300">
+                    <div className="cap-px-4 cap-py-3 cap-bg-base-300 cap-flex cap-justify-between cap-items-center">
                         <img src={TextWhite} alt="" className="cap-h-10" />
+                        <span className="cap-mr-8">{reduceAddress(account || "")}</span>
+                    </div>
+                    <div>
+                        
                     </div>
                     <label
                         htmlFor={"cicleo-payment-modal-" + subscriptionId}
                         className="cap-absolute cap-btn cap-btn-sm cap-btn-circle cap-right-2 cap-top-2"
+                        onChange={fetchSubscriptionInfo}
                     >
                         ✕
                     </label>
 
-                    {networkSelected ? (() => {
-                        if (coin == null) {
-                            return <SelectCoinModalContent
-                                tokenOutImage={tokenOutImage}
-                                isLoaded={isLoaded}
-                                BUSD={TOKEN_IMG}
-                                subscription={subscription}
-                                oldSubscription={oldSubscription}
-                                coinLists={coinLists}
-                                setCoin={changeToken}
-                            />
-                        } else {
-                            return <PaymentModalContent
-                                isLoaded={isLoaded}
-                                inToken={{
-                                    image: coin.logo_url,
-                                    symbol: coin.symbol,
-                                    balance: coin.balance,
+                    <HeaderSubscriptionInfo
+                        subscription={subscription}
+                        oldSubscription={oldSubscription}
+                        subscriptionInfoIsFetched={subscriptionInfoIsFetched}
+                        step={step}
+                        loadingStep={loadingStep}
+                        duration={subManager.duration}
+                        _chains={_chains}
+                        networkSelected={networkSelected}
+                        handleBackOnNetwork={() => {
+                            console.log("ejhe")
+                            setNetworkSelected(false)
+                            setIsLoaded(false)
+                            setCoinLists([])
+                            setCoin({} as coin)
+                        }}
+                        handleBackStep={(step: number) => {
+                            setLoadingStep(0)
+                            setStep(step)
+                        }}
+                        handleBackCoins={() => {
+                            console.log("ejei")
+                            setStep(0)
+                            setCoin({} as coin)
+
+                        }}
+                        inToken={{
+                            image: coin.logo_url,
+                            symbol: coin.symbol,
+                            balance: coin.balance,
+                        }}
+                    />
+
+                    {(() => {
+                        if (subscription.id == oldSubscription.id && oldSubscription.isActive) return (
+                            <div className="cap-p-4">
+                                <div className="cap-alert cap-alert-success cap-shadow-lg">
+                                    <div className="cap-flex">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span>
+                                            You are already subscribed !
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+
+                        if (account == null) return (
+                            <Login
+                                handleSelectAccount={(address) => {
+                                    setAccount(address)
                                 }}
+                            />
+                        );
+
+                        if (!subscriptionInfoIsFetched) return (
+                            <LoadingState text="We're getting info on the subscription..." />
+                        );
+
+                        if (userInfoLoaded == false) return (
+                            <LoadingState text="We're getting some last info..." />
+                        );
+
+                        if (!networkSelected)
+                            return (
+                                <SelectNetwork
+                                    handleSelectNetwork={handleSelectNetwork}
+                                    _chains={_chains}
+                                />
+                            );
+
+                        if (coin.id == undefined) {
+                            return (
+                                <SelectCoin
+                                    isLoaded={isLoaded}
+                                    subscription={subscription}
+                                    oldSubscription={oldSubscription}
+                                    coinLists={coinLists}
+                                    setCoin={changeToken}
+                                />
+                            );
+                        }
+                    
+                        return (
+                            <Payment
+                                isLoaded={isLoaded}
                                 subscription={subscription}
                                 oldSubscription={oldSubscription}
                                 step={step}
                                 stepFunction={stepFunction}
                                 loadingStep={loadingStep}
                                 errorMessage={errorMessage}
-                                balance={balance}
                                 swapInfo={swapInfo}
                                 isPurchased={isPurchased}
-                                duration={subManager.duration}
+                                token={{
+                                    isInfinity: isInfinityToken,
+                                    amount: approvalToken,
+                                    setAmount: setApprovalToken,
+                                    setIsInfinity: setIsInfinityToken
+                                }}
+                                isViaBridge={isBridged}
+                                subscriptionLimit={{
+                                    isInfinity: isInfinitySubscription,
+                                    amount: approvalSubscription,
+                                    setAmount: setApprovalSubscription,
+                                    setIsInfinity: setIsInfinitySubscription
+                                }}
                             />
-                        }
-                    })()
-                    :
-                    <SelectNetwork handleSelectNetwork={handleSelectNetwork} />
-                }
-                    
-                    
-
-                    {/* {coin == null ? (
-                        <SelectCoinModalContent
-                            tokenOutImage={tokenOutImage}
-                            isWrongNetwork={isWrongNetwork}
-                            isLoaded={isLoaded}
-                            BUSD={TOKEN_IMG}
-                            subscription={subscription}
-                            oldSubscription={oldSubscription}
-                            coinLists={coinLists}
-                            setCoin={changeToken}
-                        />
-                    ) : (
-                        <PaymentModalContent
-                            isLoaded={isLoaded}
-                            inToken={{
-                                image: coin.logo_url,
-                                symbol: coin.symbol,
-                                balance: coin.balance,
-                            }}
-                            subscription={subscription}
-                            oldSubscription={oldSubscription}
-                            step={step}
-                            stepFunction={stepFunction}
-                            loadingStep={loadingStep}
-                            errorMessage={errorMessage}
-                            balance={balance}
-                            swapInfo={swapInfo}
-                            isPurchased={isPurchased}
-                            duration={subManager.duration}
-                        />
-                    )} */}
+                        );
+                    })()}
                 </div>
             </div>
         </>

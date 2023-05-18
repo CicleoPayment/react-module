@@ -3,3 +3,4 @@
 /* eslint-disable */
 export type { ICicleoSubscriptionRouter } from "./ICicleoSubscriptionRouter";
 export type { IERC20 } from "./IERC20";
+export type { ILiFi } from "./ILiFi";
