@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import React, { FC } from "react";
 
-type ApprovalPart = {
+type ApprovalBlock = {
     subManager: any;
     subscription: any;
 };
@@ -12,10 +12,10 @@ const getDurationPeriod = (duration: number) => {
     if (duration == 86400) return "day";
 }
 
-const ApprovalPart: FC<ApprovalPart> = ({ subManager, subscription }) => {
+const ApprovalBlock: FC<ApprovalBlock> = ({ subManager, subscription }) => {
     const getDefaultValueInput = (approval: any, decimals: number) => {
         if (approval == undefined) return;
-        if (approval.eq(ethers.constants.MaxUint256)) return "Inifity";
+        if (approval.eq(ethers.constants.MaxUint256)) return "Infinity";
         if (approval) {
             if (Number(ethers.utils.formatUnits(approval, decimals)) > 1000000)
                 return ">1M";
@@ -75,4 +75,4 @@ const ApprovalPart: FC<ApprovalPart> = ({ subManager, subscription }) => {
     );
 };
 
-export default ApprovalPart;
+export default ApprovalBlock;

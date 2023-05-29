@@ -21,3 +21,4 @@ import type * as testBridgeSol from "./TestBridge.sol";
 export type { testBridgeSol };
 import type * as types from "./Types";
 export type { types };
+export type { LibBridgeManager } from "./LibBridgeManager";

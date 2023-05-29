@@ -1,22 +1,18 @@
 import React, { useState, FC, useEffect } from "react";
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, ethers, Signer } from "ethers";
 import "./AccountBlock.css";
 import TextWhite from "@assets/logo_text_white.svg";
 import { ConfirmationModal } from "./../index";
 import {
-    Contracts,
-    isGoodNetwork,
-    doTx,
     reduceAddress,
 } from "@context/contract";
-import { BounceLoader, ClipLoader } from "react-spinners";
 import { SiweMessage } from "siwe";
 import axios from "axios";
-import SubscriptionPart from "./SubscriptionPart";
-import ApprovalPart from "./ApprovalPart";
-import SubscriptionInfo from "./SubscriptionInfo";
-import EditApprovalModal from "./EditApprovalModal";
-import ChangeTokenModal from "./ChangeTokenModal";
+import {SubscriptionSettingsBlock, ApprovalBlock, SubscriptionInfoBlock, EditApproval, ChangeToken } from "./components";
+import {LoadingState, Login} from "@components";
+import { erc20ABI, readContract, createClient, prepareWriteContract, connect, InjectedConnector, writeContract, fetchSigner} from "@wagmi/core";
+import { CicleoSubscriptionManager__factory } from "@context/Types";
+
 
 axios.defaults.withCredentials = true;
 
@@ -43,6 +39,29 @@ if (typeof window !== "undefined") {
 }
 
 const BACKEND_ADDR = "https://backend-test.cicleo.io";
+
+type Network = {
+    name: string,
+    rpcUrls: string,
+    image: string,
+}
+
+type NetworkList = {
+    [key: number]: Network
+}
+
+let _chains: NetworkList = {
+    250: {
+        name: "Fantom",
+        rpcUrls: "https://rpc.ftm.tools/",
+        image: "https://cryptologos.cc/logos/fantom-ftm-logo.png?v=013",
+    },
+    137: {
+        name: "Polygon",
+        rpcUrls: "https://rpc-mainnet.maticvigil.com/",
+        image: "https://cryptologos.cc/logos/polygon-matic-logo.png?v=013",
+    }
+}
 
 async function createSiweMessage(address: string, statement: any) {
     const res = await axios.get(`${BACKEND_ADDR}/nonce`, {
@@ -89,25 +108,25 @@ async function signInWithEthereum(signer: ethers.providers.JsonRpcSigner) {
 type AccountModalContent = {
     isWrongNetwork: boolean;
     isLoaded: boolean;
-    isNotSubscribed: boolean;
     account: string;
     subManager: any;
     subscription: any;
     errorMessage: string;
+    setIsWrongNetwork: (value: boolean) => void;
 };
 
 const AccountModalContent: FC<AccountModalContent> = ({
     isWrongNetwork,
     isLoaded,
-    isNotSubscribed,
     account,
     subManager,
     subscription,
     errorMessage,
+    setIsWrongNetwork
 }) => {
     if (isWrongNetwork)
         return (
-            <div className="cap-p-4">
+            <div className="cap-p-4 cap-space-y-4">
                 <div className="cap-alert cap-alert-error cap-shadow-lg">
                     <div>
                         <svg
@@ -123,13 +142,60 @@ const AccountModalContent: FC<AccountModalContent> = ({
                                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                         </svg>
-                        <span>Sorry but this network is unsuported</span>
+                        <span>Sorry but you use another network to pay</span>
+                    </div>
+                </div>
+                <div className="cap-w-full cap-flex cap-items-center cap-justify-center">
+                    <button className="cap-btn cap-btn-primary" onClick={async () => {
+                        const resp = await connect({
+                            connector: new InjectedConnector(),
+                            chainId: subscription.paymentChain
+                        })
+
+                        if (resp) {
+                            setIsWrongNetwork(false)
+                        }
+                    }}>Change network</button>
+                </div>
+            </div>
+        );
+    
+    if (isLoaded == false)
+        return (
+            <LoadingState text="Getting your membership information..." />
+        );
+    
+    if (subscription.subscriptionEndDate < Date.now() / 1000)
+        return (
+            <div className="cap-p-4">
+                <div className="cap-shadow-lg cap-alert cap-alert-warning">
+                    <div>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                        <div className="cap-flex cap-flex-col">
+                            <span>You currently dont have an active subscription</span>
+                            <span>
+                                Close this page and click on "Pay with Cicleo"
+                                button to get started !
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         );
 
-    if (isNotSubscribed)
+    if (subscription.id == 0)
         return (
             <div className="cap-p-4">
                 <div className="cap-shadow-lg cap-alert cap-alert-warning">
@@ -159,15 +225,7 @@ const AccountModalContent: FC<AccountModalContent> = ({
             </div>
         );
 
-    if (isLoaded == false)
-        return (
-            <div className="cap-flex cap-items-center cap-justify-center cap-flex-grow cap-w-full cap-h-full cap-p-20 cap-flex-col cap-space-y-4">
-                <span className="cap-font-medium cap-text-2xl ">
-                    Getting your membership information...
-                </span>
-                <progress className="cap-w-56 cap-progress"></progress>
-            </div>
-        );
+    
 
     const endCycleDate = new Date(subscription.subscriptionEndDate * 1000);
 
@@ -177,9 +235,18 @@ const AccountModalContent: FC<AccountModalContent> = ({
                 <span className="cap-font-semibold cap-text-xl">
                     Manage your account
                 </span>
-                <span className="cap-font-semibold cap-text-tiny cap-text-gray-600">
-                    {reduceAddress(account)}
-                </span>
+
+                <div className="cap-items-center cap-justify-center cap-space-x-4 cap-flex cap-flex-row">
+                    <span className="cap-font-semibold cap-text-tiny cap-text-gray-600">
+                        {reduceAddress(account)}
+                    </span>
+
+                    {subscription.paymentChain != 0  && (
+                        <div className="cap-w-8 cap-h-8">
+                            <img src={ _chains[subscription.paymentChain].image} alt="" />
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="cap-divider !cap-mb-0"></div>
@@ -210,8 +277,8 @@ const AccountModalContent: FC<AccountModalContent> = ({
                     </div>
                 </div>
             ) : (
-                <div className="cap-flex">
-                    <SubscriptionPart
+                <div className="cap-px-4 cap-flex">
+                    <SubscriptionSettingsBlock
                         subscription={subscription}
                         symbol={subManager.tokenSymbol}
                         duration={subManager.duration}
@@ -219,14 +286,15 @@ const AccountModalContent: FC<AccountModalContent> = ({
 
                     <div className="cap-divider cap-divider-horizontal"></div>
 
-                    <ApprovalPart
+                    <ApprovalBlock
                         subManager={subManager}
                         subscription={subscription}
                     />
-
-                    <div className="cap-divider cap-divider-horizontal"></div>
-
-                    <SubscriptionInfo endCycleDate={endCycleDate} />
+                    
+                    {subscription.isCancelled == false && (<>
+                        <div className="cap-divider cap-divider-horizontal"></div>
+                        <SubscriptionInfoBlock endCycleDate={endCycleDate} />
+                    </>)}
                 </div>
             )}
         </>
@@ -234,11 +302,11 @@ const AccountModalContent: FC<AccountModalContent> = ({
 };
 
 type AccountBlock = {
-    config: { [key: number]: number };
-    signer: ethers.providers.JsonRpcSigner | undefined;
+    chainId: number;
+    subManagerId: number;
 };
 
-const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
+const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
     const [isWrongNetwork, setIsWrongNetwork] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [subManager, setSubManager] = useState({} as SubManagerInfo);
@@ -250,165 +318,48 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
         isContractActive: false,
         userTokenAddress: "",
         userTokenSymbol: "",
+        userTokenDecimals: 0,
     });
-    const [account, setAccount] = useState("");
+    const [account, setAccount] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState("");
-    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isTxSend, setIsTxSend] = useState(false);
-    const [isNotSubscribed, setIsNotSubscribed] = useState(false);
+    const [currentChainId, setCurrentChainId] = useState(0);
 
-    const createContracts = async () => {
-        setIsLoaded(false);
-        setIsWrongNetwork(false);
+    const getInfo = async () => { 
+        if (account == undefined) return
+        const subscriptionInfo = await axios.get(
+            `https://backend-test.cicleo.io/chain/${chainId}/getUserStatusInfo/${subManagerId}/${account}`
+        );
 
-        if (!signer) return;
+        console.log(subscriptionInfo.data);
 
-        try {
-            const { chainId } = await signer.provider.getNetwork();
+        let _subManager = subscriptionInfo.data.subManager as SubManagerInfo;
 
-            const address = await signer.getAddress();
+        //Verify if user is subscribed
+        if (_subManager.allowance != undefined) {
+            _subManager.allowance = BigNumber.from(_subManager.allowance)
+            _subManager.tokenApproval = BigNumber.from(_subManager.tokenApproval)
 
-            setAccount(address);
+            if (subscriptionInfo.data.subscription.paymentChain != currentChainId) {
+                setIsWrongNetwork(true)
+            } else {
 
-            const subManagerId = config[chainId];
-
-            if (!(await isGoodNetwork(chainId)) || subManagerId == undefined) {
-                setIsWrongNetwork(true);
-                console.log("Wrong network");
-                return;
             }
-
-            const subscriptionRouterContract =
-                await Contracts.SubscriptionRouter(signer);
-            if (subscriptionRouterContract == null) return;
-
-            // @ts-ignore
-            try {
-                let _subManagerInfo =
-                    await subscriptionRouterContract.getSubscriptionManager(
-                        subManagerId
-                    );
-
-                const _subManagerContract = await Contracts.SubscriptionManager(
-                    signer,
-                    _subManagerInfo._address
-                );
-
-                const userInfo = await _subManagerContract.users(address);
-
-                const res = await fetch(
-                    `${BACKEND_ADDR}/chain/${chainId}/subscription/${_subManagerInfo.id}/${address}`,
-                    {
-                        credentials: "same-origin",
-                    }
-                );
-
-                const _resJson = await res.json();
-
-                if (_resJson.tokenPaymentAddress == undefined) {
-                    _resJson.tokenPaymentAddress = await _subManagerContract.token();
-                    console.log("okje");
-                }
-
-                const erc20 = await Contracts.ERC20(
-                    signer,
-                    _resJson.tokenPaymentAddress.toLowerCase(),
-                    true
-                );
-                const allowance = await erc20.allowance(
-                    address,
-                    _subManagerInfo._address
-                );
-
-                setSubManager({
-                    id: Number(subManagerId),
-                    address: _subManagerInfo._address,
-                    name: _subManagerInfo.name,
-                    owner: _subManagerInfo.owners[0],
-                    decimals: Number(_subManagerInfo.tokenDecimals),
-                    tokenAddress: _subManagerInfo.tokenAddress,
-                    treasury: _subManagerInfo.treasury,
-                    tokenSymbol: _subManagerInfo.tokenSymbol,
-                    subscriptions: _subManagerInfo.subscriptions,
-                    allowance: userInfo.subscriptionLimit,
-                    tokenApproval: allowance,
-                    duration: Number(_subManagerInfo.subscriptionDuration),
-                });
-
-                const subscriptionData =
-                    await _subManagerContract.getUserSubscriptionStatus(
-                        address
-                    );
-
-                if (subscriptionData.subscriptionId == 255) {
-                    const sub = await subscriptionRouterContract.users(
-                        Number(subManagerId),
-                        address
-                    );
-
-                    let _subscription = {
-                        id: subscriptionData.subscriptionId,
-                        isActive: true,
-                        name: sub.name,
-                        price: ethers.utils.formatUnits(
-                            sub.price,
-                            Number(_subManagerInfo.tokenDecimals)
-                        ),
-                        isCancelled:
-                            !subscriptionData.isActive || _resJson.isCanceled,
-                        isContractActive: subscriptionData.isActive,
-                        subscriptionEndDate:
-                            userInfo.subscriptionEndDate.toNumber(),
-                        originalPrice: sub.price,
-                        userTokenAddress:
-                            _resJson.tokenPaymentAddress.toLowerCase(),
-                        userTokenSymbol: _resJson.tokenPaymentSymbol,
-                    };
-
-                    setSubscription(_subscription);
-                } else {
-                    const sub = await subscriptionRouterContract.subscriptions(
-                        Number(subManagerId),
-                        subscriptionData.subscriptionId
-                    );
-
-                    let _subscription = {
-                        id: subscriptionData.subscriptionId,
-                        isActive: sub.isActive,
-                        name: sub.name,
-                        price: ethers.utils.formatUnits(
-                            sub.price,
-                            Number(_subManagerInfo.tokenDecimals)
-                        ),
-                        isCancelled:
-                            !subscriptionData.isActive || _resJson.isCanceled,
-                        isContractActive: subscriptionData.isActive,
-                        subscriptionEndDate:
-                            userInfo.subscriptionEndDate.toNumber(),
-                        originalPrice: sub.price,
-                        userTokenAddress:
-                            _resJson.tokenPaymentAddress.toLowerCase(),
-                        userTokenSymbol: _resJson.tokenPaymentSymbol,
-                    };
-
-                    setSubscription(_subscription);
-                }
-
-                setIsLoaded(true);
-            } catch (e) {
-                console.log(e);
-                setIsWrongNetwork(true);
-            }
-        } catch (error: any) {
-            console.log(error);
         }
-    };
+
+        console.log(_subManager)
+        setSubManager(_subManager);
+        setSubscription(subscriptionInfo.data.subscription);
+
+        setIsLoaded(true)
+    }
+
+    const signer = ""
 
     const unsubscribe = async () => {
-        if (!signer) return;
+        const signer = await fetchSigner() as ethers.providers.JsonRpcSigner;
         await signInWithEthereum(signer);
-        const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
             `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.id}/cancel`,
@@ -418,13 +369,12 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
             }
         );
 
-        await createContracts();
+        await getInfo();
     };
 
     const renew = async () => {
-        if (!signer) return;
+        const signer = await fetchSigner() as ethers.providers.JsonRpcSigner;
         await signInWithEthereum(signer);
-        const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
             `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.id}/renew`,
@@ -434,13 +384,12 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
             }
         );
 
-        await createContracts();
+        await getInfo();
     };
 
     const changeToken = async (tokenAddress: string, tokenSymbol: string) => {
-        if (!signer) return;
+        const signer = await fetchSigner() as ethers.providers.JsonRpcSigner;
         await signInWithEthereum(signer);
-        const { chainId } = await signer.provider.getNetwork();
 
         await axios.post(
             `${BACKEND_ADDR}/chain/${chainId}/subscription/${subManager.id}/changeCoin`,
@@ -453,60 +402,79 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
             }
         );
 
-        await createContracts();
+        await getInfo();
     };
 
-    useEffect(() => {
-        createContracts();
-    }, [signer]);
-
     const handleApproveToken = async (amountToApprove: BigNumber) => {
-        if (!signer) return;
         setIsTxSend(false);
         setIsLoading(true);
 
-        const erc20 = await Contracts.ERC20(
-            signer,
-            subscription.userTokenAddress,
-            true
-        );
+        console.log("heifji")
 
-        await doTx(
-            () => erc20.approve(subManager.address, amountToApprove),
-            "Approve ERC20",
-            () => {
-                setIsTxSend(true);
-            }
-        );
+        console.log(await fetchSigner())
+
+        try {
+            console.log(amountToApprove)
+            console.log(subscription.userTokenAddress)
+            const config = await prepareWriteContract({
+                //@ts-ignore
+                address: subscription.userTokenAddress,
+                abi: erc20ABI,
+                functionName: 'approve',
+                //@ts-ignore
+                args: [subManager.address, amountToApprove],
+            })
+
+            const { hash, wait } = await writeContract(config)
+
+            console.log("jdruh")
+
+            setIsTxSend(true);
+
+            await wait()
+        } catch (error: any) {
+            console.log(error)
+            setErrorMessage(error.message)
+        }
+
         setIsTxSend(false);
         document.getElementById("cicleo-edit-approval-token")?.click();
         setIsLoading(false);
-        createContracts();
+        getInfo();
     };
 
     const handleApproveSubscribe = async (amountToApprove: BigNumber) => {
-        if (!signer) return;
         setIsTxSend(false);
         setIsLoading(true);
 
-        const _subManager = await Contracts.SubscriptionManager(
-            signer,
-            subManager.address,
-            true
-        );
+        try {
+            const { hash, wait } = await writeContract({
+                //@ts-ignore
+                address: subscription.userTokenAddress,
+                abi: CicleoSubscriptionManager__factory.abi,
+                functionName: 'changeSubscriptionLimit',
+                args: [amountToApprove],
+            })
 
-        await doTx(
-            () => _subManager.changeSubscriptionLimit(amountToApprove),
-            "Approve Subscription",
-            () => {
-                setIsTxSend(true);
-            }
-        );
+            setIsTxSend(true);
+
+            await wait()
+        } catch (error: any) {
+            console.log(error)
+            setErrorMessage(error.message)
+        }
+        
         setIsTxSend(false);
         document.getElementById("cicleo-edit-approval-subscription")?.click();
         setIsLoading(false);
-        createContracts();
+        getInfo();
     };
+
+    useEffect(() => {
+        getInfo();
+    }, [account]);
+
+    
 
     const handleConfirmationPage = () => {
         if (subscription.isCancelled) {
@@ -562,31 +530,40 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                         ✕
                     </label>
 
-                    <AccountModalContent
-                        isWrongNetwork={isWrongNetwork}
-                        isLoaded={isLoaded}
-                        isNotSubscribed={isNotSubscribed}
-                        account={account}
-                        subManager={subManager}
-                        subscription={subscription}
-                        errorMessage={errorMessage}
-                    />
+                    {account == null ?
+                        <Login
+                            handleSelectAccount={(address, chainId) => {
+                                setAccount(address)
+                                setCurrentChainId(chainId)
+                            }}
+                        />
+                        :
+                        <AccountModalContent
+                            isWrongNetwork={isWrongNetwork}
+                            isLoaded={isLoaded}
+                            account={account || ""}
+                            subManager={subManager}
+                            subscription={subscription}
+                            errorMessage={errorMessage}
+                            setIsWrongNetwork={setIsWrongNetwork}
+                        />
+                    }
                 </div>
             </div>
             {handleConfirmationPage()}
-            <EditApprovalModal
+            <EditApproval
                 name="token"
-                labelTextInput={subManager.tokenSymbol}
+                labelTextInput={subscription.userTokenSymbol}
                 onConfirm={handleApproveToken}
-                messageHeader={`Edit your ${subManager.tokenSymbol} approval`}
-                messageInfo={`You can edit the total amount of ${subManager.tokenSymbol} that we can withdraw from your wallet. This total amount will decrease over time as each payment for your subscription is withdrawn from your wallet in the appropriate installments.`}
-                textInput={`Amount of ${subManager.tokenSymbol} to approve`}
-                decimals={subManager.decimals}
+                messageHeader={`Edit your ${subscription.userTokenSymbol} approval`}
+                messageInfo={`You can edit the total amount of ${subscription.userTokenSymbol} that we can withdraw from your wallet. This total amount will decrease over time as each payment for your subscription is withdrawn from your wallet in the appropriate installments.\nFor MetaMask users please click on "Use Default" when token approval modal appeard`}
+                textInput={`Amount of ${subscription.userTokenSymbol} to approve`}
+                decimals={subscription.userTokenDecimals}
                 isLoading={isLoading}
                 isTxSend={isTxSend}
                 approval={subManager.tokenApproval}
             />
-            <EditApprovalModal
+            <EditApproval
                 name="subscription"
                 labelTextInput={`${subManager.tokenSymbol} / Month`}
                 onConfirm={handleApproveSubscribe}
@@ -598,8 +575,8 @@ const AccountBlock: FC<AccountBlock> = ({ config, signer }) => {
                 isTxSend={isTxSend}
                 approval={subManager.allowance}
             />
-            <ChangeTokenModal
-                address={account}
+            <ChangeToken
+                address={account || ""}
                 subManager={subManager}
                 subscription={subscription}
                 changeToken={changeToken}

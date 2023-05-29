@@ -2,7 +2,7 @@ import { BigNumber, ethers } from "ethers";
 import React, { FC, useEffect, useState } from "react";
 import TextWhite from "@assets/logo_text_white.svg";
 
-type EditApprovalModal = {
+type EditApproval = {
     name: string;
     messageHeader: string;
     messageInfo: string;
@@ -15,7 +15,7 @@ type EditApprovalModal = {
     labelTextInput: string;
 };
 
-const EditApprovalModal: FC<EditApprovalModal> = ({
+const EditApproval: FC<EditApproval> = ({
     name,
     messageHeader,
     messageInfo,
@@ -27,7 +27,7 @@ const EditApprovalModal: FC<EditApprovalModal> = ({
     approval,
     labelTextInput,
 }) => {
-    const [isInifity, setIsInifity] = useState(false);
+    const [isInfinity, setIsInfinity] = useState(false);
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
@@ -49,8 +49,8 @@ const EditApprovalModal: FC<EditApprovalModal> = ({
         onConfirm(approveAmount);
     };
 
-    const toggleInifity = (e: any) => {
-        setIsInifity(e.target.checked);
+    const toggleInfinity = (e: any) => {
+        setIsInfinity(e.target.checked);
     };
 
     const getDefaultValueInput = () => {
@@ -65,7 +65,7 @@ const EditApprovalModal: FC<EditApprovalModal> = ({
         if (approval == undefined) return;
         if (approval.eq(ethers.constants.MaxUint256)) {
             console.log("is inifity");
-            setIsInifity(true);
+            setIsInfinity(true);
         }
     }, [approval]);
 
@@ -136,9 +136,9 @@ const EditApprovalModal: FC<EditApprovalModal> = ({
                                                 id="approveAmount"
                                                 placeholder="50"
                                                 name="approveAmount"
-                                                required={!isInifity}
+                                                required={!isInfinity}
                                                 min={0}
-                                                disabled={isInifity}
+                                                disabled={isInfinity}
                                                 defaultValue={getDefaultValueInput()}
                                                 className="cap-input cap-input-bordered"
                                             />
@@ -155,8 +155,8 @@ const EditApprovalModal: FC<EditApprovalModal> = ({
                                             id="infinity-checkbox"
                                             type="checkbox"
                                             name="infinity-checkbox"
-                                            onChange={toggleInifity}
-                                            checked={isInifity}
+                                            onChange={toggleInfinity}
+                                            checked={isInfinity}
                                             className="cap-checkbox"
                                         />
                                         <label
@@ -194,4 +194,4 @@ const EditApprovalModal: FC<EditApprovalModal> = ({
     );
 };
 
-export default EditApprovalModal;
+export default EditApproval;

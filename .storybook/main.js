@@ -24,6 +24,7 @@ module.exports = {
             ...config.resolve.alias,
             "@assets": path.resolve(__dirname, "./../src/assets"),
             "@context": path.resolve(__dirname, "./../src/context"),
+            "@components": path.resolve(__dirname, "./../src/components"),
         };
         config.plugins.push(
             new webpack.ProvidePlugin({

@@ -99,6 +99,7 @@ export interface PaymentFacetInterface extends utils.Interface {
     "subscribeWithSwap(uint256,uint8,address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
     "subscriptionRenew(uint256,address)": FunctionFragment;
     "subscriptionRenewWithSwap(uint256,address,address,(address,address,address,address,uint256,uint256,uint256,uint256,address,bytes),(uint256,uint256,uint256,bytes)[])": FunctionFragment;
+    "taxAccount()": FunctionFragment;
   };
 
   getFunction(
@@ -115,6 +116,7 @@ export interface PaymentFacetInterface extends utils.Interface {
       | "subscribeWithSwap"
       | "subscriptionRenew"
       | "subscriptionRenewWithSwap"
+      | "taxAccount"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -199,6 +201,10 @@ export interface PaymentFacetInterface extends utils.Interface {
       IOpenOceanCaller.CallDescriptionStruct[]
     ]
   ): string;
+  encodeFunctionData(
+    functionFragment: "taxAccount",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "getChangeSubscriptionPrice",
@@ -239,16 +245,19 @@ export interface PaymentFacetInterface extends utils.Interface {
     functionFragment: "subscriptionRenewWithSwap",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "taxAccount", data: BytesLike): Result;
 
   events: {
     "PaymentSubscription(uint256,address,uint8,uint256)": EventFragment;
     "ReferralPercentEdited(uint256,address,uint16)": EventFragment;
+    "SelectBlockchain(uint256,address,uint256)": EventFragment;
     "SelectToken(uint256,address,address)": EventFragment;
     "UserEdited(uint256,address,uint8,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "PaymentSubscription"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ReferralPercentEdited"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SelectBlockchain"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SelectToken"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserEdited"): EventFragment;
 }
@@ -279,6 +288,19 @@ export type ReferralPercentEditedEvent = TypedEvent<
 
 export type ReferralPercentEditedEventFilter =
   TypedEventFilter<ReferralPercentEditedEvent>;
+
+export interface SelectBlockchainEventObject {
+  SubscriptionManagerId: BigNumber;
+  user: string;
+  paymentBlockchainId: BigNumber;
+}
+export type SelectBlockchainEvent = TypedEvent<
+  [BigNumber, string, BigNumber],
+  SelectBlockchainEventObject
+>;
+
+export type SelectBlockchainEventFilter =
+  TypedEventFilter<SelectBlockchainEvent>;
 
 export interface SelectTokenEventObject {
   SubscriptionManagerId: BigNumber;
@@ -415,6 +437,8 @@ export interface PaymentFacet extends BaseContract {
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    taxAccount(overrides?: CallOverrides): Promise<[string]>;
   };
 
   getChangeSubscriptionPrice(
@@ -501,6 +525,8 @@ export interface PaymentFacet extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  taxAccount(overrides?: CallOverrides): Promise<string>;
+
   callStatic: {
     getChangeSubscriptionPrice(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
@@ -585,6 +611,8 @@ export interface PaymentFacet extends BaseContract {
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    taxAccount(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
@@ -611,6 +639,17 @@ export interface PaymentFacet extends BaseContract {
       user?: PromiseOrValue<string> | null,
       percent?: null
     ): ReferralPercentEditedEventFilter;
+
+    "SelectBlockchain(uint256,address,uint256)"(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      paymentBlockchainId?: PromiseOrValue<BigNumberish> | null
+    ): SelectBlockchainEventFilter;
+    SelectBlockchain(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      paymentBlockchainId?: PromiseOrValue<BigNumberish> | null
+    ): SelectBlockchainEventFilter;
 
     "SelectToken(uint256,address,address)"(
       SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
@@ -721,6 +760,8 @@ export interface PaymentFacet extends BaseContract {
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    taxAccount(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -807,5 +848,7 @@ export interface PaymentFacet extends BaseContract {
       calls: IOpenOceanCaller.CallDescriptionStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    taxAccount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

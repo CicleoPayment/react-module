@@ -4,6 +4,7 @@
 import type {
   BaseContract,
   BigNumber,
+  BigNumberish,
   BytesLike,
   CallOverrides,
   PopulatedTransaction,
@@ -20,32 +21,38 @@ import type {
   PromiseOrValue,
 } from "../../../common";
 
-export interface IERC1271Interface extends utils.Interface {
+export interface LibPaymentInterface extends utils.Interface {
   functions: {
-    "isValidSignature(bytes32,bytes)": FunctionFragment;
+    "getChangeSubscriptionPrice(uint256,address,uint8)": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "isValidSignature"): FunctionFragment;
+  getFunction(
+    nameOrSignatureOrTopic: "getChangeSubscriptionPrice"
+  ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "isValidSignature",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
+    functionFragment: "getChangeSubscriptionPrice",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "isValidSignature",
+    functionFragment: "getChangeSubscriptionPrice",
     data: BytesLike
   ): Result;
 
   events: {};
 }
 
-export interface IERC1271 extends BaseContract {
+export interface LibPayment extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IERC1271Interface;
+  interface: LibPaymentInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -67,41 +74,46 @@ export interface IERC1271 extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    isValidSignature(
-      hash: PromiseOrValue<BytesLike>,
-      signature: PromiseOrValue<BytesLike>,
+    getChangeSubscriptionPrice(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[string] & { magicValue: string }>;
+    ): Promise<[BigNumber]>;
   };
 
-  isValidSignature(
-    hash: PromiseOrValue<BytesLike>,
-    signature: PromiseOrValue<BytesLike>,
+  getChangeSubscriptionPrice(
+    subscriptionManagerId: PromiseOrValue<BigNumberish>,
+    user: PromiseOrValue<string>,
+    newSubscriptionId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
-  ): Promise<string>;
+  ): Promise<BigNumber>;
 
   callStatic: {
-    isValidSignature(
-      hash: PromiseOrValue<BytesLike>,
-      signature: PromiseOrValue<BytesLike>,
+    getChangeSubscriptionPrice(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<BigNumber>;
   };
 
   filters: {};
 
   estimateGas: {
-    isValidSignature(
-      hash: PromiseOrValue<BytesLike>,
-      signature: PromiseOrValue<BytesLike>,
+    getChangeSubscriptionPrice(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    isValidSignature(
-      hash: PromiseOrValue<BytesLike>,
-      signature: PromiseOrValue<BytesLike>,
+    getChangeSubscriptionPrice(
+      subscriptionManagerId: PromiseOrValue<BigNumberish>,
+      user: PromiseOrValue<string>,
+      newSubscriptionId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

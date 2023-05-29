@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 
-type SubscriptionPart = {
+type SubscriptionSettingsBlock = {
     subscription: any;
     symbol: string;
     duration: number;
@@ -12,7 +12,7 @@ const getDurationPeriod = (duration: number) => {
     if (duration == 86400) return "day";
 }
 
-const SubscriptionPart: FC<SubscriptionPart> = ({
+const SubscriptionSettingsBlock: FC<SubscriptionSettingsBlock> = ({
     subscription,
     symbol,
     duration
@@ -20,7 +20,7 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
     if (subscription.isCancelled) {
         return (
             
-            <div className="cap-grow cap-flex cap-flex-col cap-px-4 cap-py-4 cap-space-y-2">
+            <div className="cap-grow cap-flex cap-flex-col cap-py-4 cap-space-y-2">
                 <span className=" cap-font-semibold">
                     
                     Your canceled subscription
@@ -92,4 +92,4 @@ const SubscriptionPart: FC<SubscriptionPart> = ({
     );
 };
 
-export default SubscriptionPart;
+export default SubscriptionSettingsBlock;

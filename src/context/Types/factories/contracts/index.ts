@@ -11,3 +11,4 @@ export * as subscriptionSecuritySol from "./SubscriptionSecurity.sol";
 export * as test from "./Test";
 export * as testBridgeSol from "./TestBridge.sol";
 export * as types from "./Types";
+export { LibBridgeManager__factory } from "./LibBridgeManager__factory";

@@ -30,8 +30,6 @@ export type { ERC165Upgradeable } from "./@openzeppelin/contracts-upgradeable/ut
 export { ERC165Upgradeable__factory } from "./factories/@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable__factory";
 export type { IERC165Upgradeable } from "./@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable";
 export { IERC165Upgradeable__factory } from "./factories/@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeable__factory";
-export type { IERC1271 } from "./@openzeppelin/contracts/interfaces/IERC1271";
-export { IERC1271__factory } from "./factories/@openzeppelin/contracts/interfaces/IERC1271__factory";
 export type { ERC20 } from "./@openzeppelin/contracts/token/ERC20/ERC20";
 export { ERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/ERC20__factory";
 export type { IERC20Metadata } from "./@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata";
@@ -42,6 +40,8 @@ export type { ICicleoSubscriptionRouter } from "./contracts/Interfaces/ICicleoSu
 export { ICicleoSubscriptionRouter__factory } from "./factories/contracts/Interfaces/ICicleoSubscriptionRouter__factory";
 export type { ILiFi } from "./contracts/Interfaces/ILiFi";
 export { ILiFi__factory } from "./factories/contracts/Interfaces/ILiFi__factory";
+export type { LibBridgeManager } from "./contracts/LibBridgeManager";
+export { LibBridgeManager__factory } from "./factories/contracts/LibBridgeManager__factory";
 export type { CicleoProxy } from "./contracts/Proxy.sol/CicleoProxy";
 export { CicleoProxy__factory } from "./factories/contracts/Proxy.sol/CicleoProxy__factory";
 export type { Diamond } from "./contracts/Router/Diamond";

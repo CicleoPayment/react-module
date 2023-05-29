@@ -1,6 +1,6 @@
 import { BigNumber, utils } from "ethers";
 import React, { FC } from "react";
-import LoadingState from "../../LoadingState";
+import LoadingState from "../../Shared/LoadingState";
 
 type SelctCoin = {
     isLoaded: boolean;

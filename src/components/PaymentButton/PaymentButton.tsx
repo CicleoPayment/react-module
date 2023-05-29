@@ -4,38 +4,19 @@ import "./PaymentButton.css";
 import TextWhite from "@assets/logo_text_white.svg";
 import PayImage from "@assets/pay.svg";
 import {
-	getConfig,
-	doTx,
-	reduceAddress,
-	openOceanIface,
-} from "@context/contract";
-import {
-	Payment,
-	SelectCoin,
-	SelectNetwork,
-	Login,
-	HeaderSubscriptionInfo,
+    Payment,
+    SelectCoin,
+    SelectNetwork,
+    HeaderSubscriptionInfo,
 } from "./components";
 import axios from "axios";
-import {
-	getNetwork,
-	fetchSigner,
-	getContract,
-	readContract,
-	erc20ABI,
-	readContracts,
-	signMessage,
-	prepareWriteContract,
-	writeContract,
-	getAccount,
-} from "@wagmi/core";
-import LoadingState from "./../LoadingState";
+import { getNetwork, fetchSigner, getContract, readContract, erc20ABI, readContracts, signMessage, prepareWriteContract, writeContract, getAccount} from "@wagmi/core";
+import {Login, LoadingState} from "@components";
 import {
 	CicleoSubscriptionBridgeManager__factory,
 	CicleoSubscriptionManager__factory,
 	PaymentFacet__factory,
 } from "@context/Types";
-import { useNetwork } from "wagmi";
 
 type PaymentButton = {
 	subscriptionId: number;
@@ -99,9 +80,8 @@ const PaymentButton: FC<PaymentButton> = ({
 	chainId,
 	referral,
 }) => {
-	const [account, setAccount] = useState<string | null>(null);
-
-	const [isBridged, setIsBridged] = useState(false);
+    const [account, setAccount] = useState<string | null>(null);
+    const [isBridged, setIsBridged] = useState(false)
 
 	const [subscriptionInfoIsFetched, setSubscriptionInfoIsFetched] =
 		useState(false);
@@ -212,28 +192,56 @@ const PaymentButton: FC<PaymentButton> = ({
 		if (!chain) return;
 		const paymentChainId = chain.id;
 
-		setStep(1);
-		setIsLoaded(true);
+        setStep(1);
+        setIsLoaded(true)
+        
+        const config = await getConfig(paymentChainId);
+        const router = config.subscriptionRouterAddress;
+        const bridge = config.subscriptionBridgeAddress;
+    
+        if (isBridged) {
+            console.log("BRIDGED")
+            setSwapInfo({
+                inToken: {
+                    address: coin.id,
+                    symbol: coin.symbol,
+                    decimals: coin.decimals
+                },
+                inAmount: coin.toPay,
+                outToken: {
+                    address: subManager.tokenAddress,
+                    symbol: subManager.tokenSymbol,
+                    decimals: subManager.decimals,
+                },
+                outAmount: subscription.originalUserPrice.toString(),
+            });
 
-		const config = await getConfig(paymentChainId);
-		const router = config.subscriptionRouterAddress;
-		const bridge = config.subscriptionBridgeAddress;
+            const approval = await readContract({
+                // @ts-ignore
+                address: coin.id,
+                abi: erc20ABI,
+                functionName: 'allowance',
+                // @ts-ignore
+                args: [account, bridge],
+            })
+            
+            const users = await readContract({
+                // @ts-ignore
+                address: bridge,
+                abi: CicleoSubscriptionBridgeManager__factory.abi,
+                functionName: 'users',
+                // @ts-ignore
+                args: [chainId, subManagerId, account],
+            })
 
-		if (isBridged) {
-			setSwapInfo({
-				inToken: {
-					address: coin.id,
-					symbol: coin.symbol,
-					decimals: coin.decimals,
-				},
-				inAmount: coin.toPay,
-				outToken: {
-					address: subManager.tokenAddress,
-					symbol: subManager.tokenSymbol,
-					decimals: subManager.decimals,
-				},
-				outAmount: subscription.originalUserPrice.toString(),
-			});
+            const subApproval = users.subscriptionLimit as BigNumber
+
+            if (approval.gte(subscription.originalPrice)) {
+                setStep(2);
+                
+                if (subApproval.gte(subscription.originalPrice)) {
+                    setStep(3);
+                }
 
 			const approval = await readContract({
 				// @ts-ignore
@@ -253,14 +261,27 @@ const PaymentButton: FC<PaymentButton> = ({
 				args: [chainId, subManagerId, account],
 			});
 
-			if (
-				approval.gte(ethers.utils.parseUnits(coin.toPay, coin.decimals))
-			) {
-				setStep(2);
+            setApprovalSubscription(Number(subscription.price));
 
-				if (subApproval.gte(coin.toPay)) {
-					setStep(3);
-				}
+            setStepFunction({
+                1: async (isInfinityToken, approvalToken) => {
+                    if (isInfinityToken == false) { 
+                        if (approvalToken < Number(subscription.price)) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
+                    
+                    try {
+
+                        console.log("Eihfi")
+
+                        const { hash, wait } = await writeContract({
+                            // @ts-ignore
+                            address: coin.id,
+                            abi: erc20ABI,
+                            functionName: 'approve',
+                            args: [bridge, isInfinityToken ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalToken.toString(), subManager.decimals)],
+                        })
 
 				console.log(subApproval);
 			}
@@ -275,15 +296,16 @@ const PaymentButton: FC<PaymentButton> = ({
 				Number(ethers.utils.formatUnits(coin.toPay, coin.decimals))
 			);
 
-			setStepFunction({
-				1: async (isInfinityToken, approvalToken) => {
-					if (isInfinityToken == false) {
-						if (approvalToken < Number(subscription.userPrice)) {
-							return setErrorMessage(
-								"You need to approve at least the subscription price"
-							);
-						}
-					}
+                    if (subApproval.gte(coin.toPay)) {
+                        setStep(3);
+                    }
+                },
+                2: async (isInfinitySubscription, approvalSubscription) => {
+                    if (isInfinitySubscription == false) { 
+                        if (approvalSubscription < Number(subscription.price)) {
+                            return setErrorMessage("You need to approve at least the subscription price")
+                        }
+                    }
 
 					try {
 						const { hash, wait } = await writeContract({
@@ -314,21 +336,14 @@ const PaymentButton: FC<PaymentButton> = ({
 						return;
 					}
 
-					if (subApproval.gte(coin.toPay)) {
-						setStep(3);
-					}
-				},
-				2: async (isInfinitySubscription, approvalSubscription) => {
-					if (isInfinitySubscription == false) {
-						console.log(approvalSubscription);
-						console.log(
-							Number(
-								ethers.utils.formatUnits(
-									coin.toPay,
-									coin.decimals
-								)
-							)
-						);
+                        const { v, r, s } = ethers.utils.splitSignature(signature)
+                        const adjustedV = _adjustV(v)
+                        signature = ethers.utils.joinSignature({ r, s, v: adjustedV }) as any
+                        
+                        console.log(coin._stargateData)
+
+                        // @ts-ignore
+                        const nativePrice = BigNumber.from(coin._stargateData[3].hex).mul(12).div(10)
 
 						if (
 							approvalSubscription <
@@ -364,7 +379,25 @@ const PaymentButton: FC<PaymentButton> = ({
 							],
 						});
 
-						setLoadingStep(2);
+                        const tx = await _bridge.payFunctionWithBridge(
+                            //@ts-ignore
+                            [
+                                BigNumber.from(chainId),
+                                BigNumber.from(subManagerId),
+                                subscriptionId,
+                                subscription.originalUserPrice.toString(),
+                                coin.id
+                            ],
+                            coin._bridgeData,
+                            coin._swapData,
+                            starGate,
+                            referral != undefined ? referral : ethers.constants.AddressZero,
+                            subManager.duration,
+                            signature,
+                            { value: nativePrice }
+                        )
+                
+                        setLoadingStep(3);
 
 						await wait();
 
@@ -400,63 +433,80 @@ const PaymentButton: FC<PaymentButton> = ({
 								0
 						);
 
-						console.log(ethers.utils.keccak256(message));
+                        setErrorMessage("");
+                        setIsPurchased(true);
+                    } catch (error: any) {  
+                        console.log(error);
+                        
+                        if (error.data && error.data.message) {
+                            return setErrorMessage(error.data.message);
+                        }
+                        if (error.message) {
+                            return setErrorMessage(error.message);
+                        }
+
+                        
+                        return
+                    }
+                },
+            });
 
 						let signature = await signMessage({
 							message: message,
 						});
 
-						function _adjustV(v: number): number {
-							if (v === 0) {
-								return 27;
-							} else if (v === 1) {
-								return 28;
-							} else {
-								return v;
-							}
-						}
+        const resulat = await readContracts({
+            contracts: [
+                {
+                    address: coin.id as `0x${string}`,
+                    abi: erc20ABI,
+                    functionName: 'allowance',
+                    // @ts-ignore
+                    args: [account, subManager.address],
+                },{
+                    address: subManager.address as `0x${string}`,
+                    abi: CicleoSubscriptionManager__factory.abi,
+                    functionName: 'users',
+                    args: [account as `0x${string}`],
+                }
+            ]
+        })
 
-						const { v, r, s } =
-							ethers.utils.splitSignature(signature);
-						const adjustedV = _adjustV(v);
-						signature = ethers.utils.joinSignature({
-							r,
-							s,
-							v: adjustedV,
-						}) as any;
+        const approval = resulat[0] as BigNumber;
+        const users = resulat[1] as any;
 
-						// @ts-ignore
-						const nativePrice = BigNumber.from(
-							coin._stargateData[3].hex
-						)
-							.mul(12)
-							.div(10);
+        const subApproval = users.subscriptionLimit as BigNumber;
+
+        if (approval.gte(ethers.utils.parseUnits(coin.toPay, coin.decimals))) {
+            setStep(2);
+            
+            if (subApproval.gte(subscription.originalUserPrice)) {
+                setStep(3);
+            }
 
 						let starGate: any = coin._stargateData;
 						starGate[3] = nativePrice.toString() as any;
 
-						const signer = await fetchSigner();
+        const approvalSub = Number(ethers.utils.formatUnits(subscription.originalPrice, subManager.decimals))
+    
+        setApprovalSubscription(Number(ethers.utils.formatUnits(subscription.originalPrice, subManager.decimals)));
 
-						const _bridge = getContract({
-							address: bridge,
-							abi: CicleoSubscriptionBridgeManager__factory.abi,
-							signerOrProvider: signer as Signer,
-						});
-
-						// @ts-ignore
-						const tx = await _bridge.payFunctionWithBridge(
-							// @ts-ignore
-							chainId,
-							subManagerId,
-							subscriptionId,
-							coin.toPay,
-							coin.id,
-							coin._bridgeData,
-							coin._swapData,
-							starGate,
-							signature,
-							{ value: nativePrice }
-						);
+        //If same coin payment as submanager
+        if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
+            setSwapInfo({
+                inToken: {
+                    address: subManager.tokenAddress,
+                    symbol: subManager.tokenSymbol,
+                    decimals: subManager.decimals,
+                },
+                inAmount: subscription.originalUserPrice.toString(),
+                outToken: {
+                    address: subManager.tokenAddress,
+                    symbol: subManager.tokenSymbol,
+                    decimals: subManager.decimals,
+                },
+                outAmount: subscription.originalUserPrice.toString(),
+            });
 
 						setLoadingStep(3);
 
@@ -650,328 +700,17 @@ const PaymentButton: FC<PaymentButton> = ({
 
 						setLoadingStep(3);
 
-						await wait();
-
-						setErrorMessage("");
-						setIsPurchased(true);
-					} catch (error: any) {
-						console.log(error);
-						setErrorMessage(error.message);
-						return;
-					}
-				},
-			});
-
-			//For swap things on same network
-		} else {
-			let data = JSON.stringify({
-				tokenIn: coin.id,
-				tokenOut: subManager.tokenAddress,
-				price: subscription.originalUserPrice.toString(),
-				fromAddress: subManager.address,
-			});
-
-			let config = {
-				method: "post",
-				maxBodyLength: Infinity,
-				url: `https://backend-test.cicleo.io/chain/${chainId}/getExactPrice/`,
-				headers: {
-					"Content-Type": "application/json",
-				},
-				data: data,
-			};
-
-			const resp = await axios(config);
-
-			setSwapInfo(resp.data.data);
-
-			setStepFunction({
-				1: async (isInfinity: boolean, approvalToken: number) => {
-					if (isInfinityToken == false) {
-						if (approvalToken < Number(subscription.userPrice)) {
-							return setErrorMessage(
-								"You need to approve at least the subscription price"
-							);
-						}
-					}
-
-					try {
-						const { hash, wait } = await writeContract({
-							// @ts-ignore
-							address: coin.id,
-							abi: erc20ABI,
-							functionName: "approve",
-							args: [
-								subManager.address,
-								isInfinityToken
-									? ethers.constants.MaxUint256
-									: ethers.utils.parseUnits(
-											approvalToken.toString(),
-											subManager.decimals
-									  ),
-							],
-						});
-
-						setLoadingStep(1);
-
-						await wait();
-					} catch (error: any) {
-						console.log(error);
-						setErrorMessage(error.message);
-						return;
-					}
-
-					if (subApproval.gte(subscription.originalUserPrice)) {
-						setStep(3);
-					}
-
-					setStep(2);
-				},
-				2: async (
-					isInfinity: boolean,
-					approvalSubscription: number
-				) => {
-					if (isInfinitySubscription == false) {
-						if (approvalSubscription < Number(subscription.price)) {
-							return setErrorMessage(
-								"You need to approve at least the subscription price"
-							);
-						}
-					}
-
-					try {
-						// @ts-ignore
-						const { hash, wait } = await writeContract({
-							// @ts-ignore
-							address: subManager.address,
-							abi: CicleoSubscriptionManager__factory.abi,
-							functionName: "changeSubscriptionLimit",
-							args: [
-								isInfinitySubscription
-									? ethers.constants.MaxUint256
-									: ethers.utils.parseUnits(
-											approvalSubscription.toString(),
-											subManager.decimals
-									  ),
-							],
-						});
-
-						setLoadingStep(2);
-
-						await wait();
-					} catch (error: any) {
-						console.log(error);
-						setErrorMessage(error.message);
-						return;
-					}
-
-					setErrorMessage("");
-					setStep(3);
-				},
-				3: async () => {
-					try {
-						let decodedData = openOceanIface.parseTransaction({
-							data: resp.data.data.data,
-							value: resp.data.data.value,
-						});
-
-						console.log("decodeddata");
-						console.log(decodedData);
-
-						// @ts-ignore
-						const { wait } = writeContract({
-							// @ts-ignore
-							address: router,
-							abi: PaymentFacet__factory.abi,
-							functionName: "subscribeWithSwap",
-							args: [
-								subManagerId,
-								subscriptionId,
-								referral != undefined
-									? referral
-									: ethers.constants.AddressZero,
-								decodedData.args.caller,
-								decodedData.args.desc,
-								decodedData.args.calls,
-							],
-						});
-
-						setLoadingStep(3);
-
-						await wait();
-
-						setLoadingStep(0);
-						setIsPurchased(true);
-					} catch (error: any) {
-						console.log(error);
-						setErrorMessage(error.message);
-						setStep(1);
-					}
-				},
-			});
-
-			setApprovalSubscription(
-				Number(
-					ethers.utils.formatUnits(
-						subscription.originalPrice,
-						subManager.decimals
-					)
-				)
-			);
-		}
-
-		//If payment token is the same as the subscription token
-		/*  if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
-            let step = 1;
-
-            const allowance = await erc20.allowance(
-                address,
-                subManager.address
-            );
-
-            if (allowance.gt(subscription.originalPrice)) {
-                step = 2;
-
-                if (subManager.allowance.gte(subscription.originalPrice)) {
-                    step = 3;
-                }
-            }
-
-            if (subscription.originalPrice.eq(BigNumber.from("0"))) {
-                step = 3;
-            }
-
-            setStep(step);
-
-            setStepFunction({
-                1: async () => {
-                    await doTx(
-                        () =>
-                            erc20.approve(
-                                subManager.address,
-                                ethers.constants.MaxUint256
-                            ),
-                        `Approve ${subManager.tokenSymbol}`,
-                        () => setLoadingStep(1)
-                    );
-
-                    setLoadingStep(0);
-                    setStep(2);
-                },
-                2: async () => {
-                    console.log(subscription.originalPrice);
-                    await doTx(
-                        () =>
-                            subManagerContract.changeSubscriptionLimit(
-                                subscription.originalPrice
-                            ),
-                        "Approve Subscription",
-                        () => setLoadingStep(2)
-                    );
-
-                    setLoadingStep(0);
-                    setStep(3);
-                },
-                3: async () => {
-                    if (
-                        subscription.id != oldSubscription.id &&
-                        subscription.id != 0
-                    ) {
-                        console.log("subscription.id != oldSubscription.id");
-                        await doTx(
-                            () =>
-                                subscriptionRouterContract.changeSubscription(
-                                    subManager.id,
-                                    subscriptionId
-                                ),
-                            "Change Subscribtion",
-                            () => setLoadingStep(3)
-                        );
-
                         setLoadingStep(0);
                         setIsPurchased(true);
-                    } else {
-                        console.log("else");
-
-                        await doTx(
-                            () =>
-                                subscriptionRouterContract.subscribe(
-                                    subManager.id,
-                                    subscriptionId,
-                                    referral != undefined
-                                        ? referral
-                                        : ethers.constants.AddressZero
-                                ),
-                            "Subscribe",
-                            () => setLoadingStep(3)
-                        );
-
-                        setLoadingStep(0);
-                        setIsPurchased(true);
+                    } catch (error: any) {
+                        console.log(error);
+                        setErrorMessage(error.message);
+                        setStep(1);
                     }
-                },
-            });
-
-            setSwapInfo({
-                inToken: {
-                    address: subManager.tokenAddress,
-                    symbol: subManager.tokenSymbol,
-                    decimals: subManager.decimals,
-                },
-                inAmount: subscription.originalUserPrice.toString(),
-                outToken: {
-                    address: subManager.tokenAddress,
-                    symbol: subManager.tokenSymbol,
-                    decimals: subManager.decimals,
-                },
-                outAmount: subscription.originalUserPrice.toString(),
-            });
-        } else {
-            let data = JSON.stringify({
-                tokenIn: coin.id,
-                tokenOut: subManager.tokenAddress,
-                price: subscription.originalUserPrice.toString(),
-                fromAddress: subManager.address,
-            });
-
-            let config = {
-                method: "post",
-                maxBodyLength: Infinity,
-                url: `https://backend-test.cicleo.io/chain/${chainId}/getExactPrice/`,
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                data: data,
-            };
-
-            const resp = await axios(config);
-
-            console.log(resp.data);
-
-            let step = 1;
-
-            const allowance = await erc20.allowance(
-                address,
-                subManager.address
-            );
-
-            if (allowance.gt(subscription.originalPrice)) {
-                step = 2;
-
-                if (subManager.allowance.gte(subscription.originalPrice)) {
-                    step = 3;
                 }
-            }
-
-            setStep(step);
-
-            console.log(subManager.address);
-
-            
-
-            setSwapInfo(resp.data.data);
-        } */
-	};
+            });
+        }
+    };
 
 	useEffect(() => {
 		getSwap();

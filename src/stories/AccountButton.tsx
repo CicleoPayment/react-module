@@ -7,27 +7,9 @@ type User = {
 };
 
 export const Page: React.FC = () => {
-
-    const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | undefined>()
-
-    const getSigner = async () => {
-        //@ts-ignore
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        await provider.send("eth_requestAccounts", []);
-
-        const signer = provider.getSigner()
-
-        setSigner(signer)
-    }
-
-    useEffect(() => {
-        getSigner()
-    }, [])
-
-
     return (
         <div>
-            <AccountBlock config={{ 56: 1, 250: 2 }} signer={signer} />
+            <AccountBlock chainId={250} subManagerId={4} />
         </div>
     );
 };

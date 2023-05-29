@@ -61,10 +61,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
-      name: "IERC1271",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC1271__factory>;
-    getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20__factory>;
@@ -88,6 +84,10 @@ declare module "hardhat/types/runtime" {
       name: "ILiFi",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ILiFi__factory>;
+    getContractFactory(
+      name: "LibBridgeManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LibBridgeManager__factory>;
     getContractFactory(
       name: "CicleoProxy",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -258,11 +258,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
-      name: "IERC1271",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC1271>;
-    getContractAt(
       name: "ERC20",
       address: string,
       signer?: ethers.Signer
@@ -292,6 +287,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ILiFi>;
+    getContractAt(
+      name: "LibBridgeManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LibBridgeManager>;
     getContractAt(
       name: "CicleoProxy",
       address: string,

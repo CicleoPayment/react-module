@@ -2,15 +2,16 @@ import React, { FC, useEffect, useState } from "react";
 import TextWhite from "@assets/logo_text_white.svg";
 import axios from "axios";
 import { BigNumber, utils } from "ethers";
+import { getNetwork } from '@wagmi/core'
 
-type ChangeTokenModal = {
+type ChangeToken = {
     subManager: any;
     subscription: any;
     address: string;
     changeToken: (tokenAddress: string, tokenSymbol: string) => void;
 };
 
-const ChangeTokenModal: FC<ChangeTokenModal> = ({
+const ChangeToken: FC<ChangeToken> = ({
     subManager,
     subscription,
     address,
@@ -24,8 +25,12 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({
         if (subManager == undefined) return;
         console.log(subscription);
 
+        const { chain } = getNetwork()
+
+        if (chain == undefined) return;
+        
         const coinList = await axios.get(
-            `https://backend-test.cicleo.io/chain/250/getBalance/${address}/${subManager.tokenAddress}/${subscription.originalPrice}`
+            `https://backend-test.cicleo.io/chain/${chain.id}/getBalance/${address}/${subManager.tokenAddress}/${subscription.originalPrice}`
         );
 
         let coinData = coinList.data;
@@ -233,4 +238,4 @@ const ChangeTokenModal: FC<ChangeTokenModal> = ({
     );
 };
 
-export default ChangeTokenModal;
+export default ChangeToken;

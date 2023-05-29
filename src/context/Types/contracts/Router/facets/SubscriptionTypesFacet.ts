@@ -110,7 +110,7 @@ export interface SubscriptionTypesFacetInterface extends utils.Interface {
     "getSubscriptionsManager(address)": FunctionFragment;
     "getUserSubscriptionStatus(uint256,address)": FunctionFragment;
     "newSubscription(uint256,uint256,string)": FunctionFragment;
-    "subscriptions(uint256,uint16)": FunctionFragment;
+    "subscriptions(uint256,uint8)": FunctionFragment;
   };
 
   getFunction(
@@ -284,7 +284,7 @@ export interface SubscriptionTypesFacet extends BaseContract {
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, boolean] & { subscriptionId: BigNumber; isActive: boolean }
+      [number, boolean] & { subscriptionId: number; isActive: boolean }
     >;
 
     newSubscription(
@@ -334,9 +334,7 @@ export interface SubscriptionTypesFacet extends BaseContract {
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
     user: PromiseOrValue<string>,
     overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, boolean] & { subscriptionId: BigNumber; isActive: boolean }
-  >;
+  ): Promise<[number, boolean] & { subscriptionId: number; isActive: boolean }>;
 
   newSubscription(
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
@@ -386,7 +384,7 @@ export interface SubscriptionTypesFacet extends BaseContract {
       user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, boolean] & { subscriptionId: BigNumber; isActive: boolean }
+      [number, boolean] & { subscriptionId: number; isActive: boolean }
     >;
 
     newSubscription(

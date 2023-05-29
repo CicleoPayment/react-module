@@ -1,43 +1,38 @@
 import React, { FC } from "react";
-import { connect } from '@wagmi/core'
-import { InjectedConnector, configureChains, createClient } from "@wagmi/core";
+import { connect, InjectedConnector, configureChains, createClient } from '@wagmi/core'
 import { fantom, polygon } from "@wagmi/core/chains";
 import { publicProvider } from '@wagmi/core/providers/public';
 import { ClipLoader } from "react-spinners";
 
-type Login = {
-    handleSelectAccount: (account: string) => void,
+type Login = {  
+    handleSelectAccount: (account: string, chainId: number) => void,
 };
 
 const Login: FC<Login> = ({
     handleSelectAccount
 }) => { 
-
     const [isLoading, setIsLoading] = React.useState(false)
-
-    const { chains, provider } = configureChains(
-        [fantom, polygon],
-        [publicProvider()],
-    )
-
-    const client = createClient({
-        provider,
-        connectors: [new InjectedConnector({ chains })],
-    })
 
     const _handleSelectAccount = async () => {
         setIsLoading(true)
+
+        const { chains, provider } = configureChains(
+            [fantom, polygon],
+            [publicProvider()],
+        )
+    
+        const client = createClient({
+            provider,
+            connectors: [new InjectedConnector({ chains })],
+        });
         
         const result = await connect({
             connector: new InjectedConnector(),
         })
 
-        console.log(result)
-
         if (result) {
-            handleSelectAccount(result.account)
+            handleSelectAccount(result.account, result.chain.id)
         }
-          
     }
 
     return (

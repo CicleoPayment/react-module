@@ -1,4 +1,4 @@
-import LoadingState from "./../../LoadingState";
+import LoadingState from "../../Shared/LoadingState";
 import { formatNumber } from "@context/contract";
 import { BigNumber, utils } from "ethers";
 import React, { FC, useState } from "react";

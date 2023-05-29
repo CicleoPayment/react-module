@@ -27,9 +27,32 @@ import type {
   PromiseOrValue,
 } from "../../../common";
 
+export type PaymentParametersStruct = {
+  chainId: PromiseOrValue<BigNumberish>;
+  subscriptionManagerId: PromiseOrValue<BigNumberish>;
+  subscriptionId: PromiseOrValue<BigNumberish>;
+  priceInSubToken: PromiseOrValue<BigNumberish>;
+  token: PromiseOrValue<string>;
+};
+
+export type PaymentParametersStructOutput = [
+  BigNumber,
+  BigNumber,
+  number,
+  BigNumber,
+  string
+] & {
+  chainId: BigNumber;
+  subscriptionManagerId: BigNumber;
+  subscriptionId: number;
+  priceInSubToken: BigNumber;
+  token: string;
+};
+
 export interface BridgeFacetInterface extends utils.Interface {
   functions: {
-    "bridgeSubscription(uint256,uint8,address,uint256,bytes)": FunctionFragment;
+    "bridgeRenew(uint256,address)": FunctionFragment;
+    "bridgeSubscribe((uint256,uint256,uint8,uint256,address),address,address,bytes)": FunctionFragment;
     "getChainID()": FunctionFragment;
     "getEthSignedMessageHash(bytes32)": FunctionFragment;
     "getMessage(uint256,uint8,address,uint256,uint256)": FunctionFragment;
@@ -42,7 +65,8 @@ export interface BridgeFacetInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "bridgeSubscription"
+      | "bridgeRenew"
+      | "bridgeSubscribe"
       | "getChainID"
       | "getEthSignedMessageHash"
       | "getMessage"
@@ -54,12 +78,15 @@ export interface BridgeFacetInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "bridgeSubscription",
+    functionFragment: "bridgeRenew",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bridgeSubscribe",
     values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
+      PaymentParametersStruct,
       PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
       PromiseOrValue<BytesLike>
     ]
   ): string;
@@ -121,7 +148,11 @@ export interface BridgeFacetInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "bridgeSubscription",
+    functionFragment: "bridgeRenew",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "bridgeSubscribe",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getChainID", data: BytesLike): Result;
@@ -150,10 +181,14 @@ export interface BridgeFacetInterface extends utils.Interface {
 
   events: {
     "PaymentSubscription(uint256,address,uint8,uint256)": EventFragment;
+    "SelectBlockchain(uint256,address,uint256)": EventFragment;
+    "SelectToken(uint256,address,address)": EventFragment;
     "UserEdited(uint256,address,uint8,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "PaymentSubscription"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SelectBlockchain"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SelectToken"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserEdited"): EventFragment;
 }
 
@@ -170,6 +205,31 @@ export type PaymentSubscriptionEvent = TypedEvent<
 
 export type PaymentSubscriptionEventFilter =
   TypedEventFilter<PaymentSubscriptionEvent>;
+
+export interface SelectBlockchainEventObject {
+  SubscriptionManagerId: BigNumber;
+  user: string;
+  paymentBlockchainId: BigNumber;
+}
+export type SelectBlockchainEvent = TypedEvent<
+  [BigNumber, string, BigNumber],
+  SelectBlockchainEventObject
+>;
+
+export type SelectBlockchainEventFilter =
+  TypedEventFilter<SelectBlockchainEvent>;
+
+export interface SelectTokenEventObject {
+  SubscriptionManagerId: BigNumber;
+  user: string;
+  tokenAddress: string;
+}
+export type SelectTokenEvent = TypedEvent<
+  [BigNumber, string, string],
+  SelectTokenEventObject
+>;
+
+export type SelectTokenEventFilter = TypedEventFilter<SelectTokenEvent>;
 
 export interface UserEditedEventObject {
   subscriptionManagerId: BigNumber;
@@ -211,11 +271,16 @@ export interface BridgeFacet extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    bridgeSubscription(
+    bridgeRenew(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
       user: PromiseOrValue<string>,
-      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    bridgeSubscribe(
+      paymentParams: PaymentParametersStruct,
+      user: PromiseOrValue<string>,
+      referral: PromiseOrValue<string>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -274,11 +339,16 @@ export interface BridgeFacet extends BaseContract {
     ): Promise<[string] & { signer: string }>;
   };
 
-  bridgeSubscription(
+  bridgeRenew(
     subscriptionManagerId: PromiseOrValue<BigNumberish>,
-    subscriptionId: PromiseOrValue<BigNumberish>,
     user: PromiseOrValue<string>,
-    price: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  bridgeSubscribe(
+    paymentParams: PaymentParametersStruct,
+    user: PromiseOrValue<string>,
+    referral: PromiseOrValue<string>,
     signature: PromiseOrValue<BytesLike>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -337,11 +407,16 @@ export interface BridgeFacet extends BaseContract {
   ): Promise<string>;
 
   callStatic: {
-    bridgeSubscription(
+    bridgeRenew(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
       user: PromiseOrValue<string>,
-      price: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    bridgeSubscribe(
+      paymentParams: PaymentParametersStruct,
+      user: PromiseOrValue<string>,
+      referral: PromiseOrValue<string>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -414,6 +489,28 @@ export interface BridgeFacet extends BaseContract {
       price?: null
     ): PaymentSubscriptionEventFilter;
 
+    "SelectBlockchain(uint256,address,uint256)"(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      paymentBlockchainId?: PromiseOrValue<BigNumberish> | null
+    ): SelectBlockchainEventFilter;
+    SelectBlockchain(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      paymentBlockchainId?: PromiseOrValue<BigNumberish> | null
+    ): SelectBlockchainEventFilter;
+
+    "SelectToken(uint256,address,address)"(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      tokenAddress?: PromiseOrValue<string> | null
+    ): SelectTokenEventFilter;
+    SelectToken(
+      SubscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
+      user?: PromiseOrValue<string> | null,
+      tokenAddress?: PromiseOrValue<string> | null
+    ): SelectTokenEventFilter;
+
     "UserEdited(uint256,address,uint8,uint256)"(
       subscriptionManagerId?: PromiseOrValue<BigNumberish> | null,
       user?: PromiseOrValue<string> | null,
@@ -429,11 +526,16 @@ export interface BridgeFacet extends BaseContract {
   };
 
   estimateGas: {
-    bridgeSubscription(
+    bridgeRenew(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
       user: PromiseOrValue<string>,
-      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    bridgeSubscribe(
+      paymentParams: PaymentParametersStruct,
+      user: PromiseOrValue<string>,
+      referral: PromiseOrValue<string>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -493,11 +595,16 @@ export interface BridgeFacet extends BaseContract {
   };
 
   populateTransaction: {
-    bridgeSubscription(
+    bridgeRenew(
       subscriptionManagerId: PromiseOrValue<BigNumberish>,
-      subscriptionId: PromiseOrValue<BigNumberish>,
       user: PromiseOrValue<string>,
-      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    bridgeSubscribe(
+      paymentParams: PaymentParametersStruct,
+      user: PromiseOrValue<string>,
+      referral: PromiseOrValue<string>,
       signature: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
