@@ -3,16 +3,28 @@ import { BigNumber, ethers, Signer } from "ethers";
 import "./AccountBlock.css";
 import TextWhite from "@assets/logo_text_white.svg";
 import { ConfirmationModal } from "./../index";
-import {
-    reduceAddress,
-} from "@context/contract";
+import { reduceAddress } from "@context/contract";
 import { SiweMessage } from "siwe";
 import axios from "axios";
-import {SubscriptionSettingsBlock, ApprovalBlock, SubscriptionInfoBlock, EditApproval, ChangeToken } from "./components";
-import {LoadingState, Login} from "@components";
-import { erc20ABI, readContract, createClient, prepareWriteContract, connect, InjectedConnector, writeContract, fetchSigner} from "@wagmi/core";
+import {
+    SubscriptionSettingsBlock,
+    ApprovalBlock,
+    SubscriptionInfoBlock,
+    EditApproval,
+    ChangeToken,
+} from "./components";
+import { LoadingState, Login } from "@components";
+import {
+    erc20ABI,
+    readContract,
+    createClient,
+    prepareWriteContract,
+    connect,
+    InjectedConnector,
+    writeContract,
+    fetchSigner,
+} from "@wagmi/core";
 import { CicleoSubscriptionManager__factory } from "@context/Types";
-
 
 axios.defaults.withCredentials = true;
 
@@ -41,14 +53,14 @@ if (typeof window !== "undefined") {
 const BACKEND_ADDR = "https://backend-test.cicleo.io";
 
 type Network = {
-    name: string,
-    rpcUrls: string,
-    image: string,
-}
+    name: string;
+    rpcUrls: string;
+    image: string;
+};
 
 type NetworkList = {
-    [key: number]: Network
-}
+    [key: number]: Network;
+};
 
 let _chains: NetworkList = {
     250: {
@@ -60,8 +72,8 @@ let _chains: NetworkList = {
         name: "Polygon",
         rpcUrls: "https://rpc-mainnet.maticvigil.com/",
         image: "https://cryptologos.cc/logos/polygon-matic-logo.png?v=013",
-    }
-}
+    },
+};
 
 async function createSiweMessage(address: string, statement: any) {
     const res = await axios.get(`${BACKEND_ADDR}/nonce`, {
@@ -122,7 +134,7 @@ const AccountModalContent: FC<AccountModalContent> = ({
     subManager,
     subscription,
     errorMessage,
-    setIsWrongNetwork
+    setIsWrongNetwork,
 }) => {
     if (isWrongNetwork)
         return (
@@ -146,25 +158,28 @@ const AccountModalContent: FC<AccountModalContent> = ({
                     </div>
                 </div>
                 <div className="cap-w-full cap-flex cap-items-center cap-justify-center">
-                    <button className="cap-btn cap-btn-primary" onClick={async () => {
-                        const resp = await connect({
-                            connector: new InjectedConnector(),
-                            chainId: subscription.paymentChain
-                        })
+                    <button
+                        className="cap-btn cap-btn-primary"
+                        onClick={async () => {
+                            const resp = await connect({
+                                connector: new InjectedConnector(),
+                                chainId: subscription.paymentChain,
+                            });
 
-                        if (resp) {
-                            setIsWrongNetwork(false)
-                        }
-                    }}>Change network</button>
+                            if (resp) {
+                                setIsWrongNetwork(false);
+                            }
+                        }}
+                    >
+                        Change network
+                    </button>
                 </div>
             </div>
         );
-    
+
     if (isLoaded == false)
-        return (
-            <LoadingState text="Getting your membership information..." />
-        );
-    
+        return <LoadingState text="Getting your membership information..." />;
+
     if (subscription.subscriptionEndDate < Date.now() / 1000)
         return (
             <div className="cap-p-4">
@@ -184,7 +199,9 @@ const AccountModalContent: FC<AccountModalContent> = ({
                             />
                         </svg>
                         <div className="cap-flex cap-flex-col">
-                            <span>You currently dont have an active subscription</span>
+                            <span>
+                                You currently dont have an active subscription
+                            </span>
                             <span>
                                 Close this page and click on "Pay with Cicleo"
                                 button to get started !
@@ -225,8 +242,6 @@ const AccountModalContent: FC<AccountModalContent> = ({
             </div>
         );
 
-    
-
     const endCycleDate = new Date(subscription.subscriptionEndDate * 1000);
 
     return (
@@ -241,9 +256,12 @@ const AccountModalContent: FC<AccountModalContent> = ({
                         {reduceAddress(account)}
                     </span>
 
-                    {subscription.paymentChain != 0  && (
+                    {subscription.paymentChain != 0 && (
                         <div className="cap-w-8 cap-h-8">
-                            <img src={ _chains[subscription.paymentChain].image} alt="" />
+                            <img
+                                src={_chains[subscription.paymentChain].image}
+                                alt=""
+                            />
                         </div>
                     )}
                 </div>
@@ -290,11 +308,15 @@ const AccountModalContent: FC<AccountModalContent> = ({
                         subManager={subManager}
                         subscription={subscription}
                     />
-                    
-                    {subscription.isCancelled == false && (<>
-                        <div className="cap-divider cap-divider-horizontal"></div>
-                        <SubscriptionInfoBlock endCycleDate={endCycleDate} />
-                    </>)}
+
+                    {subscription.isCancelled == false && (
+                        <>
+                            <div className="cap-divider cap-divider-horizontal"></div>
+                            <SubscriptionInfoBlock
+                                endCycleDate={endCycleDate}
+                            />
+                        </>
+                    )}
                 </div>
             )}
         </>
@@ -326,8 +348,8 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
     const [isTxSend, setIsTxSend] = useState(false);
     const [currentChainId, setCurrentChainId] = useState(0);
 
-    const getInfo = async () => { 
-        if (account == undefined) return
+    const getInfo = async () => {
+        if (account == undefined) return;
         const subscriptionInfo = await axios.get(
             `https://backend-test.cicleo.io/chain/${chainId}/getUserStatusInfo/${subManagerId}/${account}`
         );
@@ -338,27 +360,31 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
 
         //Verify if user is subscribed
         if (_subManager.allowance != undefined) {
-            _subManager.allowance = BigNumber.from(_subManager.allowance)
-            _subManager.tokenApproval = BigNumber.from(_subManager.tokenApproval)
+            _subManager.allowance = BigNumber.from(_subManager.allowance);
+            _subManager.tokenApproval = BigNumber.from(
+                _subManager.tokenApproval
+            );
 
-            if (subscriptionInfo.data.subscription.paymentChain != currentChainId) {
-                setIsWrongNetwork(true)
+            if (
+                subscriptionInfo.data.subscription.paymentChain !=
+                currentChainId
+            ) {
+                setIsWrongNetwork(true);
             } else {
-
             }
         }
 
-        console.log(_subManager)
+        console.log(_subManager);
         setSubManager(_subManager);
         setSubscription(subscriptionInfo.data.subscription);
 
-        setIsLoaded(true)
-    }
+        setIsLoaded(true);
+    };
 
-    const signer = ""
+    const signer = "";
 
     const unsubscribe = async () => {
-        const signer = await fetchSigner() as ethers.providers.JsonRpcSigner;
+        const signer = (await fetchSigner()) as ethers.providers.JsonRpcSigner;
         await signInWithEthereum(signer);
 
         await axios.post(
@@ -373,7 +399,7 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
     };
 
     const renew = async () => {
-        const signer = await fetchSigner() as ethers.providers.JsonRpcSigner;
+        const signer = (await fetchSigner()) as ethers.providers.JsonRpcSigner;
         await signInWithEthereum(signer);
 
         await axios.post(
@@ -388,7 +414,7 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
     };
 
     const changeToken = async (tokenAddress: string, tokenSymbol: string) => {
-        const signer = await fetchSigner() as ethers.providers.JsonRpcSigner;
+        const signer = (await fetchSigner()) as ethers.providers.JsonRpcSigner;
         await signInWithEthereum(signer);
 
         await axios.post(
@@ -409,32 +435,32 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
         setIsTxSend(false);
         setIsLoading(true);
 
-        console.log("heifji")
+        console.log("heifji");
 
-        console.log(await fetchSigner())
+        console.log(await fetchSigner());
 
         try {
-            console.log(amountToApprove)
-            console.log(subscription.userTokenAddress)
+            console.log(amountToApprove);
+            console.log(subscription.userTokenAddress);
             const config = await prepareWriteContract({
                 //@ts-ignore
                 address: subscription.userTokenAddress,
                 abi: erc20ABI,
-                functionName: 'approve',
+                functionName: "approve",
                 //@ts-ignore
                 args: [subManager.address, amountToApprove],
-            })
+            });
 
-            const { hash, wait } = await writeContract(config)
+            const { hash, wait } = await writeContract(config);
 
-            console.log("jdruh")
+            console.log("jdruh");
 
             setIsTxSend(true);
 
-            await wait()
+            await wait();
         } catch (error: any) {
-            console.log(error)
-            setErrorMessage(error.message)
+            console.log(error);
+            setErrorMessage(error.message);
         }
 
         setIsTxSend(false);
@@ -452,18 +478,18 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
                 //@ts-ignore
                 address: subscription.userTokenAddress,
                 abi: CicleoSubscriptionManager__factory.abi,
-                functionName: 'changeSubscriptionLimit',
+                functionName: "changeSubscriptionLimit",
                 args: [amountToApprove],
-            })
+            });
 
             setIsTxSend(true);
 
-            await wait()
+            await wait();
         } catch (error: any) {
-            console.log(error)
-            setErrorMessage(error.message)
+            console.log(error);
+            setErrorMessage(error.message);
         }
-        
+
         setIsTxSend(false);
         document.getElementById("cicleo-edit-approval-subscription")?.click();
         setIsLoading(false);
@@ -473,8 +499,6 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
     useEffect(() => {
         getInfo();
     }, [account]);
-
-    
 
     const handleConfirmationPage = () => {
         if (subscription.isCancelled) {
@@ -530,14 +554,14 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
                         ✕
                     </label>
 
-                    {account == null ?
+                    {account == null ? (
                         <Login
                             handleSelectAccount={(address, chainId) => {
-                                setAccount(address)
-                                setCurrentChainId(chainId)
+                                setAccount(address);
+                                setCurrentChainId(chainId);
                             }}
                         />
-                        :
+                    ) : (
                         <AccountModalContent
                             isWrongNetwork={isWrongNetwork}
                             isLoaded={isLoaded}
@@ -547,7 +571,7 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
                             errorMessage={errorMessage}
                             setIsWrongNetwork={setIsWrongNetwork}
                         />
-                    }
+                    )}
                 </div>
             </div>
             {handleConfirmationPage()}

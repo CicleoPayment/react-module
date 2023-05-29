@@ -30,7 +30,7 @@ type HeaderSubscriptionInfo = {
 	handleBackOnNetwork: () => void;
 	handleBackCoins: () => void;
 	handleBackStep: (stepNumber: number) => void;
-	handleEmail: boolean;
+	isEmailEnter: boolean;
 	handleBackEmailUser: () => void;
 };
 
@@ -75,7 +75,7 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
 	handleBackOnNetwork,
 	handleBackStep,
 	handleBackCoins,
-	handleEmail,
+	isEmailEnter,
 	handleBackEmailUser,
 }) => {
 	//In case of info of the subscription is not fetched yet
@@ -83,7 +83,7 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
 
 	const { chain, chains } = getNetwork();
 	let paymentChainId = 0;
-	let chainInfo = null;
+	let chainInfo: any = null;
 	if (chain) {
 		paymentChainId = chain.id;
 
@@ -109,13 +109,7 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
 							) {
 								return <></>;
 							}
-
-							if (handleEmail == true && networkSelected == false)
-								return (
-									<ArrowGetBack
-										onClick={handleBackEmailUser}
-									/>
-								);
+                            
 							if (step == 1 && loadingStep != 1)
 								return (
 									<ArrowGetBack onClick={handleBackCoins} />
@@ -140,7 +134,14 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
 									<ArrowGetBack
 										onClick={handleBackOnNetwork}
 									/>
-								);
+                                );
+                            
+                            if (isEmailEnter == true)
+								return (
+									<ArrowGetBack
+										onClick={handleBackEmailUser}
+									/>
+                                );
 						})()}
 
 						{networkSelected == true &&
