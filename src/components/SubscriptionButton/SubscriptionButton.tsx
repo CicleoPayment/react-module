@@ -1,6 +1,6 @@
 import React, { useState, FC, useEffect } from "react";
 import { BigNumber, Signer, ethers, providers } from "ethers";
-import "./PaymentButton.css";
+import "./SubscriptionButton.css";
 import TextWhite from "@assets/logo_text_white.svg";
 import PayImage from "@assets/pay.svg";
 import { getConfig, doTx, reduceAddress, openOceanIface } from "@context/contract";
@@ -17,11 +17,10 @@ import {
     CicleoSubscriptionBridgeManager__factory, CicleoSubscriptionManager__factory, PaymentFacet__factory
 } from "@context/Types";
 
-type DynamicPaymentButton = {
+type SubscriptionButton = {
+    subscriptionId: number;
     chainId: number;
     subManagerId: number;
-    price: BigNumber;
-    name: string;
     referral?: string;
 };
 
@@ -73,11 +72,10 @@ let _chains: Network[] = [
     }
 ]
 
-const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
+const SubscriptionButton: FC<SubscriptionButton> = ({
+    subscriptionId,
     subManagerId,
     chainId,
-    name,
-    price,
     referral,
 }) => {
     const [account, setAccount] = useState<string | null>(null);
@@ -86,6 +84,9 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
     const [subscriptionInfoIsFetched, setSubscriptionInfoIsFetched] =
         useState(false);
     const [networkSelected, setNetworkSelected] = useState(false);
+
+    const [userInfoLoaded, setUserInfoLoaded] =
+        useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [subManager, setSubManager] = useState<SubManagerInfo>(
@@ -96,6 +97,22 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
     const [coinLists, setCoinLists] = useState([]);
     const [step, setStep] = useState(0);
     const [balance, setBalance] = useState<string | number>("#");
+    const [subscription, setSubscription] = useState({
+        id: subscriptionId,
+        isActive: true,
+        name: "",
+        price: "0",
+        originalPrice: BigNumber.from("0"),
+        tokenSymbol: "",
+        userPrice: "0",
+        originalUserPrice: BigNumber.from("0"),
+    });
+    const [oldSubscription, setOldSubscription] = useState({
+        id: 0,
+        name: "",
+        price: "0",
+        isActive: false,
+    });
     const [loadingStep, setLoadingStep] = useState(0);
     const [stepFunction, setStepFunction] = useState({
         1: (isInfinity: boolean, approvalToken: number) => {},
@@ -184,6 +201,8 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
         const config = await getConfig(paymentChainId);
         const router = config.subscriptionRouterAddress;
         const bridge = config.subscriptionBridgeAddress;
+
+        setApprovalSubscription(Number(ethers.utils.formatUnits(subscription.originalPrice, subManager.decimals)));
     
         if (isBridged) {
             console.log("BRIDGED")
@@ -199,7 +218,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                     symbol: subManager.tokenSymbol,
                     decimals: subManager.decimals,
                 },
-                outAmount: price.toString(),
+                outAmount: subscription.originalUserPrice.toString(),
             });
 
             const approval = await readContract({
@@ -222,27 +241,34 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
 
             const subApproval = users.subscriptionLimit as BigNumber
 
-            if (approval.gte(price)) {
+            if (approval.gte(subscription.originalPrice)) {
                 setStep(2);
                 
-                if (subApproval.gte(price)) {
+                if (subApproval.gte(subscription.originalPrice)) {
                     setStep(3);
                 }
 
                 console.log(subApproval)
             }
-            
-            setApprovalSubscription(Number(ethers.utils.formatUnits(price, coin.decimals)));
+
+            setSubscription({
+                ...subscription,
+                originalPrice: BigNumber.from(coin.toPay),
+                price: ethers.utils.formatUnits(coin.toPay, coin.decimals),
+            });
 
             setStepFunction({
                 1: async (isInfinityToken, approvalToken) => {
                     if (isInfinityToken == false) { 
-                        if (approvalToken < priceFormatted) {
+                        if (approvalToken < Number(subscription.price)) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
                     
                     try {
+
+                        console.log("Eihfi")
+
                         const { hash, wait } = await writeContract({
                             // @ts-ignore
                             address: coin.id,
@@ -269,7 +295,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                 },
                 2: async (isInfinitySubscription, approvalSubscription) => {
                     if (isInfinitySubscription == false) { 
-                        if (approvalSubscription < priceFormatted) {
+                        if (approvalSubscription < Number(subscription.price)) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -297,14 +323,17 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                     }
                 },
                 3: async () => {
+                    console.log("subscription.id != oldSubscription.id");
                     try {
                         const message = ethers.utils.toUtf8Bytes('Cicleo Bridged Subscription\n\n'
                         + 'Chain: ' + chainId + '\n'
                         + 'User: ' + account.toLowerCase() + '\n'
                         + 'SubManager: ' + subManagerId + '\n'
-                        + 'Subscription: 255\n'
-                        + 'Price: ' + price.toString() + '\n'
+                        + 'Subscription: ' + subscriptionId + '\n'
+                        + 'Price: ' + subscription.originalUserPrice.toString() + '\n'
                             + 'Nonce: ' + 0)
+                        
+                        console.log(ethers.utils.keccak256(message))
 
                         let signature = await signMessage({
                             message: message
@@ -341,8 +370,8 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                             [
                                 BigNumber.from(chainId),
                                 BigNumber.from(subManagerId),
-                                255,
-                                price.toString(),
+                                subscriptionId,
+                                subscription.originalUserPrice.toString(),
                                 coin.id
                             ],
                             coin._bridgeData,
@@ -403,17 +432,15 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
 
         const subApproval = users.subscriptionLimit as BigNumber;
 
-        if (approval.gte(price)) {
+        if (approval.gte(ethers.utils.parseUnits(coin.toPay, coin.decimals))) {
             setStep(2);
             
-            if (subApproval.gte(price)) {
+            if (subApproval.gte(subscription.originalUserPrice)) {
                 setStep(3);
             }
+
+            console.log(subApproval)
         }
-        
-        setApprovalSubscription(Number(ethers.utils.formatUnits(price, subManager.decimals)));
-        
-        const priceFormatted = Number(ethers.utils.formatUnits(price, coin.decimals));
 
         //If same coin payment as submanager
         if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
@@ -423,21 +450,19 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                     symbol: subManager.tokenSymbol,
                     decimals: subManager.decimals,
                 },
-                inAmount: price.toString(),
+                inAmount: subscription.originalUserPrice.toString(),
                 outToken: {
                     address: subManager.tokenAddress,
                     symbol: subManager.tokenSymbol,
                     decimals: subManager.decimals,
                 },
-                outAmount: price.toString(),
+                outAmount: subscription.originalUserPrice.toString(),
             });
-
-            
 
             setStepFunction({
                 1: async (isInfinityToken, approvalToken) => {
                     if (isInfinityToken == false) { 
-                        if (approvalToken < priceFormatted) {
+                        if (approvalToken < Number(subscription.userPrice)) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -463,13 +488,16 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                         return
                     }
 
-                    if (subApproval.gte(price)) {
+                    if (subApproval.gte(subscription.originalUserPrice)) {
                         setStep(3);
                     }
                 },
                 2: async (isInfinitySubscription, approvalSubscription) => {
                     if (isInfinitySubscription == false) { 
-                        if (approvalSubscription < priceFormatted) {
+                        console.log(approvalSubscription);
+                        console.log(Number(ethers.utils.formatUnits(coin.toPay, coin.decimals)));
+                        
+                        if (approvalSubscription < Number(ethers.utils.formatUnits(coin.toPay, coin.decimals))) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -481,6 +509,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                             address: subManager.address,
                             abi: CicleoSubscriptionManager__factory.abi,
                             functionName: "changeSubscriptionLimit",
+                           // @ts-ignore
                             args: [isInfinitySubscription ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalSubscription.toString(), subManager.decimals)],
                         })
 
@@ -503,8 +532,8 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                             // @ts-ignore
                             address: router,
                             abi: PaymentFacet__factory.abi,
-                            functionName: "subscribeDynamicly",
-                            args: [subManagerId, name, price, referral != undefined ? referral : ethers.constants.AddressZero]
+                            functionName: "subscribe",
+                            args: [subManagerId, subscriptionId, referral != undefined ? referral : ethers.constants.AddressZero]
                         })
 
                         setLoadingStep(3);
@@ -526,7 +555,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
             let data = JSON.stringify({
                 tokenIn: coin.id,
                 tokenOut: subManager.tokenAddress,
-                price: price.toString(),
+                price: subscription.originalUserPrice.toString(),
                 fromAddress: subManager.address,
             });
 
@@ -547,7 +576,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
             setStepFunction({
                 1: async (isInfinity: boolean, approvalToken: number) => {
                     if (isInfinityToken == false) { 
-                        if (approvalToken < priceFormatted) {
+                        if (approvalToken < Number(subscription.userPrice)) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -570,7 +599,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                         return
                     }
 
-                    if (subApproval.gte(priceFormatted)) {
+                    if (subApproval.gte(subscription.originalUserPrice)) {
                         setStep(3);
                     }
                     
@@ -578,7 +607,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                 },
                 2: async (isInfinity: boolean, approvalSubscription: number) => {
                     if (isInfinitySubscription == false) { 
-                        if (approvalSubscription < priceFormatted) {
+                        if (approvalSubscription < Number(subscription.price)) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -620,8 +649,8 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                             // @ts-ignore
                             address: router,
                             abi: PaymentFacet__factory.abi,
-                            functionName: "subscribeDynamiclyWithSwap",
-                            args: [subManagerId, name, price, referral != undefined ? referral : ethers.constants.AddressZero, decodedData.args.caller, decodedData.args.desc, decodedData.args.calls]
+                            functionName: "subscribeWithSwap",
+                            args: [subManagerId, subscriptionId, referral != undefined ? referral : ethers.constants.AddressZero, decodedData.args.caller, decodedData.args.desc, decodedData.args.calls]
                         })
                         
                         setLoadingStep(3)
@@ -649,16 +678,17 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
     //Called when modal is opened
     const fetchSubscriptionInfo = async () => {
         const subscriptionInfo = await axios.get(
-            `https://backend-test.cicleo.io/chain/${chainId}/getSubscriptionInfo/${subManagerId}/255`
+            `https://backend-test.cicleo.io/chain/${chainId}/getSubscriptionInfo/${subManagerId}/${subscriptionId}`
         );
-
-        console.log("hndihj")
 
         console.log(subscriptionInfo.data);
 
         const _subManager = subscriptionInfo.data.subManager as SubManagerInfo;
 
+        console.log(_subManager)
         setSubManager(_subManager);
+        setSubscription(subscriptionInfo.data.subscription);
+
         setSubscriptionInfoIsFetched(true);
     };
 
@@ -673,14 +703,52 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
         if (!address) return;
 
         const userInfo = await axios.get(
-            `https://backend-test.cicleo.io/chain/${chainId}/getUserInfo/${subManagerId}/255/${address}/${sourceChainId}?price=${price.toString()}`
+            `https://backend-test.cicleo.io/chain/${chainId}/getUserInfo/${subManagerId}/${subscriptionId}/${address}/${sourceChainId}`
         );
 
         setCoinLists(userInfo.data.coinList);
         setIsLoaded(true);
+        //setCoinLists(userInfo.data.coinList);
+    };
+
+    const getUserSub = async (address: string) => {
+        console.log("Get user info");
+        if (!address) return;
+
+        const userInfo = await axios.get(
+            `https://backend-test.cicleo.io/chain/${chainId}/getUserSub/${subManagerId}/${subscriptionId}/${address}/`
+        );
+
+        console.log(userInfo.data);
+
+        setOldSubscription({
+            id: userInfo.data.id,
+            name: userInfo.data.name,
+            price: ethers.utils.formatUnits(userInfo.data.price, subManager.decimals),
+            isActive: userInfo.data.isActive,
+        });
+
+        let _subscription = subscription;
+
+        console.log(userInfo.data.userPrice);
+        console.log(subManager)
+        setSubscription({
+            ..._subscription,
+            originalUserPrice: BigNumber.from(userInfo.data.userPrice),
+            userPrice: ethers.utils.formatUnits(userInfo.data.userPrice, subManager.decimals),
+        });
+        
+        setUserInfoLoaded(true);
     };
 
     useEffect(() => {
+        if (account && subManager.decimals != null) {
+            getUserSub(account);
+        }
+     }, [account, subManager]);
+
+    useEffect(() => {
+        //createContracts();
         getUserTokenList();
     }, [networkSelected]);
 
@@ -692,7 +760,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
     return (
         <>
             <label
-                htmlFor={"cicleo-payment-modal-" + name}
+                htmlFor={"cicleo-payment-modal-" + subscriptionId}
                 className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
                 <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
@@ -702,13 +770,9 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
 
             <input
                 type="checkbox"
-                id={"cicleo-payment-modal-" + name}
+                id={"cicleo-payment-modal-" + subscriptionId}
                 className="cap-modal-toggle"
-                onChange={(event) => { 
-                    if (event.target.checked) {
-                        fetchSubscriptionInfo();
-                    }
-                }}
+                onChange={fetchSubscriptionInfo}
             />
             <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
                 <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
@@ -720,7 +784,7 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                         
                     </div>
                     <label
-                        htmlFor={"cicleo-payment-modal-" + name}
+                        htmlFor={"cicleo-payment-modal-" + subscriptionId}
                         className="cap-absolute cap-btn cap-btn-sm cap-btn-circle cap-right-2 cap-top-2"
                         onChange={fetchSubscriptionInfo}
                     >
@@ -728,9 +792,9 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                     </label>
 
                     <HeaderSubscriptionInfo
-                        name={name}
-                        price={ethers.utils.formatUnits(price, subManager.decimals)}
-                        tokenSymbol={subManager.tokenSymbol}
+                        subscription={subscription}
+                        oldSubscription={oldSubscription}
+                        subscriptionInfoIsFetched={subscriptionInfoIsFetched}
                         step={step}
                         loadingStep={loadingStep}
                         duration={subManager.duration}
@@ -761,10 +825,22 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                             symbol: coin.symbol,
                             balance: coin.balance,
                         }}
-                        subscriptionInfoIsFetched={subscriptionInfoIsFetched}
                     />
 
                     {(() => {
+                        if (subscription.id == oldSubscription.id && oldSubscription.isActive) return (
+                            <div className="cap-p-4">
+                                <div className="cap-alert cap-alert-success cap-shadow-lg">
+                                    <div className="cap-flex">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span>
+                                            You are already subscribed !
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+
                         if (account == null) return (
                             <Login
                                 handleSelectAccount={(address) => {
@@ -773,11 +849,15 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                             />
                         );
 
-                        if (subscriptionInfoIsFetched == false) return (
+                        if (!subscriptionInfoIsFetched) return (
                             <LoadingState text="We're getting info on the subscription..." />
                         );
 
-                        if (networkSelected == false)
+                        if (userInfoLoaded == false) return (
+                            <LoadingState text="We're getting some last info..." />
+                        );
+
+                        if (!networkSelected)
                             return (
                                 <SelectNetwork
                                     handleSelectNetwork={handleSelectNetwork}
@@ -789,9 +869,8 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                             return (
                                 <SelectCoin
                                     isLoaded={isLoaded}
-                                    name={name}
-                                    price={ethers.utils.formatUnits(price, subManager.decimals)}
-                                    tokenSymbol={subManager.tokenSymbol}
+                                    subscription={subscription}
+                                    oldSubscription={oldSubscription}
                                     coinLists={coinLists}
                                     setCoin={changeToken}
                                 />
@@ -801,8 +880,8 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
                         return (
                             <Payment
                                 isLoaded={isLoaded}
-                                price={ethers.utils.formatUnits(price, subManager.decimals)}
-                                name={name}
+                                subscription={subscription}
+                                oldSubscription={oldSubscription}
                                 step={step}
                                 stepFunction={stepFunction}
                                 loadingStep={loadingStep}
@@ -831,4 +910,4 @@ const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
     );
 };
 
-export default DynamicPaymentButton;
+export default SubscriptionButton;

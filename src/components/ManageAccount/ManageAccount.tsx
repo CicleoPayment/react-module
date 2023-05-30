@@ -1,8 +1,8 @@
 import React, { useState, FC, useEffect } from "react";
 import { BigNumber, ethers, Signer } from "ethers";
-import "./AccountBlock.css";
+import "./ManageAccount.css";
 import TextWhite from "@assets/logo_text_white.svg";
-import { ConfirmationModal } from "./../index";
+import { ConfirmationModal } from "../index";
 import { reduceAddress } from "@context/contract";
 import { SiweMessage } from "siwe";
 import axios from "axios";
@@ -117,7 +117,7 @@ async function signInWithEthereum(signer: ethers.providers.JsonRpcSigner) {
     return json;
 }
 
-type AccountModalContent = {
+type ManageAccount = {
     isWrongNetwork: boolean;
     isLoaded: boolean;
     account: string;
@@ -127,7 +127,7 @@ type AccountModalContent = {
     setIsWrongNetwork: (value: boolean) => void;
 };
 
-const AccountModalContent: FC<AccountModalContent> = ({
+const ManageAccount: FC<ManageAccount> = ({
     isWrongNetwork,
     isLoaded,
     account,
@@ -562,7 +562,7 @@ const AccountBlock: FC<AccountBlock> = ({ chainId, subManagerId }) => {
                             }}
                         />
                     ) : (
-                        <AccountModalContent
+                        <ManageAccount
                             isWrongNetwork={isWrongNetwork}
                             isLoaded={isLoaded}
                             account={account || ""}
