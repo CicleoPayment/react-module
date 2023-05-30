@@ -21,9 +21,8 @@ let config: any;
 
 const getConfig = async (networkId: number) => {
     const resp = await axios.get("https://backend-test.cicleo.io/chain");
-    console.log(resp.data)
+    console.log(resp.data);
     return resp.data[networkId];
-
 };
 const reduceAddress = (address: string) => {
     return address.slice(0, 6) + "..." + address.slice(address.length - 4);
@@ -378,5 +377,5 @@ export {
     reduceAddress,
     formatNumber,
     openOceanIface,
-    getConfig
+    getConfig,
 };

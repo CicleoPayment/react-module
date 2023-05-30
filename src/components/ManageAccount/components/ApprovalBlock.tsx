@@ -10,7 +10,7 @@ const getDurationPeriod = (duration: number) => {
     if (duration == 30 * 86400) return "month";
     if (duration == 7 * 86400) return "week";
     if (duration == 86400) return "day";
-}
+};
 
 const ApprovalBlock: FC<ApprovalBlock> = ({ subManager, subscription }) => {
     const getDefaultValueInput = (approval: any, decimals: number) => {
@@ -61,7 +61,8 @@ const ApprovalBlock: FC<ApprovalBlock> = ({ subManager, subscription }) => {
                               subManager.allowance,
                               subManager.decimals
                           )}{" "}
-                    {subManager.tokenSymbol} per {getDurationPeriod(subManager.duration)}
+                    {subManager.tokenSymbol} per{" "}
+                    {getDurationPeriod(subManager.duration)}
                 </span>
 
                 <label

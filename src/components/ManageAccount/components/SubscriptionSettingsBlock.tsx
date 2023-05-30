@@ -10,19 +10,17 @@ const getDurationPeriod = (duration: number) => {
     if (duration == 30 * 86400) return "month";
     if (duration == 7 * 86400) return "week";
     if (duration == 86400) return "day";
-}
+};
 
 const SubscriptionSettingsBlock: FC<SubscriptionSettingsBlock> = ({
     subscription,
     symbol,
-    duration
+    duration,
 }) => {
     if (subscription.isCancelled) {
         return (
-            
             <div className="cap-grow cap-flex cap-flex-col cap-py-4 cap-space-y-2">
                 <span className=" cap-font-semibold">
-                    
                     Your canceled subscription
                 </span>
                 <div className="cap-divider !cap-mt-0 !cap-mb-0 "></div>
@@ -31,7 +29,8 @@ const SubscriptionSettingsBlock: FC<SubscriptionSettingsBlock> = ({
                         {subscription.name} Package
                     </span>
                     <span className="cap-text-sm cap-text-gray-500">
-                        {subscription.price} {symbol} per {getDurationPeriod(duration)}
+                        {subscription.price} {symbol} per{" "}
+                        {getDurationPeriod(duration)}
                     </span>
                 </div>
 
@@ -60,7 +59,13 @@ const SubscriptionSettingsBlock: FC<SubscriptionSettingsBlock> = ({
                             {subscription.name}
                         </span>
                         <span className="cap-text-sm cap-text-gray-500">
-                            {Number(subscription.price) == 0 ? "Free" : subscription.price + " " + symbol + " per " + getDurationPeriod(duration)}
+                            {Number(subscription.price) == 0
+                                ? "Free"
+                                : subscription.price +
+                                  " " +
+                                  symbol +
+                                  " per " +
+                                  getDurationPeriod(duration)}
                         </span>
                     </div>
 
@@ -73,14 +78,14 @@ const SubscriptionSettingsBlock: FC<SubscriptionSettingsBlock> = ({
                         </span>
                     </div>
                 </div>
-                
+
                 <label
                     htmlFor="cicleo-change-token"
                     className="cap-btn cap-btn-primary"
                 >
                     Change Token
                 </label>
-                
+
                 <label
                     htmlFor="cicleo-confirm-modal-cancel"
                     className="cap-btn cap-btn-error"

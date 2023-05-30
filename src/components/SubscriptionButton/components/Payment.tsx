@@ -10,26 +10,29 @@ type ApprovalSelector = {
     textLabel: string;
     setApprovalAmount: (approvalAmount: number) => void;
     approvalAmount: number;
-}
+};
 
-const ApprovalSelector: FC<ApprovalSelector> = ({ isInfinity, setIsInfinity, textLabel, approvalAmount, setApprovalAmount }) => { 
-
+const ApprovalSelector: FC<ApprovalSelector> = ({
+    isInfinity,
+    setIsInfinity,
+    textLabel,
+    approvalAmount,
+    setApprovalAmount,
+}) => {
     const toggleInfinity = (e: any) => {
         setIsInfinity(e.target.checked);
     };
 
     const handleOnChangeValue = (e: any) => {
         setApprovalAmount(e.target.value);
-    }
-    
+    };
+
     return (
         <div className="cap-flex cap-space-x-5">
             <div className="cap-flex-grow">
                 <div className="cap-form-control">
                     <label className="cap-label">
-                        <span className="cap-label-text">
-                            Approval
-                        </span>
+                        <span className="cap-label-text">Approval</span>
                     </label>
                     <label className="cap-input-group">
                         <input
@@ -61,17 +64,16 @@ const ApprovalSelector: FC<ApprovalSelector> = ({ isInfinity, setIsInfinity, tex
                         checked={isInfinity}
                         className="cap-checkbox"
                     />
-                    <label
-                        htmlFor="infinity-checkbox"
-                        className="cap-label"
-                    >
-                        <span className="cap-label-text">Unlimited approval</span>
+                    <label htmlFor="infinity-checkbox" className="cap-label">
+                        <span className="cap-label-text">
+                            Unlimited approval
+                        </span>
                     </label>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 type Step = {
     onClick: () => void;
@@ -116,20 +118,41 @@ const Step1: FC<Step> = ({
 
                 <div className="cap-alert cap-alert-info cap-shadow-lg cap-mt-2">
                     <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="cap-stroke-current cap-flex-shrink-0 cap-w-6 cap-h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>We advise you to use recommanded parameters. For Metamask users click on "use default" button on the approval window</span>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            className="cap-stroke-current cap-flex-shrink-0 cap-w-6 cap-h-6"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                        <span>
+                            We advise you to use recommanded parameters. For
+                            Metamask users click on "use default" button on the
+                            approval window
+                        </span>
                     </div>
                 </div>
 
                 <span className="cap-font-normal cap-text-red-400">
                     {errorMessage}
                 </span>
-                
+
                 <div className="cap-mt-4">
                     {/* // @ts-ignore */}
-                    <ApprovalSelector textLabel={swapInfo.inToken.symbol} isInfinity={isInfinity || false} setIsInfinity={setIsInfinity || (() => {})} setApprovalAmount={setApprovalAmount|| (() => {})} approvalAmount={approvalAmount || 0} />
+                    <ApprovalSelector
+                        textLabel={swapInfo.inToken.symbol}
+                        isInfinity={isInfinity || false}
+                        setIsInfinity={setIsInfinity || (() => {})}
+                        setApprovalAmount={setApprovalAmount || (() => {})}
+                        approvalAmount={approvalAmount || 0}
+                    />
                 </div>
-                
             </div>
 
             <div className="cap-modal-action">
@@ -156,7 +179,7 @@ const Step2: FC<Step> = ({
     isInfinity,
     approvalAmount,
     setApprovalAmount,
-    swapInfo
+    swapInfo,
 }) => {
     return (
         <div className="cap-text-left cap-space-y-10">
@@ -172,7 +195,13 @@ const Step2: FC<Step> = ({
 
                 <div className="cap-mt-4">
                     {/* // @ts-ignore */}
-                    <ApprovalSelector textLabel={`${swapInfo.outToken.symbol}`} isInfinity={isInfinity || false} setIsInfinity={setIsInfinity || (() => {})} setApprovalAmount={setApprovalAmount|| (() => {})} approvalAmount={approvalAmount || 0} />
+                    <ApprovalSelector
+                        textLabel={`${swapInfo.outToken.symbol}`}
+                        isInfinity={isInfinity || false}
+                        setIsInfinity={setIsInfinity || (() => {})}
+                        setApprovalAmount={setApprovalAmount || (() => {})}
+                        approvalAmount={approvalAmount || 0}
+                    />
                 </div>
             </div>
 
@@ -194,13 +223,8 @@ const formatPrice = (price: any, decimals: number, symbol: string) => {
         return "Free";
     }
 
-    return `${Number(
-        utils.formatUnits(
-            price,
-            decimals
-        )
-    ).toFixed(2)} ${symbol}`
-}
+    return `${Number(utils.formatUnits(price, decimals)).toFixed(2)} ${symbol}`;
+};
 
 const Step3: FC<Step> = ({
     onClick,
@@ -216,7 +240,8 @@ const Step3: FC<Step> = ({
                 <div className="cap-text-left cap-space-y-10">
                     <div className="cap-px-8">
                         <h3 className="cap-font-medium">
-                            Subscribe for{" "}{subscription.userPrice} {swapInfo.outToken.symbol}
+                            Subscribe for {subscription.userPrice}{" "}
+                            {swapInfo.outToken.symbol}
                         </h3>
                         <p className="cap-text-sm">
                             Begin your Cicleo transaction-free payment plan now!
@@ -232,18 +257,25 @@ const Step3: FC<Step> = ({
                             onClick={onClick}
                         >
                             <span>
-                                Subscribe for{" "}{subscription.userPrice} {swapInfo.outToken.symbol}
+                                Subscribe for {subscription.userPrice}{" "}
+                                {swapInfo.outToken.symbol}
                             </span>
-                            {isLoading && <ClipLoader color={"#fff"} size={20} />}
+                            {isLoading && (
+                                <ClipLoader color={"#fff"} size={20} />
+                            )}
                         </button>
                     </div>
                 </div>
             ) : (
-
                 <div className="cap-text-left cap-space-y-10">
                     <div className="cap-px-8">
                         <h3 className="cap-font-medium">
-                            Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
+                            Subscribe for{" "}
+                            {formatPrice(
+                                swapInfo.inAmount,
+                                swapInfo.inToken.decimals,
+                                swapInfo.outToken.symbol
+                            )}
                         </h3>
                         <p className="cap-text-sm">
                             Begin your Cicleo transaction-free payment plan now!
@@ -259,15 +291,20 @@ const Step3: FC<Step> = ({
                             onClick={onClick}
                         >
                             <span>
-                                Subscribe for{" "}{formatPrice(swapInfo.inAmount, swapInfo.inToken.decimals, swapInfo.outToken.symbol)}
+                                Subscribe for{" "}
+                                {formatPrice(
+                                    swapInfo.inAmount,
+                                    swapInfo.inToken.decimals,
+                                    swapInfo.outToken.symbol
+                                )}
                             </span>
-                            {isLoading && <ClipLoader color={"#fff"} size={20} />}
+                            {isLoading && (
+                                <ClipLoader color={"#fff"} size={20} />
+                            )}
                         </button>
                     </div>
                 </div>
-            )
-            }
-
+            )}
         </>
     );
 };
@@ -277,7 +314,7 @@ type Approval = {
     amount: number;
     setIsInfinity: (isInfinity: boolean) => void;
     setAmount: (amount: number) => void;
-}
+};
 
 type Payment = {
     isLoaded: boolean;
@@ -291,7 +328,7 @@ type Payment = {
     isPurchased: boolean;
     token: Approval;
     subscriptionLimit: Approval;
-    isViaBridge: boolean
+    isViaBridge: boolean;
 };
 
 const Payment: FC<Payment> = ({
@@ -306,7 +343,7 @@ const Payment: FC<Payment> = ({
     isPurchased,
     token,
     subscriptionLimit,
-    isViaBridge
+    isViaBridge,
 }) => {
     if (isPurchased) {
         return (
@@ -315,7 +352,14 @@ const Payment: FC<Payment> = ({
                     Thanks for your subscription!
                 </h2>
 
-                {isViaBridge && <span>Note that since you use a bridge to pay this subscription that can take some mintues to perform on the destination chain! You'll receive an email when that would be done !</span>}
+                {isViaBridge && (
+                    <span>
+                        Note that since you use a bridge to pay this
+                        subscription that can take some mintues to perform on
+                        the destination chain! You'll receive an email when that
+                        would be done !
+                    </span>
+                )}
 
                 <div className="cap-shadow-lg cap-alert cap-alert-success">
                     <div>
@@ -374,20 +418,23 @@ const Payment: FC<Payment> = ({
                     <>
                         <ul className="cap-steps cap-steps-vertical lg:cap-steps-horizontal">
                             <li
-                                className={`cap-step ${step >= 1 && "cap-step-primary"
-                                    }`}
+                                className={`cap-step ${
+                                    step >= 1 && "cap-step-primary"
+                                }`}
                             >
                                 Approve {swapInfo.inToken.symbol}
                             </li>
                             <li
-                                className={`cap-step ${step >= 2 && "cap-step-primary"
-                                    }`}
+                                className={`cap-step ${
+                                    step >= 2 && "cap-step-primary"
+                                }`}
                             >
                                 Subscription Limit
                             </li>
                             <li
-                                className={`cap-step ${step == 3 && "cap-step-primary"
-                                    }`}
+                                className={`cap-step ${
+                                    step == 3 && "cap-step-primary"
+                                }`}
                             >
                                 Subscribe
                             </li>
@@ -396,7 +443,12 @@ const Payment: FC<Payment> = ({
                         <div className="cap-mt-8 ">
                             {step == 1 && (
                                 <Step1
-                                    onClick={() => stepFunction[1](token.isInfinity, token.amount)}
+                                    onClick={() =>
+                                        stepFunction[1](
+                                            token.isInfinity,
+                                            token.amount
+                                        )
+                                    }
                                     subscription={subscription}
                                     oldSubscription={oldSubscription}
                                     isLoading={loadingStep == 1}
@@ -411,16 +463,25 @@ const Payment: FC<Payment> = ({
 
                             {step == 2 && (
                                 <Step2
-                                    onClick={() => stepFunction[2](subscriptionLimit.isInfinity, subscriptionLimit.amount)}
+                                    onClick={() =>
+                                        stepFunction[2](
+                                            subscriptionLimit.isInfinity,
+                                            subscriptionLimit.amount
+                                        )
+                                    }
                                     subscription={subscription}
                                     oldSubscription={oldSubscription}
                                     isLoading={loadingStep == 2}
                                     errorMessage={errorMessage}
                                     swapInfo={swapInfo}
                                     isInfinity={subscriptionLimit.isInfinity}
-                                    setIsInfinity={subscriptionLimit.setIsInfinity}
+                                    setIsInfinity={
+                                        subscriptionLimit.setIsInfinity
+                                    }
                                     approvalAmount={subscriptionLimit.amount}
-                                    setApprovalAmount={subscriptionLimit.setAmount}
+                                    setApprovalAmount={
+                                        subscriptionLimit.setAmount
+                                    }
                                 />
                             )}
 

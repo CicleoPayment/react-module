@@ -8,7 +8,12 @@ type ConfirmationModal = {
     onConfirm: () => void;
 };
 
-const ConfirmationModal: FC<ConfirmationModal> = ({ name, confirmationMessageHeader, confirmationMessage, onConfirm }) => {
+const ConfirmationModal: FC<ConfirmationModal> = ({
+    name,
+    confirmationMessageHeader,
+    confirmationMessage,
+    onConfirm,
+}) => {
     return (
         <>
             <input
@@ -34,18 +39,30 @@ const ConfirmationModal: FC<ConfirmationModal> = ({ name, confirmationMessageHea
                         </div>
                     </div>
 
-                    
-                    <div className="cap-flex cap-w-full cap-justify-between cap-space-y-4 cap-py-4 cap-px-5 cap-leading-[1.2] cap-flex-col" >
-                        <span className="cap-font-bold cap-text-2xl">{confirmationMessageHeader}</span>
+                    <div className="cap-flex cap-w-full cap-justify-between cap-space-y-4 cap-py-4 cap-px-5 cap-leading-[1.2] cap-flex-col">
+                        <span className="cap-font-bold cap-text-2xl">
+                            {confirmationMessageHeader}
+                        </span>
                         <div className="cap-shadow-lg cap-alert cap-alert-info">
                             <div>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span>{ confirmationMessage }</span>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    ></path>
+                                </svg>
+                                <span>{confirmationMessage}</span>
                             </div>
                         </div>
                     </div>
 
-                    
                     {/* <!-- Modal footer --> */}
                     <div className="cap-modal-action cap-m-4">
                         <label
@@ -55,7 +72,6 @@ const ConfirmationModal: FC<ConfirmationModal> = ({ name, confirmationMessageHea
                         >
                             Confirm
                         </label>
-                        
                     </div>
                 </div>
             </div>

@@ -18,8 +18,6 @@ type Coin = {
     balance: number;
 };
 
-
-
 const getDurationPeriod = (duration: number) => {
     if (duration == 30 * 86400) return "month";
 
@@ -81,20 +79,20 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
     handleBackCoins,
     isEmailEnter,
     handleBackEmailUser,
-    subscriptionInfoIsFetched
+    subscriptionInfoIsFetched,
 }) => {
     let paymentChainId = 0;
     let chainInfo: any = null;
 
     if (networkSelected) {
         const { chain } = getNetwork();
-        
+
         if (chain) {
             paymentChainId = chain.id;
-    
+
             for (let i = 0; i < _chains.length; i++) {
                 let _chainInfo = _chains[i];
-    
+
                 if (_chainInfo.chainId == paymentChainId) {
                     chainInfo = _chainInfo;
                 }
@@ -102,7 +100,7 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
         }
     }
 
-    if (subscriptionInfoIsFetched == false) return <></>
+    if (subscriptionInfoIsFetched == false) return <></>;
 
     //If user didnt have a actual subscription
     return (
@@ -111,9 +109,7 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
                 <div className="cap-flex cap-items-center cap-space-x-2">
                     {(() => {
                         if (step == 1 && loadingStep != 1)
-                            return (
-                                <ArrowGetBack onClick={handleBackCoins} />
-                            );
+                            return <ArrowGetBack onClick={handleBackCoins} />;
 
                         if (step == 2 && loadingStep != 2)
                             return (
@@ -131,9 +127,7 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
 
                         if (networkSelected == true)
                             return (
-                                <ArrowGetBack
-                                    onClick={handleBackOnNetwork}
-                                />
+                                <ArrowGetBack onClick={handleBackOnNetwork} />
                             );
 
                         /* if (isEmailEnter == true)
@@ -154,14 +148,14 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
                                 width={40}
                                 height={40}
                             />
-                    )}
+                        )}
                     <div className="cap-flex cap-flex-col cap-justify-center">
                         <span className="cap-text-xl cap-font-semibold">
                             {name}
                         </span>
                         <span className="cap-text-lg cap-font-medium">
-                            {price} {tokenSymbol}{" "}
-                            per {getDurationPeriod(duration)}
+                            {price} {tokenSymbol} per{" "}
+                            {getDurationPeriod(duration)}
                         </span>
                     </div>
                 </div>
@@ -188,7 +182,6 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
             <div className="cap-divider cap-my-0"></div>
         </>
     );
-
 };
 
 export default HeaderSubscriptionInfo;

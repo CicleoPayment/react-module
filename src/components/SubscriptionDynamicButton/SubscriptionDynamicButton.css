@@ -1,18 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@200;300;400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Mulish:wght@200;300;400;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @font-face {
-    font-family: 'Cicleo';
+    font-family: "Cicleo";
     font-style: normal;
     font-weight: 400;
-    src: url('https://cicleo.io/fonts/Cicleo.woff2') format('woff2'),
-    url('https://cicleo.io/fonts/Cicleo.woff') format('woff');
-  }
+    src: url("https://cicleo.io/fonts/Cicleo.woff2") format("woff2"),
+        url("https://cicleo.io/fonts/Cicleo.woff") format("woff");
+}
 
-.cap-font-bold, .cap-font-semibold {
+.cap-font-bold,
+.cap-font-semibold {
     font-family: "Outfit", sans-serif;
 }
 
@@ -28,20 +29,20 @@
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    background-color: rgb(0, 0, 0); /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
     color: white;
 }
-  
-  /* Modal Content/Box */
+
+/* Modal Content/Box */
 .cicleo-modal-content {
     margin: 15% auto; /* 15% from the top and centered */
     max-width: 40%; /* Could be more or less, depending on screen size */
-    font-family: 'Mulish', sans-serif;
+    font-family: "Mulish", sans-serif;
 }
 
 .cicleo-blue-button {
-    background-color: #0037A5;
+    background-color: #0037a5;
     color: white;
     border: none;
     border-radius: 4px;
@@ -53,7 +54,6 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    
 }
 
 .cicleo-blue-button img {
@@ -61,7 +61,6 @@
     height: 22px;
     margin-left: 8px;
 }
-
 
 .cicleo-blue-button:hover {
     background-color: darkblue;
@@ -73,15 +72,6 @@
 
 .cicleo-blue-button span {
     flex-grow: 1;
-    font-family: 'Mulish', sans-serif;
+    font-family: "Mulish", sans-serif;
     font-weight: 700;
 }
-
-
-
-
-
-
-
-
-

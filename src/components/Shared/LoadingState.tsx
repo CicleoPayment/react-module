@@ -1,8 +1,8 @@
 import React from "react";
 
 type LoadingState = {
-    text: string,
-}
+    text: string;
+};
 
 const LoadingState: React.FC<LoadingState> = ({ text }) => {
     return (
@@ -12,7 +12,7 @@ const LoadingState: React.FC<LoadingState> = ({ text }) => {
             </span>
             <progress className="cap-w-56 cap-progress"></progress>
         </div>
-    )
-}
+    );
+};
 
 export default LoadingState;

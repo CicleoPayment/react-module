@@ -57,8 +57,8 @@ const EditApproval: FC<EditApproval> = ({
         if (approval == undefined) return;
         if (approval.eq(ethers.constants.MaxUint256)) return "1";
         if (approval) {
-            return ethers.utils.formatUnits(approval, decimals)
-        };
+            return ethers.utils.formatUnits(approval, decimals);
+        }
     };
 
     useEffect(() => {
@@ -142,7 +142,9 @@ const EditApproval: FC<EditApproval> = ({
                                                 defaultValue={getDefaultValueInput()}
                                                 className="cap-input cap-input-bordered"
                                             />
-                                            <span className="cap-max-w-[30rem]">{labelTextInput}</span>
+                                            <span className="cap-max-w-[30rem]">
+                                                {labelTextInput}
+                                            </span>
                                         </label>
                                     </div>
                                 </div>
@@ -163,7 +165,9 @@ const EditApproval: FC<EditApproval> = ({
                                             htmlFor="infinity-checkbox"
                                             className="cap-label"
                                         >
-                                            <span className="cap-label-text">Unlimited approval</span>
+                                            <span className="cap-label-text">
+                                                Unlimited approval
+                                            </span>
                                         </label>
                                     </div>
                                 </div>

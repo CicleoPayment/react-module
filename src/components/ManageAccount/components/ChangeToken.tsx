@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from "react";
 import TextWhite from "@assets/logo_text_white.svg";
 import axios from "axios";
 import { BigNumber, utils } from "ethers";
-import { getNetwork } from '@wagmi/core'
+import { getNetwork } from "@wagmi/core";
 
 type ChangeToken = {
     subManager: any;
@@ -25,10 +25,10 @@ const ChangeToken: FC<ChangeToken> = ({
         if (subManager == undefined) return;
         console.log(subscription);
 
-        const { chain } = getNetwork()
+        const { chain } = getNetwork();
 
         if (chain == undefined) return;
-        
+
         const coinList = await axios.get(
             `https://backend-test.cicleo.io/chain/${chain.id}/getBalance/${address}/${subManager.tokenAddress}/${subscription.originalPrice}`
         );
