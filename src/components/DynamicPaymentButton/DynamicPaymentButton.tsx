@@ -17,10 +17,11 @@ import {
     CicleoSubscriptionBridgeManager__factory, CicleoSubscriptionManager__factory, PaymentFacet__factory
 } from "@context/Types";
 
-type PaymentButton = {
-    subscriptionId: number;
+type DynamicPaymentButton = {
     chainId: number;
     subManagerId: number;
+    price: BigNumber;
+    name: string;
     referral?: string;
 };
 
@@ -72,10 +73,11 @@ let _chains: Network[] = [
     }
 ]
 
-const PaymentButton: FC<PaymentButton> = ({
-    subscriptionId,
+const DynamicPaymentButton: FC<DynamicPaymentButton> = ({
     subManagerId,
     chainId,
+    name,
+    price,
     referral,
 }) => {
     const [account, setAccount] = useState<string | null>(null);
@@ -84,9 +86,6 @@ const PaymentButton: FC<PaymentButton> = ({
     const [subscriptionInfoIsFetched, setSubscriptionInfoIsFetched] =
         useState(false);
     const [networkSelected, setNetworkSelected] = useState(false);
-
-    const [userInfoLoaded, setUserInfoLoaded] =
-        useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [subManager, setSubManager] = useState<SubManagerInfo>(
@@ -97,22 +96,6 @@ const PaymentButton: FC<PaymentButton> = ({
     const [coinLists, setCoinLists] = useState([]);
     const [step, setStep] = useState(0);
     const [balance, setBalance] = useState<string | number>("#");
-    const [subscription, setSubscription] = useState({
-        id: subscriptionId,
-        isActive: true,
-        name: "",
-        price: "0",
-        originalPrice: BigNumber.from("0"),
-        tokenSymbol: "",
-        userPrice: "0",
-        originalUserPrice: BigNumber.from("0"),
-    });
-    const [oldSubscription, setOldSubscription] = useState({
-        id: 0,
-        name: "",
-        price: "0",
-        isActive: false,
-    });
     const [loadingStep, setLoadingStep] = useState(0);
     const [stepFunction, setStepFunction] = useState({
         1: (isInfinity: boolean, approvalToken: number) => {},
@@ -201,8 +184,6 @@ const PaymentButton: FC<PaymentButton> = ({
         const config = await getConfig(paymentChainId);
         const router = config.subscriptionRouterAddress;
         const bridge = config.subscriptionBridgeAddress;
-
-        setApprovalSubscription(Number(ethers.utils.formatUnits(subscription.originalPrice, subManager.decimals)));
     
         if (isBridged) {
             console.log("BRIDGED")
@@ -218,7 +199,7 @@ const PaymentButton: FC<PaymentButton> = ({
                     symbol: subManager.tokenSymbol,
                     decimals: subManager.decimals,
                 },
-                outAmount: subscription.originalUserPrice.toString(),
+                outAmount: price.toString(),
             });
 
             const approval = await readContract({
@@ -241,34 +222,27 @@ const PaymentButton: FC<PaymentButton> = ({
 
             const subApproval = users.subscriptionLimit as BigNumber
 
-            if (approval.gte(subscription.originalPrice)) {
+            if (approval.gte(price)) {
                 setStep(2);
                 
-                if (subApproval.gte(subscription.originalPrice)) {
+                if (subApproval.gte(price)) {
                     setStep(3);
                 }
 
                 console.log(subApproval)
             }
-
-            setSubscription({
-                ...subscription,
-                originalPrice: BigNumber.from(coin.toPay),
-                price: ethers.utils.formatUnits(coin.toPay, coin.decimals),
-            });
+            
+            setApprovalSubscription(Number(ethers.utils.formatUnits(price, coin.decimals)));
 
             setStepFunction({
                 1: async (isInfinityToken, approvalToken) => {
                     if (isInfinityToken == false) { 
-                        if (approvalToken < Number(subscription.price)) {
+                        if (approvalToken < priceFormatted) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
                     
                     try {
-
-                        console.log("Eihfi")
-
                         const { hash, wait } = await writeContract({
                             // @ts-ignore
                             address: coin.id,
@@ -295,7 +269,7 @@ const PaymentButton: FC<PaymentButton> = ({
                 },
                 2: async (isInfinitySubscription, approvalSubscription) => {
                     if (isInfinitySubscription == false) { 
-                        if (approvalSubscription < Number(subscription.price)) {
+                        if (approvalSubscription < priceFormatted) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -323,17 +297,14 @@ const PaymentButton: FC<PaymentButton> = ({
                     }
                 },
                 3: async () => {
-                    console.log("subscription.id != oldSubscription.id");
                     try {
                         const message = ethers.utils.toUtf8Bytes('Cicleo Bridged Subscription\n\n'
                         + 'Chain: ' + chainId + '\n'
                         + 'User: ' + account.toLowerCase() + '\n'
                         + 'SubManager: ' + subManagerId + '\n'
-                        + 'Subscription: ' + subscriptionId + '\n'
-                        + 'Price: ' + subscription.originalUserPrice.toString() + '\n'
+                        + 'Subscription: 255\n'
+                        + 'Price: ' + price.toString() + '\n'
                             + 'Nonce: ' + 0)
-                        
-                        console.log(ethers.utils.keccak256(message))
 
                         let signature = await signMessage({
                             message: message
@@ -370,8 +341,8 @@ const PaymentButton: FC<PaymentButton> = ({
                             [
                                 BigNumber.from(chainId),
                                 BigNumber.from(subManagerId),
-                                subscriptionId,
-                                subscription.originalUserPrice.toString(),
+                                255,
+                                price.toString(),
                                 coin.id
                             ],
                             coin._bridgeData,
@@ -432,15 +403,17 @@ const PaymentButton: FC<PaymentButton> = ({
 
         const subApproval = users.subscriptionLimit as BigNumber;
 
-        if (approval.gte(ethers.utils.parseUnits(coin.toPay, coin.decimals))) {
+        if (approval.gte(price)) {
             setStep(2);
             
-            if (subApproval.gte(subscription.originalUserPrice)) {
+            if (subApproval.gte(price)) {
                 setStep(3);
             }
-
-            console.log(subApproval)
         }
+        
+        setApprovalSubscription(Number(ethers.utils.formatUnits(price, subManager.decimals)));
+        
+        const priceFormatted = Number(ethers.utils.formatUnits(price, coin.decimals));
 
         //If same coin payment as submanager
         if (coin.id.toUpperCase() == subManager.tokenAddress.toUpperCase()) {
@@ -450,19 +423,21 @@ const PaymentButton: FC<PaymentButton> = ({
                     symbol: subManager.tokenSymbol,
                     decimals: subManager.decimals,
                 },
-                inAmount: subscription.originalUserPrice.toString(),
+                inAmount: price.toString(),
                 outToken: {
                     address: subManager.tokenAddress,
                     symbol: subManager.tokenSymbol,
                     decimals: subManager.decimals,
                 },
-                outAmount: subscription.originalUserPrice.toString(),
+                outAmount: price.toString(),
             });
+
+            
 
             setStepFunction({
                 1: async (isInfinityToken, approvalToken) => {
                     if (isInfinityToken == false) { 
-                        if (approvalToken < Number(subscription.userPrice)) {
+                        if (approvalToken < priceFormatted) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -488,16 +463,13 @@ const PaymentButton: FC<PaymentButton> = ({
                         return
                     }
 
-                    if (subApproval.gte(subscription.originalUserPrice)) {
+                    if (subApproval.gte(price)) {
                         setStep(3);
                     }
                 },
                 2: async (isInfinitySubscription, approvalSubscription) => {
                     if (isInfinitySubscription == false) { 
-                        console.log(approvalSubscription);
-                        console.log(Number(ethers.utils.formatUnits(coin.toPay, coin.decimals)));
-                        
-                        if (approvalSubscription < Number(ethers.utils.formatUnits(coin.toPay, coin.decimals))) {
+                        if (approvalSubscription < priceFormatted) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -509,7 +481,6 @@ const PaymentButton: FC<PaymentButton> = ({
                             address: subManager.address,
                             abi: CicleoSubscriptionManager__factory.abi,
                             functionName: "changeSubscriptionLimit",
-                           // @ts-ignore
                             args: [isInfinitySubscription ? ethers.constants.MaxUint256 : ethers.utils.parseUnits(approvalSubscription.toString(), subManager.decimals)],
                         })
 
@@ -532,8 +503,8 @@ const PaymentButton: FC<PaymentButton> = ({
                             // @ts-ignore
                             address: router,
                             abi: PaymentFacet__factory.abi,
-                            functionName: "subscribe",
-                            args: [subManagerId, subscriptionId, referral != undefined ? referral : ethers.constants.AddressZero]
+                            functionName: "subscribeDynamicly",
+                            args: [subManagerId, name, price, referral != undefined ? referral : ethers.constants.AddressZero]
                         })
 
                         setLoadingStep(3);
@@ -555,7 +526,7 @@ const PaymentButton: FC<PaymentButton> = ({
             let data = JSON.stringify({
                 tokenIn: coin.id,
                 tokenOut: subManager.tokenAddress,
-                price: subscription.originalUserPrice.toString(),
+                price: price.toString(),
                 fromAddress: subManager.address,
             });
 
@@ -576,7 +547,7 @@ const PaymentButton: FC<PaymentButton> = ({
             setStepFunction({
                 1: async (isInfinity: boolean, approvalToken: number) => {
                     if (isInfinityToken == false) { 
-                        if (approvalToken < Number(subscription.userPrice)) {
+                        if (approvalToken < priceFormatted) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -599,7 +570,7 @@ const PaymentButton: FC<PaymentButton> = ({
                         return
                     }
 
-                    if (subApproval.gte(subscription.originalUserPrice)) {
+                    if (subApproval.gte(priceFormatted)) {
                         setStep(3);
                     }
                     
@@ -607,7 +578,7 @@ const PaymentButton: FC<PaymentButton> = ({
                 },
                 2: async (isInfinity: boolean, approvalSubscription: number) => {
                     if (isInfinitySubscription == false) { 
-                        if (approvalSubscription < Number(subscription.price)) {
+                        if (approvalSubscription < priceFormatted) {
                             return setErrorMessage("You need to approve at least the subscription price")
                         }
                     }
@@ -649,8 +620,8 @@ const PaymentButton: FC<PaymentButton> = ({
                             // @ts-ignore
                             address: router,
                             abi: PaymentFacet__factory.abi,
-                            functionName: "subscribeWithSwap",
-                            args: [subManagerId, subscriptionId, referral != undefined ? referral : ethers.constants.AddressZero, decodedData.args.caller, decodedData.args.desc, decodedData.args.calls]
+                            functionName: "subscribeDynamiclyWithSwap",
+                            args: [subManagerId, name, price, referral != undefined ? referral : ethers.constants.AddressZero, decodedData.args.caller, decodedData.args.desc, decodedData.args.calls]
                         })
                         
                         setLoadingStep(3)
@@ -678,17 +649,16 @@ const PaymentButton: FC<PaymentButton> = ({
     //Called when modal is opened
     const fetchSubscriptionInfo = async () => {
         const subscriptionInfo = await axios.get(
-            `https://backend-test.cicleo.io/chain/${chainId}/getSubscriptionInfo/${subManagerId}/${subscriptionId}`
+            `https://backend-test.cicleo.io/chain/${chainId}/getSubscriptionInfo/${subManagerId}/255`
         );
+
+        console.log("hndihj")
 
         console.log(subscriptionInfo.data);
 
         const _subManager = subscriptionInfo.data.subManager as SubManagerInfo;
 
-        console.log(_subManager)
         setSubManager(_subManager);
-        setSubscription(subscriptionInfo.data.subscription);
-
         setSubscriptionInfoIsFetched(true);
     };
 
@@ -703,52 +673,14 @@ const PaymentButton: FC<PaymentButton> = ({
         if (!address) return;
 
         const userInfo = await axios.get(
-            `https://backend-test.cicleo.io/chain/${chainId}/getUserInfo/${subManagerId}/${subscriptionId}/${address}/${sourceChainId}`
+            `https://backend-test.cicleo.io/chain/${chainId}/getUserInfo/${subManagerId}/255/${address}/${sourceChainId}?price=${price.toString()}`
         );
 
         setCoinLists(userInfo.data.coinList);
         setIsLoaded(true);
-        //setCoinLists(userInfo.data.coinList);
-    };
-
-    const getUserSub = async (address: string) => {
-        console.log("Get user info");
-        if (!address) return;
-
-        const userInfo = await axios.get(
-            `https://backend-test.cicleo.io/chain/${chainId}/getUserSub/${subManagerId}/${subscriptionId}/${address}/`
-        );
-
-        console.log(userInfo.data);
-
-        setOldSubscription({
-            id: userInfo.data.id,
-            name: userInfo.data.name,
-            price: ethers.utils.formatUnits(userInfo.data.price, subManager.decimals),
-            isActive: userInfo.data.isActive,
-        });
-
-        let _subscription = subscription;
-
-        console.log(userInfo.data.userPrice);
-        console.log(subManager)
-        setSubscription({
-            ..._subscription,
-            originalUserPrice: BigNumber.from(userInfo.data.userPrice),
-            userPrice: ethers.utils.formatUnits(userInfo.data.userPrice, subManager.decimals),
-        });
-        
-        setUserInfoLoaded(true);
     };
 
     useEffect(() => {
-        if (account && subManager.decimals != null) {
-            getUserSub(account);
-        }
-     }, [account, subManager]);
-
-    useEffect(() => {
-        //createContracts();
         getUserTokenList();
     }, [networkSelected]);
 
@@ -760,7 +692,7 @@ const PaymentButton: FC<PaymentButton> = ({
     return (
         <>
             <label
-                htmlFor={"cicleo-payment-modal-" + subscriptionId}
+                htmlFor={"cicleo-payment-modal-" + name}
                 className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
                 <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
@@ -770,9 +702,13 @@ const PaymentButton: FC<PaymentButton> = ({
 
             <input
                 type="checkbox"
-                id={"cicleo-payment-modal-" + subscriptionId}
+                id={"cicleo-payment-modal-" + name}
                 className="cap-modal-toggle"
-                onChange={fetchSubscriptionInfo}
+                onChange={(event) => { 
+                    if (event.target.checked) {
+                        fetchSubscriptionInfo();
+                    }
+                }}
             />
             <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
                 <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
@@ -784,7 +720,7 @@ const PaymentButton: FC<PaymentButton> = ({
                         
                     </div>
                     <label
-                        htmlFor={"cicleo-payment-modal-" + subscriptionId}
+                        htmlFor={"cicleo-payment-modal-" + name}
                         className="cap-absolute cap-btn cap-btn-sm cap-btn-circle cap-right-2 cap-top-2"
                         onChange={fetchSubscriptionInfo}
                     >
@@ -792,9 +728,9 @@ const PaymentButton: FC<PaymentButton> = ({
                     </label>
 
                     <HeaderSubscriptionInfo
-                        subscription={subscription}
-                        oldSubscription={oldSubscription}
-                        subscriptionInfoIsFetched={subscriptionInfoIsFetched}
+                        name={name}
+                        price={ethers.utils.formatUnits(price, subManager.decimals)}
+                        tokenSymbol={subManager.tokenSymbol}
                         step={step}
                         loadingStep={loadingStep}
                         duration={subManager.duration}
@@ -825,22 +761,10 @@ const PaymentButton: FC<PaymentButton> = ({
                             symbol: coin.symbol,
                             balance: coin.balance,
                         }}
+                        subscriptionInfoIsFetched={subscriptionInfoIsFetched}
                     />
 
                     {(() => {
-                        if (subscription.id == oldSubscription.id && oldSubscription.isActive) return (
-                            <div className="cap-p-4">
-                                <div className="cap-alert cap-alert-success cap-shadow-lg">
-                                    <div className="cap-flex">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="cap-flex-shrink-0 cap-w-6 cap-h-6 cap-stroke-current" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <span>
-                                            You are already subscribed !
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-
                         if (account == null) return (
                             <Login
                                 handleSelectAccount={(address) => {
@@ -849,15 +773,11 @@ const PaymentButton: FC<PaymentButton> = ({
                             />
                         );
 
-                        if (!subscriptionInfoIsFetched) return (
+                        if (subscriptionInfoIsFetched == false) return (
                             <LoadingState text="We're getting info on the subscription..." />
                         );
 
-                        if (userInfoLoaded == false) return (
-                            <LoadingState text="We're getting some last info..." />
-                        );
-
-                        if (!networkSelected)
+                        if (networkSelected == false)
                             return (
                                 <SelectNetwork
                                     handleSelectNetwork={handleSelectNetwork}
@@ -869,8 +789,9 @@ const PaymentButton: FC<PaymentButton> = ({
                             return (
                                 <SelectCoin
                                     isLoaded={isLoaded}
-                                    subscription={subscription}
-                                    oldSubscription={oldSubscription}
+                                    name={name}
+                                    price={ethers.utils.formatUnits(price, subManager.decimals)}
+                                    tokenSymbol={subManager.tokenSymbol}
                                     coinLists={coinLists}
                                     setCoin={changeToken}
                                 />
@@ -880,8 +801,8 @@ const PaymentButton: FC<PaymentButton> = ({
                         return (
                             <Payment
                                 isLoaded={isLoaded}
-                                subscription={subscription}
-                                oldSubscription={oldSubscription}
+                                price={ethers.utils.formatUnits(price, subManager.decimals)}
+                                name={name}
                                 step={step}
                                 stepFunction={stepFunction}
                                 loadingStep={loadingStep}
@@ -910,4 +831,4 @@ const PaymentButton: FC<PaymentButton> = ({
     );
 };
 
-export default PaymentButton;
+export default DynamicPaymentButton;
