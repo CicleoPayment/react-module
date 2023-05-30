@@ -45,7 +45,7 @@ export default [
             external(),
             resolve(),
             terser(),
-            commonjs({ include: "node_modules/axios/**" }),
+            commonjs(),
             rollupNodeResolve({
                 jsnext: true,
                 preferBuiltins: true,

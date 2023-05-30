@@ -109,6 +109,7 @@
     "outDir": "./dist",
     "paths": {
         "@components/*": ["./src/components/*"],
+        "@components": ["./src/components"],
         "@assets/*": ["./src/assets/*"],
         "@context/*": ["./src/context/*"]
     }

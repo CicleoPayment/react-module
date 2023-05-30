@@ -366,7 +366,7 @@ export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
 export interface MintOwnerPassEventObject {
   minter: string;
-  subscriptionId: BigNumber;
+  subscriptionManagerId: BigNumber;
 }
 export type MintOwnerPassEvent = TypedEvent<
   [string, BigNumber],
@@ -913,11 +913,11 @@ export interface CicleoSubscriptionSecurity extends BaseContract {
 
     "MintOwnerPass(address,uint256)"(
       minter?: null,
-      subscriptionId?: null
+      subscriptionManagerId?: null
     ): MintOwnerPassEventFilter;
     MintOwnerPass(
       minter?: null,
-      subscriptionId?: null
+      subscriptionManagerId?: null
     ): MintOwnerPassEventFilter;
 
     "OwnershipTransferred(address,address)"(

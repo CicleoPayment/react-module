@@ -3,3 +3,4 @@
 /* eslint-disable */
 export { ICicleoSubscriptionRouter__factory } from "./ICicleoSubscriptionRouter__factory";
 export { IERC20__factory } from "./IERC20__factory";
+export { ILiFi__factory } from "./ILiFi__factory";

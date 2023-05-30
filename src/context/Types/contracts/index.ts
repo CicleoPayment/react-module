@@ -3,17 +3,22 @@
 /* eslint-disable */
 import type * as interfaces from "./Interfaces";
 export type { interfaces };
+import type * as proxySol from "./Proxy.sol";
+export type { proxySol };
+import type * as router from "./Router";
+export type { router };
 import type * as subscriptionBridgeManagerSol from "./SubscriptionBridgeManager.sol";
 export type { subscriptionBridgeManagerSol };
 import type * as subscriptionFactorySol from "./SubscriptionFactory.sol";
 export type { subscriptionFactorySol };
 import type * as subscriptionManagerSol from "./SubscriptionManager.sol";
 export type { subscriptionManagerSol };
-import type * as subscriptionRouterSol from "./SubscriptionRouter.sol";
-export type { subscriptionRouterSol };
 import type * as subscriptionSecuritySol from "./SubscriptionSecurity.sol";
 export type { subscriptionSecuritySol };
 import type * as test from "./Test";
 export type { test };
+import type * as testBridgeSol from "./TestBridge.sol";
+export type { testBridgeSol };
 import type * as types from "./Types";
 export type { types };
+export type { LibBridgeManager } from "./LibBridgeManager";

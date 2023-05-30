@@ -2,10 +2,13 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as interfaces from "./Interfaces";
+export * as proxySol from "./Proxy.sol";
+export * as router from "./Router";
 export * as subscriptionBridgeManagerSol from "./SubscriptionBridgeManager.sol";
 export * as subscriptionFactorySol from "./SubscriptionFactory.sol";
 export * as subscriptionManagerSol from "./SubscriptionManager.sol";
-export * as subscriptionRouterSol from "./SubscriptionRouter.sol";
 export * as subscriptionSecuritySol from "./SubscriptionSecurity.sol";
 export * as test from "./Test";
+export * as testBridgeSol from "./TestBridge.sol";
 export * as types from "./Types";
+export { LibBridgeManager__factory } from "./LibBridgeManager__factory";

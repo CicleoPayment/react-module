@@ -87,6 +87,7 @@ export declare namespace IOpenOceanCaller {
 
 export interface CicleoSubscriptionManagerInterface extends utils.Interface {
   functions: {
+    "bridgeSubscription(address,uint8,bool,uint256)": FunctionFragment;
     "cancel()": FunctionFragment;
     "changeSubscription(address,uint256,uint256,uint8)": FunctionFragment;
     "changeSubscriptionLimit(uint256)": FunctionFragment;
@@ -94,7 +95,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     "deleteSubManager()": FunctionFragment;
     "editAccount(address,uint256,uint8)": FunctionFragment;
     "factory()": FunctionFragment;
-    "getAmountChangeSubscription(address,uint256,uint256)": FunctionFragment;
+    "getAmountChangeSubscription(address,uint256)": FunctionFragment;
     "getUserSubscriptionId(address)": FunctionFragment;
     "getUserSubscriptionStatus(address)": FunctionFragment;
     "initialize(string,address,address,uint256)": FunctionFragment;
@@ -116,6 +117,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "bridgeSubscription"
       | "cancel"
       | "changeSubscription"
       | "changeSubscriptionLimit"
@@ -143,6 +145,15 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
       | "users"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "bridgeSubscription",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<boolean>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
   encodeFunctionData(functionFragment: "cancel", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "changeSubscription",
@@ -184,11 +195,7 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getAmountChangeSubscription",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "getUserSubscriptionId",
@@ -268,6 +275,10 @@ export interface CicleoSubscriptionManagerInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "bridgeSubscription",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "cancel", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "changeSubscription",
@@ -427,6 +438,14 @@ export interface CicleoSubscriptionManager extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    bridgeSubscription(
+      user: PromiseOrValue<string>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      isNewPeriod: PromiseOrValue<boolean>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     cancel(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -470,7 +489,6 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
     getAmountChangeSubscription(
       user: PromiseOrValue<string>,
-      oldPrice: PromiseOrValue<BigNumberish>,
       newPrice: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -549,15 +567,24 @@ export interface CicleoSubscriptionManager extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, number, BigNumber, BigNumber, boolean] & {
+      [BigNumber, number, BigNumber, BigNumber, BigNumber, boolean] & {
         subscriptionEndDate: BigNumber;
         subscriptionId: number;
         subscriptionLimit: BigNumber;
-        lastPayment: BigNumber;
+        lastPaymentTime: BigNumber;
+        totalPaidThisPeriod: BigNumber;
         canceled: boolean;
       }
     >;
   };
+
+  bridgeSubscription(
+    user: PromiseOrValue<string>,
+    subscriptionId: PromiseOrValue<BigNumberish>,
+    isNewPeriod: PromiseOrValue<boolean>,
+    price: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   cancel(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -602,7 +629,6 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
   getAmountChangeSubscription(
     user: PromiseOrValue<string>,
-    oldPrice: PromiseOrValue<BigNumberish>,
     newPrice: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
@@ -679,16 +705,25 @@ export interface CicleoSubscriptionManager extends BaseContract {
     arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, number, BigNumber, BigNumber, boolean] & {
+    [BigNumber, number, BigNumber, BigNumber, BigNumber, boolean] & {
       subscriptionEndDate: BigNumber;
       subscriptionId: number;
       subscriptionLimit: BigNumber;
-      lastPayment: BigNumber;
+      lastPaymentTime: BigNumber;
+      totalPaidThisPeriod: BigNumber;
       canceled: boolean;
     }
   >;
 
   callStatic: {
+    bridgeSubscription(
+      user: PromiseOrValue<string>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      isNewPeriod: PromiseOrValue<boolean>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     cancel(overrides?: CallOverrides): Promise<void>;
 
     changeSubscription(
@@ -728,7 +763,6 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
     getAmountChangeSubscription(
       user: PromiseOrValue<string>,
-      oldPrice: PromiseOrValue<BigNumberish>,
       newPrice: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -807,11 +841,12 @@ export interface CicleoSubscriptionManager extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, number, BigNumber, BigNumber, boolean] & {
+      [BigNumber, number, BigNumber, BigNumber, BigNumber, boolean] & {
         subscriptionEndDate: BigNumber;
         subscriptionId: number;
         subscriptionLimit: BigNumber;
-        lastPayment: BigNumber;
+        lastPaymentTime: BigNumber;
+        totalPaidThisPeriod: BigNumber;
         canceled: boolean;
       }
     >;
@@ -856,6 +891,14 @@ export interface CicleoSubscriptionManager extends BaseContract {
   };
 
   estimateGas: {
+    bridgeSubscription(
+      user: PromiseOrValue<string>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      isNewPeriod: PromiseOrValue<boolean>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     cancel(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -899,7 +942,6 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
     getAmountChangeSubscription(
       user: PromiseOrValue<string>,
-      oldPrice: PromiseOrValue<BigNumberish>,
       newPrice: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -979,6 +1021,14 @@ export interface CicleoSubscriptionManager extends BaseContract {
   };
 
   populateTransaction: {
+    bridgeSubscription(
+      user: PromiseOrValue<string>,
+      subscriptionId: PromiseOrValue<BigNumberish>,
+      isNewPeriod: PromiseOrValue<boolean>,
+      price: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     cancel(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1022,7 +1072,6 @@ export interface CicleoSubscriptionManager extends BaseContract {
 
     getAmountChangeSubscription(
       user: PromiseOrValue<string>,
-      oldPrice: PromiseOrValue<BigNumberish>,
       newPrice: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
