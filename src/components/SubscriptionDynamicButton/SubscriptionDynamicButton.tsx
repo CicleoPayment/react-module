@@ -24,16 +24,15 @@ import {
     erc20ABI,
     readContracts,
     signMessage,
-    prepareWriteContract,
     writeContract,
     getAccount,
 } from "@wagmi/core";
 import { Login, LoadingState } from "@components";
 import {
-    CicleoSubscriptionBridgeManager__factory,
     CicleoSubscriptionManager__factory,
     PaymentFacet__factory,
 } from "@context/Types";
+import { BridgeFacet__factory } from "@context/Types/factories/contracts/Subscription/Bridge/Facets";
 
 type SubscriptionDynamicButton = {
     chainId: number;
@@ -117,8 +116,8 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
     const [balance, setBalance] = useState<string | number>("#");
     const [loadingStep, setLoadingStep] = useState(0);
     const [stepFunction, setStepFunction] = useState({
-        1: (isInfinity: boolean, approvalToken: number) => {},
-        2: (isInfinity: boolean, approvalSubscription: number) => {},
+        1: (isInfinity: boolean, approval: number) => {},
+        2: (isInfinity: boolean, approval: number) => {},
         3: () => {},
     });
     const [isPurchased, setIsPurchased] = useState(false);
@@ -225,7 +224,7 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
             const users = await readContract({
                 // @ts-ignore
                 address: bridge,
-                abi: CicleoSubscriptionBridgeManager__factory.abi,
+                abi: BridgeFacet__factory.abi,
                 functionName: "users",
                 // @ts-ignore
                 args: [chainId, subManagerId, account],
@@ -248,9 +247,17 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
             );
 
             setStepFunction({
-                1: async (isInfinityToken, approvalToken) => {
-                    if (isInfinityToken == false) {
-                        if (approvalToken < priceFormatted) {
+                1: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (
+                            approval <
+                            Number(
+                                ethers.utils.formatUnits(
+                                    coin.toPay,
+                                    coin.decimals
+                                )
+                            )
+                        ) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -265,10 +272,10 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                             functionName: "approve",
                             args: [
                                 bridge,
-                                isInfinityToken
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalToken.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -290,9 +297,9 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                         setStep(3);
                     }
                 },
-                2: async (isInfinitySubscription, approvalSubscription) => {
-                    if (isInfinitySubscription == false) {
-                        if (approvalSubscription < priceFormatted) {
+                2: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (approval < priceFormatted) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -304,15 +311,15 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                         const { hash, wait } = await writeContract({
                             // @ts-ignore
                             address: bridge,
-                            abi: CicleoSubscriptionBridgeManager__factory.abi,
+                            abi: BridgeFacet__factory.abi,
                             functionName: "changeSubscriptionLimit",
                             args: [
                                 chainId,
                                 subManagerId,
-                                isInfinitySubscription
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalSubscription.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -390,7 +397,7 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
 
                         const _bridge = getContract({
                             address: bridge,
-                            abi: CicleoSubscriptionBridgeManager__factory.abi,
+                            abi: BridgeFacet__factory.abi,
                             signerOrProvider: signer as Signer,
                         });
 
@@ -497,9 +504,17 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
             });
 
             setStepFunction({
-                1: async (isInfinityToken, approvalToken) => {
-                    if (isInfinityToken == false) {
-                        if (approvalToken < priceFormatted) {
+                1: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (
+                            approval <
+                            Number(
+                                ethers.utils.formatUnits(
+                                    coin.toPay,
+                                    coin.decimals
+                                )
+                            )
+                        ) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -514,10 +529,10 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                             functionName: "approve",
                             args: [
                                 subManager.address,
-                                isInfinityToken
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalToken.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -539,9 +554,9 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                         setStep(3);
                     }
                 },
-                2: async (isInfinitySubscription, approvalSubscription) => {
-                    if (isInfinitySubscription == false) {
-                        if (approvalSubscription < priceFormatted) {
+                2: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (approval < priceFormatted) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -556,10 +571,10 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                             abi: CicleoSubscriptionManager__factory.abi,
                             functionName: "changeSubscriptionLimit",
                             args: [
-                                isInfinitySubscription
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalSubscription.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -633,9 +648,17 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
             setSwapInfo(resp.data.data);
 
             setStepFunction({
-                1: async (isInfinity: boolean, approvalToken: number) => {
-                    if (isInfinityToken == false) {
-                        if (approvalToken < priceFormatted) {
+                1: async (isInfinity: boolean, approval: number) => {
+                    if (isInfinity == false) {
+                        if (
+                            approval <
+                            Number(
+                                ethers.utils.formatUnits(
+                                    coin.toPay,
+                                    coin.decimals
+                                )
+                            )
+                        ) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -650,10 +673,10 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                             functionName: "approve",
                             args: [
                                 subManager.address,
-                                isInfinityToken
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalToken.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -674,12 +697,9 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
 
                     setStep(2);
                 },
-                2: async (
-                    isInfinity: boolean,
-                    approvalSubscription: number
-                ) => {
-                    if (isInfinitySubscription == false) {
-                        if (approvalSubscription < priceFormatted) {
+                2: async (isInfinity: boolean, approval: number) => {
+                    if (isInfinity == false) {
+                        if (approval < priceFormatted) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -694,10 +714,10 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                             abi: CicleoSubscriptionManager__factory.abi,
                             functionName: "changeSubscriptionLimit",
                             args: [
-                                isInfinitySubscription
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalSubscription.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -761,8 +781,9 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
     };
 
     useEffect(() => {
-        getSwap();
-        console.log(coin);
+        if (coin.id != undefined) {
+            getSwap();
+        }
     }, [coin]);
 
     //Function to fetch the subscription info from the backend
@@ -801,7 +822,9 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
     };
 
     useEffect(() => {
-        getUserTokenList();
+        if (networkSelected) {
+            getUserTokenList();
+        }
     }, [networkSelected]);
 
     const handleSelectNetwork = (_chainId: number) => {

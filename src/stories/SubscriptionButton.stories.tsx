@@ -30,8 +30,8 @@ type Story = StoryObj<typeof SubscriptionButton>;
 
 export const Primary: Story = {
     args: {
-        chainId: 250,
-        subManagerId: 4,
+        chainId: 56,
+        subManagerId: 7,
         subscriptionId: 1,
     },
 };

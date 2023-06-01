@@ -258,7 +258,7 @@ const Step3: FC<Step> = ({
                         onClick={onClick}
                     >
                         <span>
-                            Subscribe for {price} {symbol}
+                            Subscribe to {name} for {price} {symbol}
                         </span>
                         {isLoading && <ClipLoader color={"#fff"} size={20} />}
                     </button>

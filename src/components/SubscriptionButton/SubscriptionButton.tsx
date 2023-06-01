@@ -1,5 +1,5 @@
 import React, { useState, FC, useEffect } from "react";
-import { BigNumber, Signer, ethers, providers } from "ethers";
+import { BigNumber, Signer, ethers } from "ethers";
 import "./SubscriptionButton.css";
 import TextWhite from "@assets/logo_text_white.svg";
 import PayImage from "@assets/pay.svg";
@@ -30,10 +30,12 @@ import {
 } from "@wagmi/core";
 import { Login, LoadingState } from "@components";
 import {
-    CicleoSubscriptionBridgeManager__factory,
     CicleoSubscriptionManager__factory,
     PaymentFacet__factory,
+    AmarokFacet__factory,
+    StargateFacet__factory,
 } from "@context/Types";
+import { BridgeFacet__factory } from "@context/Types/factories/contracts/Subscription/Bridge/Facets";
 
 type SubscriptionButton = {
     subscriptionId: number;
@@ -73,6 +75,7 @@ type coin = {
     _bridgeData: any[];
     _swapData: any[];
     _stargateData: any[];
+    _amarokData: any[];
     value: string;
 };
 
@@ -88,6 +91,12 @@ let _chains: Network[] = [
         chainId: 137,
         rpcUrls: "https://rpc-mainnet.maticvigil.com/",
         image: "https://cryptologos.cc/logos/polygon-matic-logo.png?v=013",
+    },
+    {
+        name: "Binance",
+        chainId: 56,
+        rpcUrls: "https://bsc-dataseed.binance.org/",
+        image: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png?v=013",
     },
 ];
 
@@ -221,6 +230,16 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
             )
         );
 
+        const priceFormatted = Number(
+            ethers.utils.formatUnits(
+                subscription.originalPrice,
+                subManager.decimals
+            )
+        );
+
+        console.log(subscription.originalPrice);
+        console.log(priceFormatted);
+
         if (isBridged) {
             console.log("BRIDGED");
             setSwapInfo({
@@ -238,7 +257,7 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                 outAmount: subscription.originalUserPrice.toString(),
             });
 
-            const approval = await readContract({
+            const tokenApproval = await readContract({
                 // @ts-ignore
                 address: coin.id,
                 abi: erc20ABI,
@@ -247,37 +266,37 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                 args: [account, bridge],
             });
 
-            const users = await readContract({
+            const users = (await readContract({
                 // @ts-ignore
                 address: bridge,
-                abi: CicleoSubscriptionBridgeManager__factory.abi,
+                abi: BridgeFacet__factory.abi,
                 functionName: "users",
                 // @ts-ignore
                 args: [chainId, subManagerId, account],
-            });
+            })) as any;
 
             const subApproval = users.subscriptionLimit as BigNumber;
 
-            if (approval.gte(subscription.originalPrice)) {
+            if (tokenApproval.gte(subscription.originalPrice)) {
                 setStep(2);
 
                 if (subApproval.gte(subscription.originalPrice)) {
                     setStep(3);
                 }
-
-                console.log(subApproval);
             }
 
-            setSubscription({
-                ...subscription,
-                originalPrice: BigNumber.from(coin.toPay),
-                price: ethers.utils.formatUnits(coin.toPay, coin.decimals),
-            });
-
             setStepFunction({
-                1: async (isInfinityToken, approvalToken) => {
-                    if (isInfinityToken == false) {
-                        if (approvalToken < Number(subscription.price)) {
+                1: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (
+                            approval <
+                            Number(
+                                ethers.utils.formatUnits(
+                                    coin.toPay,
+                                    coin.decimals
+                                )
+                            )
+                        ) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -285,8 +304,6 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                     }
 
                     try {
-                        console.log("Eihfi");
-
                         const { hash, wait } = await writeContract({
                             // @ts-ignore
                             address: coin.id,
@@ -294,11 +311,11 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                             functionName: "approve",
                             args: [
                                 bridge,
-                                isInfinityToken
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalToken.toString(),
-                                          subManager.decimals
+                                          approval.toString(),
+                                          coin.decimals
                                       ),
                             ],
                         });
@@ -319,9 +336,9 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                         setStep(3);
                     }
                 },
-                2: async (isInfinitySubscription, approvalSubscription) => {
-                    if (isInfinitySubscription == false) {
-                        if (approvalSubscription < Number(subscription.price)) {
+                2: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (approval < priceFormatted) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -333,15 +350,15 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                         const { hash, wait } = await writeContract({
                             // @ts-ignore
                             address: bridge,
-                            abi: CicleoSubscriptionBridgeManager__factory.abi,
+                            abi: BridgeFacet__factory.abi,
                             functionName: "changeSubscriptionLimit",
                             args: [
                                 chainId,
                                 subManagerId,
-                                isInfinitySubscription
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalSubscription.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -383,8 +400,6 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                                 0
                         );
 
-                        console.log(ethers.utils.keccak256(message));
-
                         let signature = await signMessage({
                             message: message,
                         });
@@ -408,45 +423,85 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                             v: adjustedV,
                         }) as any;
 
-                        console.log(coin._stargateData);
+                        console.log(coin);
 
-                        // @ts-ignore
-                        const nativePrice = BigNumber.from(
-                            coin._stargateData[3].hex
-                        )
-                            .mul(12)
-                            .div(10);
+                        let tx: any;
 
-                        let starGate: any = coin._stargateData;
-                        starGate[3] = nativePrice.toString() as any;
+                        if (coin._stargateData != undefined) {
+                            console.log("STARGATE");
+                            // @ts-ignore
+                            const nativePrice = BigNumber.from(
+                                coin._stargateData[3].hex
+                            )
+                                .mul(11)
+                                .div(10);
 
-                        const signer = await fetchSigner();
+                            let starGate: any = coin._stargateData;
+                            starGate[3] = nativePrice.toString() as any;
 
-                        const _bridge = getContract({
-                            address: bridge,
-                            abi: CicleoSubscriptionBridgeManager__factory.abi,
-                            signerOrProvider: signer as Signer,
-                        });
+                            const signer = await fetchSigner();
 
-                        const tx = await _bridge.payFunctionWithBridge(
-                            //@ts-ignore
-                            [
-                                BigNumber.from(chainId),
-                                BigNumber.from(subManagerId),
-                                subscriptionId,
-                                subscription.originalUserPrice.toString(),
-                                coin.id,
-                            ],
-                            coin._bridgeData,
-                            coin._swapData,
-                            starGate,
-                            referral != undefined
-                                ? referral
-                                : ethers.constants.AddressZero,
-                            subManager.duration,
-                            signature,
-                            { value: nativePrice }
-                        );
+                            const _bridge = getContract({
+                                address: bridge,
+                                abi: StargateFacet__factory.abi,
+                                signerOrProvider: signer as Signer,
+                            });
+
+                            tx =
+                                await _bridge.payFunctionWithBridgeWithStargate(
+                                    //@ts-ignore
+                                    [
+                                        BigNumber.from(chainId),
+                                        BigNumber.from(subManagerId),
+                                        subscriptionId,
+                                        subscription.originalUserPrice.toString(),
+                                        coin.id,
+                                    ],
+                                    coin._bridgeData,
+                                    coin._swapData,
+                                    starGate,
+                                    referral != undefined
+                                        ? referral
+                                        : ethers.constants.AddressZero,
+                                    subManager.duration,
+                                    signature,
+                                    { value: nativePrice }
+                                );
+                        } else if (coin._amarokData != undefined) {
+                            console.log("AMAROK");
+
+                            const nativePrice = BigNumber.from(
+                                coin._amarokData[3].hex
+                            );
+
+                            const signer = await fetchSigner();
+
+                            const _bridge = getContract({
+                                address: bridge,
+                                abi: AmarokFacet__factory.abi,
+                                signerOrProvider: signer as Signer,
+                            });
+
+                            tx = await _bridge.payFunctionWithBridgeWithAmarok(
+                                //@ts-ignore
+                                [
+                                    BigNumber.from(chainId),
+                                    BigNumber.from(subManagerId),
+                                    subscriptionId,
+                                    subscription.originalUserPrice.toString(),
+                                    coin.id,
+                                ],
+                                coin._bridgeData,
+                                coin._swapData,
+                                coin._amarokData,
+                                referral != undefined
+                                    ? referral
+                                    : ethers.constants.AddressZero,
+                                subManager.duration,
+                                signature,
+                                { value: coin.value }
+                            );
+                        }
 
                         setLoadingStep(3);
 
@@ -525,9 +580,9 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
             });
 
             setStepFunction({
-                1: async (isInfinityToken, approvalToken) => {
-                    if (isInfinityToken == false) {
-                        if (approvalToken < Number(subscription.userPrice)) {
+                1: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (approval < priceFormatted) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -542,11 +597,11 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                             functionName: "approve",
                             args: [
                                 subManager.address,
-                                isInfinityToken
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalToken.toString(),
-                                          subManager.decimals
+                                          approval.toString(),
+                                          coin.decimals
                                       ),
                             ],
                         });
@@ -567,27 +622,9 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                         setStep(3);
                     }
                 },
-                2: async (isInfinitySubscription, approvalSubscription) => {
-                    if (isInfinitySubscription == false) {
-                        console.log(approvalSubscription);
-                        console.log(
-                            Number(
-                                ethers.utils.formatUnits(
-                                    coin.toPay,
-                                    coin.decimals
-                                )
-                            )
-                        );
-
-                        if (
-                            approvalSubscription <
-                            Number(
-                                ethers.utils.formatUnits(
-                                    coin.toPay,
-                                    coin.decimals
-                                )
-                            )
-                        ) {
+                2: async (isInfinity, approval) => {
+                    if (isInfinity == false) {
+                        if (approval < priceFormatted) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -603,10 +640,10 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                             functionName: "changeSubscriptionLimit",
                             // @ts-ignore
                             args: [
-                                isInfinitySubscription
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalSubscription.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -679,9 +716,17 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
             setSwapInfo(resp.data.data);
 
             setStepFunction({
-                1: async (isInfinity: boolean, approvalToken: number) => {
-                    if (isInfinityToken == false) {
-                        if (approvalToken < Number(subscription.userPrice)) {
+                1: async (isInfinity: boolean, approval: number) => {
+                    if (isInfinity == false) {
+                        if (
+                            approval <
+                            Number(
+                                ethers.utils.formatUnits(
+                                    coin.toPay,
+                                    coin.decimals
+                                )
+                            )
+                        ) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -696,11 +741,11 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                             functionName: "approve",
                             args: [
                                 subManager.address,
-                                isInfinityToken
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalToken.toString(),
-                                          subManager.decimals
+                                          approval.toString(),
+                                          coin.decimals
                                       ),
                             ],
                         });
@@ -720,12 +765,9 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
 
                     setStep(2);
                 },
-                2: async (
-                    isInfinity: boolean,
-                    approvalSubscription: number
-                ) => {
-                    if (isInfinitySubscription == false) {
-                        if (approvalSubscription < Number(subscription.price)) {
+                2: async (isInfinity: boolean, approval: number) => {
+                    if (isInfinity == false) {
+                        if (approval < priceFormatted) {
                             return setErrorMessage(
                                 "You need to approve at least the subscription price"
                             );
@@ -740,10 +782,10 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                             abi: CicleoSubscriptionManager__factory.abi,
                             functionName: "changeSubscriptionLimit",
                             args: [
-                                isInfinitySubscription
+                                isInfinity
                                     ? ethers.constants.MaxUint256
                                     : ethers.utils.parseUnits(
-                                          approvalSubscription.toString(),
+                                          approval.toString(),
                                           subManager.decimals
                                       ),
                             ],
@@ -806,8 +848,9 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
     };
 
     useEffect(() => {
-        getSwap();
-        console.log(coin);
+        if (coin.id != undefined) {
+            getSwap();
+        }
     }, [coin]);
 
     //Function to fetch the subscription info from the backend
@@ -890,8 +933,9 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
     }, [account, subManager]);
 
     useEffect(() => {
-        //createContracts();
-        getUserTokenList();
+        if (networkSelected) {
+            getUserTokenList();
+        }
     }, [networkSelected]);
 
     const handleSelectNetwork = (_chainId: number) => {
@@ -914,7 +958,11 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                 type="checkbox"
                 id={"cicleo-payment-modal-" + subscriptionId}
                 className="cap-modal-toggle"
-                onChange={fetchSubscriptionInfo}
+                onChange={(event) => {
+                    if (event.target.checked) {
+                        fetchSubscriptionInfo();
+                    }
+                }}
             />
             <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
                 <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
@@ -928,7 +976,6 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                     <label
                         htmlFor={"cicleo-payment-modal-" + subscriptionId}
                         className="cap-absolute cap-btn cap-btn-sm cap-btn-circle cap-right-2 cap-top-2"
-                        onChange={fetchSubscriptionInfo}
                     >
                         ✕
                     </label>
@@ -1042,6 +1089,7 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                                 subscription={subscription}
                                 oldSubscription={oldSubscription}
                                 step={step}
+                                setStep={setStep}
                                 stepFunction={stepFunction}
                                 loadingStep={loadingStep}
                                 errorMessage={errorMessage}
@@ -1060,6 +1108,7 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                                     setAmount: setApprovalSubscription,
                                     setIsInfinity: setIsInfinitySubscription,
                                 }}
+                                coin={coin}
                             />
                         );
                     })()}

@@ -3,6 +3,7 @@ import TOKEN_IMG from "@assets/token.svg";
 import BACK_ARROW_IMG from "@assets/back-arrow.svg";
 import { formatNumber, reduceAddress } from "@context/contract";
 import { getNetwork } from "@wagmi/core";
+import { utils } from "ethers";
 
 type Network = {
     name: string;
@@ -81,17 +82,21 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
     //In case of info of the subscription is not fetched yet
     if (!subscriptionInfoIsFetched) return <></>;
 
-    const { chain, chains } = getNetwork();
     let paymentChainId = 0;
     let chainInfo: any = null;
-    if (chain) {
-        paymentChainId = chain.id;
 
-        for (let i = 0; i < _chains.length; i++) {
-            let _chainInfo = _chains[i];
+    if (networkSelected) {
+        const { chain, chains } = getNetwork();
 
-            if (_chainInfo.chainId == paymentChainId) {
-                chainInfo = _chainInfo;
+        if (chain) {
+            paymentChainId = chain.id;
+
+            for (let i = 0; i < _chains.length; i++) {
+                let _chainInfo = _chains[i];
+
+                if (_chainInfo.chainId == paymentChainId) {
+                    chainInfo = _chainInfo;
+                }
             }
         }
     }
@@ -167,21 +172,13 @@ const HeaderSubscriptionInfo: FC<HeaderSubscriptionInfo> = ({
                     </div>
 
                     {inToken.symbol != undefined && (
-                        <div className="cap-flex cap-items-center cap-text-end">
-                            <div className="cap-pr-4 cap-flex cap-flex-col cap-items-end">
-                                <span className="cap-font-semibold">
-                                    Your {inToken.symbol} Balance
-                                </span>
-                                <span>{formatNumber(inToken.balance, 2)}</span>
-                            </div>
-                            <img
-                                src={inToken.image}
-                                alt=""
-                                className="cap-h-fit"
-                                width={40}
-                                height={40}
-                            />
-                        </div>
+                        <img
+                            src={inToken.image}
+                            alt=""
+                            className="cap-h-fit"
+                            width={40}
+                            height={40}
+                        />
                     )}
                 </div>
 

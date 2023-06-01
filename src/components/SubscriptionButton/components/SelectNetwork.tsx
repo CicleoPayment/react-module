@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { connect } from "@wagmi/core";
 import { InjectedConnector, configureChains, createClient } from "@wagmi/core";
-import { fantom, polygon } from "@wagmi/core/chains";
+import { avalanche, fantom, polygon } from "@wagmi/core/chains";
 import { publicProvider } from "@wagmi/core/providers/public";
 
 type Network = {
@@ -18,7 +18,7 @@ type SelectNetwork = {
 
 const SelectNetwork: FC<SelectNetwork> = ({ handleSelectNetwork, _chains }) => {
     const { chains, provider } = configureChains(
-        [fantom, polygon],
+        [fantom, polygon, avalanche],
         [publicProvider()]
     );
 

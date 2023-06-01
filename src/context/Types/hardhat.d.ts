@@ -61,6 +61,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20__factory>;
@@ -73,37 +77,37 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
-      name: "ICicleoSubscriptionRouter",
+      name: "ERC721",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ICicleoSubscriptionRouter__factory>;
+    ): Promise<Contracts.ERC721__factory>;
     getContractFactory(
-      name: "IERC20",
+      name: "ERC721Enumerable",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC20__factory>;
+    ): Promise<Contracts.ERC721Enumerable__factory>;
     getContractFactory(
-      name: "ILiFi",
+      name: "IERC721Enumerable",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ILiFi__factory>;
+    ): Promise<Contracts.IERC721Enumerable__factory>;
     getContractFactory(
-      name: "LibBridgeManager",
+      name: "IERC721Metadata",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LibBridgeManager__factory>;
+    ): Promise<Contracts.IERC721Metadata__factory>;
     getContractFactory(
-      name: "CicleoProxy",
+      name: "IERC721",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CicleoProxy__factory>;
+    ): Promise<Contracts.IERC721__factory>;
     getContractFactory(
-      name: "Diamond",
+      name: "IERC721Receiver",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Diamond__factory>;
+    ): Promise<Contracts.IERC721Receiver__factory>;
     getContractFactory(
-      name: "AdminFacet",
+      name: "ERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AdminFacet__factory>;
+    ): Promise<Contracts.ERC165__factory>;
     getContractFactory(
-      name: "BridgeFacet",
+      name: "IERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BridgeFacet__factory>;
+    ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
       name: "DiamondCutFacet",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -112,14 +116,6 @@ declare module "hardhat/types/runtime" {
       name: "DiamondLoupeFacet",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DiamondLoupeFacet__factory>;
-    getContractFactory(
-      name: "PaymentFacet",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.PaymentFacet__factory>;
-    getContractFactory(
-      name: "SubscriptionTypesFacet",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SubscriptionTypesFacet__factory>;
     getContractFactory(
       name: "IDiamondCut",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -137,10 +133,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC173__factory>;
     getContractFactory(
-      name: "LibAdmin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LibAdmin__factory>;
-    getContractFactory(
       name: "LibDiamond",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LibDiamond__factory>;
@@ -149,9 +141,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DiamondInit__factory>;
     getContractFactory(
-      name: "CicleoSubscriptionBridgeManager",
+      name: "AdminFacet",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CicleoSubscriptionBridgeManager__factory>;
+    ): Promise<Contracts.AdminFacet__factory>;
+    getContractFactory(
+      name: "BridgeCallerFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BridgeCallerFacet__factory>;
     getContractFactory(
       name: "ICicleoRouter",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -161,6 +157,114 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ILiFiDiamond__factory>;
     getContractFactory(
+      name: "BridgeFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BridgeFacet__factory>;
+    getContractFactory(
+      name: "PaymentFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PaymentFacet__factory>;
+    getContractFactory(
+      name: "PaymentManagerFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PaymentManagerFacet__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
+      name: "ILiFi",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ILiFi__factory>;
+    getContractFactory(
+      name: "IOpenOceanCaller",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IOpenOceanCaller__factory>;
+    getContractFactory(
+      name: "IRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IRouter__factory>;
+    getContractFactory(
+      name: "LibBridgeCaller",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LibBridgeCaller__factory>;
+    getContractFactory(
+      name: "CicleoPaymentDiamond",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoPaymentDiamond__factory>;
+    getContractFactory(
+      name: "CicleoPaymentSecurity",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoPaymentSecurity__factory>;
+    getContractFactory(
+      name: "FakeUSDC",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FakeUSDC__factory>;
+    getContractFactory(
+      name: "AdminFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AdminFacet__factory>;
+    getContractFactory(
+      name: "AmarokFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AmarokFacet__factory>;
+    getContractFactory(
+      name: "BridgeFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BridgeFacet__factory>;
+    getContractFactory(
+      name: "StargateFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StargateFacet__factory>;
+    getContractFactory(
+      name: "ILiFiDiamond",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ILiFiDiamond__factory>;
+    getContractFactory(
+      name: "LibAdmin",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LibAdmin__factory>;
+    getContractFactory(
+      name: "LibBridge",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LibBridge__factory>;
+    getContractFactory(
+      name: "ICicleoSubscriptionRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ICicleoSubscriptionRouter__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
+      name: "ILiFi",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ILiFi__factory>;
+    getContractFactory(
+      name: "AdminFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AdminFacet__factory>;
+    getContractFactory(
+      name: "BridgeFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BridgeFacet__factory>;
+    getContractFactory(
+      name: "PaymentFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PaymentFacet__factory>;
+    getContractFactory(
+      name: "SubscriptionTypesFacet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SubscriptionTypesFacet__factory>;
+    getContractFactory(
+      name: "LibAdmin",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LibAdmin__factory>;
+    getContractFactory(
+      name: "CicleoSubscriptionBridgeDiamond",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoSubscriptionBridgeDiamond__factory>;
+    getContractFactory(
       name: "CicleoSubscriptionFactory",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CicleoSubscriptionFactory__factory>;
@@ -168,6 +272,10 @@ declare module "hardhat/types/runtime" {
       name: "CicleoSubscriptionManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CicleoSubscriptionManager__factory>;
+    getContractFactory(
+      name: "CicleoSubscriptionRouterDiamond",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.CicleoSubscriptionRouterDiamond__factory>;
     getContractFactory(
       name: "CicleoSubscriptionSecurity",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -180,10 +288,6 @@ declare module "hardhat/types/runtime" {
       name: "TestnetUSDC",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestnetUSDC__factory>;
-    getContractFactory(
-      name: "CicleoTestBridge",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CicleoTestBridge__factory>;
     getContractFactory(
       name: "IAggregationExecutor",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -258,6 +362,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
+      name: "Ownable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
+    getContractAt(
       name: "ERC20",
       address: string,
       signer?: ethers.Signer
@@ -273,45 +382,45 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
-      name: "ICicleoSubscriptionRouter",
+      name: "ERC721",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.ICicleoSubscriptionRouter>;
+    ): Promise<Contracts.ERC721>;
     getContractAt(
-      name: "IERC20",
+      name: "ERC721Enumerable",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IERC20>;
+    ): Promise<Contracts.ERC721Enumerable>;
     getContractAt(
-      name: "ILiFi",
+      name: "IERC721Enumerable",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.ILiFi>;
+    ): Promise<Contracts.IERC721Enumerable>;
     getContractAt(
-      name: "LibBridgeManager",
+      name: "IERC721Metadata",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.LibBridgeManager>;
+    ): Promise<Contracts.IERC721Metadata>;
     getContractAt(
-      name: "CicleoProxy",
+      name: "IERC721",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.CicleoProxy>;
+    ): Promise<Contracts.IERC721>;
     getContractAt(
-      name: "Diamond",
+      name: "IERC721Receiver",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Diamond>;
+    ): Promise<Contracts.IERC721Receiver>;
     getContractAt(
-      name: "AdminFacet",
+      name: "ERC165",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.AdminFacet>;
+    ): Promise<Contracts.ERC165>;
     getContractAt(
-      name: "BridgeFacet",
+      name: "IERC165",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.BridgeFacet>;
+    ): Promise<Contracts.IERC165>;
     getContractAt(
       name: "DiamondCutFacet",
       address: string,
@@ -322,16 +431,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.DiamondLoupeFacet>;
-    getContractAt(
-      name: "PaymentFacet",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.PaymentFacet>;
-    getContractAt(
-      name: "SubscriptionTypesFacet",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SubscriptionTypesFacet>;
     getContractAt(
       name: "IDiamondCut",
       address: string,
@@ -353,11 +452,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC173>;
     getContractAt(
-      name: "LibAdmin",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.LibAdmin>;
-    getContractAt(
       name: "LibDiamond",
       address: string,
       signer?: ethers.Signer
@@ -368,10 +462,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.DiamondInit>;
     getContractAt(
-      name: "CicleoSubscriptionBridgeManager",
+      name: "AdminFacet",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.CicleoSubscriptionBridgeManager>;
+    ): Promise<Contracts.AdminFacet>;
+    getContractAt(
+      name: "BridgeCallerFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BridgeCallerFacet>;
     getContractAt(
       name: "ICicleoRouter",
       address: string,
@@ -383,6 +482,141 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ILiFiDiamond>;
     getContractAt(
+      name: "BridgeFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BridgeFacet>;
+    getContractAt(
+      name: "PaymentFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PaymentFacet>;
+    getContractAt(
+      name: "PaymentManagerFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PaymentManagerFacet>;
+    getContractAt(
+      name: "IERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "ILiFi",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ILiFi>;
+    getContractAt(
+      name: "IOpenOceanCaller",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IOpenOceanCaller>;
+    getContractAt(
+      name: "IRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IRouter>;
+    getContractAt(
+      name: "LibBridgeCaller",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LibBridgeCaller>;
+    getContractAt(
+      name: "CicleoPaymentDiamond",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoPaymentDiamond>;
+    getContractAt(
+      name: "CicleoPaymentSecurity",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoPaymentSecurity>;
+    getContractAt(
+      name: "FakeUSDC",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FakeUSDC>;
+    getContractAt(
+      name: "AdminFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AdminFacet>;
+    getContractAt(
+      name: "AmarokFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AmarokFacet>;
+    getContractAt(
+      name: "BridgeFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BridgeFacet>;
+    getContractAt(
+      name: "StargateFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StargateFacet>;
+    getContractAt(
+      name: "ILiFiDiamond",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ILiFiDiamond>;
+    getContractAt(
+      name: "LibAdmin",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LibAdmin>;
+    getContractAt(
+      name: "LibBridge",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LibBridge>;
+    getContractAt(
+      name: "ICicleoSubscriptionRouter",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ICicleoSubscriptionRouter>;
+    getContractAt(
+      name: "IERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "ILiFi",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ILiFi>;
+    getContractAt(
+      name: "AdminFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AdminFacet>;
+    getContractAt(
+      name: "BridgeFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BridgeFacet>;
+    getContractAt(
+      name: "PaymentFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PaymentFacet>;
+    getContractAt(
+      name: "SubscriptionTypesFacet",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SubscriptionTypesFacet>;
+    getContractAt(
+      name: "LibAdmin",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LibAdmin>;
+    getContractAt(
+      name: "CicleoSubscriptionBridgeDiamond",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoSubscriptionBridgeDiamond>;
+    getContractAt(
       name: "CicleoSubscriptionFactory",
       address: string,
       signer?: ethers.Signer
@@ -392,6 +626,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.CicleoSubscriptionManager>;
+    getContractAt(
+      name: "CicleoSubscriptionRouterDiamond",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.CicleoSubscriptionRouterDiamond>;
     getContractAt(
       name: "CicleoSubscriptionSecurity",
       address: string,
@@ -407,11 +646,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TestnetUSDC>;
-    getContractAt(
-      name: "CicleoTestBridge",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.CicleoTestBridge>;
     getContractAt(
       name: "IAggregationExecutor",
       address: string,

@@ -86,6 +86,7 @@ type Step = {
     isInfinity?: boolean;
     approvalAmount?: number;
     setApprovalAmount?: (approvalAmount: number) => void;
+    coin: any;
 };
 
 type StepFunction = {
@@ -172,7 +173,6 @@ const Step1: FC<Step> = ({
 
 const Step2: FC<Step> = ({
     onClick,
-    subscription,
     isLoading,
     errorMessage,
     setIsInfinity,
@@ -186,7 +186,7 @@ const Step2: FC<Step> = ({
             <div className="cap-px-8">
                 <h3 className="cap-font-medium">Subscription Limit</h3>
                 <p className="cap-text-sm">
-                    Approve the amount of {subscription.symbol} Cicleo can
+                    Approve the amount of {swapInfo.outToken.symbol} Cicleo can
                     withdraw from your account each payment cycle
                 </p>
                 <span className="cap-font-normal cap-text-red-400">
@@ -218,94 +218,46 @@ const Step2: FC<Step> = ({
     );
 };
 
-const formatPrice = (price: any, decimals: number, symbol: string) => {
-    if (price == 0) {
-        return "Free";
-    }
-
-    return `${Number(utils.formatUnits(price, decimals)).toFixed(2)} ${symbol}`;
-};
-
 const Step3: FC<Step> = ({
     onClick,
     subscription,
     oldSubscription,
     isLoading,
     errorMessage,
-    swapInfo,
+    coin,
 }) => {
     return (
-        <>
-            {subscription.id != oldSubscription.id ? (
-                <div className="cap-text-left cap-space-y-10">
-                    <div className="cap-px-8">
-                        <h3 className="cap-font-medium">
-                            Subscribe for {subscription.userPrice}{" "}
-                            {swapInfo.outToken.symbol}
-                        </h3>
-                        <p className="cap-text-sm">
-                            Begin your Cicleo transaction-free payment plan now!
-                        </p>
-                        <span className="cap-font-normal cap-text-red-400">
-                            {errorMessage}
-                        </span>
-                    </div>
+        <div className="cap-text-left cap-space-y-10">
+            <div className="cap-px-8">
+                <h3 className="cap-font-medium">
+                    {subscription.id == oldSubscription.id
+                        ? " Re-Subscribe"
+                        : "Subscribe"}{" "}
+                    to {subscription.name} for{" "}
+                    {utils.formatUnits(coin.toPay, coin.decimals)} {coin.symbol}
+                </h3>
+                <p className="cap-text-sm">
+                    Begin your Cicleo transaction-free payment plan now!
+                </p>
+                <span className="cap-font-normal cap-text-red-400">
+                    {errorMessage}
+                </span>
+            </div>
 
-                    <div className="cap-modal-action">
-                        <button
-                            className="cap-space-x-3 cap-btn cap-btn-primary"
-                            onClick={onClick}
-                        >
-                            <span>
-                                Subscribe for {subscription.userPrice}{" "}
-                                {swapInfo.outToken.symbol}
-                            </span>
-                            {isLoading && (
-                                <ClipLoader color={"#fff"} size={20} />
-                            )}
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                <div className="cap-text-left cap-space-y-10">
-                    <div className="cap-px-8">
-                        <h3 className="cap-font-medium">
-                            Subscribe for{" "}
-                            {formatPrice(
-                                swapInfo.inAmount,
-                                swapInfo.inToken.decimals,
-                                swapInfo.outToken.symbol
-                            )}
-                        </h3>
-                        <p className="cap-text-sm">
-                            Begin your Cicleo transaction-free payment plan now!
-                        </p>
-                        <span className="cap-font-normal cap-text-red-400">
-                            {errorMessage}
-                        </span>
-                    </div>
-
-                    <div className="cap-modal-action">
-                        <button
-                            className="cap-space-x-3 cap-btn cap-btn-primary"
-                            onClick={onClick}
-                        >
-                            <span>
-                                Subscribe for{" "}
-                                {formatPrice(
-                                    swapInfo.inAmount,
-                                    swapInfo.inToken.decimals,
-                                    swapInfo.outToken.symbol
-                                )}
-                            </span>
-                            {isLoading && (
-                                <ClipLoader color={"#fff"} size={20} />
-                            )}
-                        </button>
-                    </div>
-                </div>
-            )}
-        </>
+            <div className="cap-modal-action">
+                <button
+                    className="cap-space-x-3 cap-btn cap-btn-primary"
+                    onClick={onClick}
+                >
+                    <span>
+                        Subscribe for{" "}
+                        {utils.formatUnits(coin.toPay, coin.decimals)}{" "}
+                        {coin.symbol}
+                    </span>
+                    {isLoading && <ClipLoader color={"#fff"} size={20} />}
+                </button>
+            </div>
+        </div>
     );
 };
 
@@ -319,6 +271,7 @@ type Approval = {
 type Payment = {
     isLoaded: boolean;
     step: number;
+    setStep: (step: number) => void;
     subscription: any;
     oldSubscription: any;
     stepFunction: StepFunction;
@@ -329,11 +282,13 @@ type Payment = {
     token: Approval;
     subscriptionLimit: Approval;
     isViaBridge: boolean;
+    coin: any;
 };
 
 const Payment: FC<Payment> = ({
     isLoaded,
     step,
+    setStep,
     subscription,
     oldSubscription,
     stepFunction,
@@ -344,6 +299,7 @@ const Payment: FC<Payment> = ({
     token,
     subscriptionLimit,
     isViaBridge,
+    coin,
 }) => {
     if (isPurchased) {
         return (
@@ -421,6 +377,9 @@ const Payment: FC<Payment> = ({
                                 className={`cap-step ${
                                     step >= 1 && "cap-step-primary"
                                 }`}
+                                onClick={() => {
+                                    setStep(1);
+                                }}
                             >
                                 Approve {swapInfo.inToken.symbol}
                             </li>
@@ -428,6 +387,9 @@ const Payment: FC<Payment> = ({
                                 className={`cap-step ${
                                     step >= 2 && "cap-step-primary"
                                 }`}
+                                onClick={() => {
+                                    setStep(2);
+                                }}
                             >
                                 Subscription Limit
                             </li>
@@ -435,6 +397,9 @@ const Payment: FC<Payment> = ({
                                 className={`cap-step ${
                                     step == 3 && "cap-step-primary"
                                 }`}
+                                onClick={() => {
+                                    setStep(3);
+                                }}
                             >
                                 Subscribe
                             </li>
@@ -458,6 +423,7 @@ const Payment: FC<Payment> = ({
                                     setIsInfinity={token.setIsInfinity}
                                     approvalAmount={token.amount}
                                     setApprovalAmount={token.setAmount}
+                                    coin={coin}
                                 />
                             )}
 
@@ -482,6 +448,7 @@ const Payment: FC<Payment> = ({
                                     setApprovalAmount={
                                         subscriptionLimit.setAmount
                                     }
+                                    coin={coin}
                                 />
                             )}
 
@@ -493,6 +460,7 @@ const Payment: FC<Payment> = ({
                                     isLoading={loadingStep == 3}
                                     errorMessage={errorMessage}
                                     swapInfo={swapInfo}
+                                    coin={coin}
                                 />
                             )}
                         </div>
