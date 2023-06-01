@@ -157,7 +157,7 @@ const ManageAccount: FC<ManageAccount> = ({
                         <span>Sorry but you use another network to pay</span>
                     </div>
                 </div>
-                <div className="cap-w-full cap-flex cap-items-center cap-justify-center">
+                <div className="cap-w-full cap-flex cap-items-center cap-justify-center cap-z-30">
                     <button
                         className="cap-btn cap-btn-primary"
                         onClick={async () => {

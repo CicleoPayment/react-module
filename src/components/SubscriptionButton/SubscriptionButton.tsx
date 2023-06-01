@@ -24,17 +24,16 @@ import {
     erc20ABI,
     readContracts,
     signMessage,
-    prepareWriteContract,
     writeContract,
     getAccount,
 } from "@wagmi/core";
 import { Login, LoadingState } from "@components";
 import {
     CicleoSubscriptionManager__factory,
-    PaymentFacet__factory,
     AmarokFacet__factory,
     StargateFacet__factory,
 } from "@context/Types";
+import { PaymentFacet__factory } from "@context/Types/factories/contracts/Subscription/Router/Facets";
 import { BridgeFacet__factory } from "@context/Types/factories/contracts/Subscription/Bridge/Facets";
 
 type SubscriptionButton = {
@@ -123,7 +122,7 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
     const [coin, setCoin] = useState<coin>({} as coin);
     const [coinLists, setCoinLists] = useState([]);
     const [step, setStep] = useState(0);
-    const [balance, setBalance] = useState<string | number>("#");
+    const [explorerLink, setExplorerLink] = useState("");
     const [subscription, setSubscription] = useState({
         id: subscriptionId,
         isActive: true,
@@ -154,26 +153,8 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
     const [isInfinitySubscription, setIsInfinitySubscription] = useState(false);
     const [approvalSubscription, setApprovalSubscription] = useState(0);
 
-    const changeToken = async (coin: any) => {
+    const changeToken = async (_coin: any) => {
         if (!account) return;
-
-        const erc20Contract = {
-            address: coin.id,
-            abi: erc20ABI,
-        };
-
-        const balance = await readContract({
-            ...erc20Contract,
-            functionName: "balanceOf",
-            // @ts-ignore
-            args: [account],
-        });
-
-        let _coin = coin;
-
-        _coin.balance = Number(
-            ethers.utils.formatUnits(balance, coin.decimals).toString()
-        );
 
         setCoin(_coin);
     };
@@ -183,32 +164,6 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
         if (!coin) return;
         if (!account) return;
         if (coin.id == undefined) return;
-
-        console.log(coin);
-        console.log(account);
-        console.log(subManager.address);
-
-        const data = await readContracts({
-            contracts: [
-                {
-                    // @ts-ignore
-                    address: coin.id,
-                    abi: erc20ABI,
-                    functionName: "allowance",
-                    // @ts-ignore
-                    args: [account, subManager.address],
-                },
-            ],
-        });
-
-        console.log("Get swap");
-        console.log(data);
-
-        /* const erc20 = await Contracts.ERC20(signer, coin.id);
-
-        const subscriptionRouterContract = await Contracts.SubscriptionRouter(
-            signer
-        ); */
 
         const { chain, chains } = getNetwork();
         if (!chain) return;
@@ -241,7 +196,6 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
         console.log(priceFormatted);
 
         if (isBridged) {
-            console.log("BRIDGED");
             setSwapInfo({
                 inToken: {
                     address: coin.id,
@@ -507,7 +461,15 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
 
                         const transac = await tx.wait();
 
-                        console.log(transac);
+                        if (coin._stargateData != undefined) {
+                            setExplorerLink(
+                                `https://backend-test.cicelo.io/getlzlink/${transac.blockHash}`
+                            );
+                        } else if (coin._amarokData != undefined) {
+                            setExplorerLink(
+                                `https://connextscan.io/tx/${transac.blockHash}?src=search`
+                            );
+                        }
 
                         setErrorMessage("");
                         setIsPurchased(true);
@@ -529,6 +491,8 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
             return;
         }
 
+        console.log(coin.id);
+
         const resulat = await readContracts({
             contracts: [
                 {
@@ -549,6 +513,8 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
 
         const approval = resulat[0] as BigNumber;
         const users = resulat[1] as any;
+
+        console.log(users);
 
         const subApproval = users.subscriptionLimit as BigNumber;
 
@@ -887,7 +853,6 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
 
         setCoinLists(userInfo.data.coinList);
         setIsLoaded(true);
-        //setCoinLists(userInfo.data.coinList);
     };
 
     const getUserSub = async (address: string) => {
@@ -964,7 +929,7 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                     }
                 }}
             />
-            <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0">
+            <div className="cap-modal cap-modal-bottom sm:cap-modal-middle !cap-ml-0 cap-z-30">
                 <div className="cap-modal-box cap-relative cap-p-0 cap-text-white">
                     <div className="cap-px-4 cap-py-3 cap-bg-base-300 cap-flex cap-justify-between cap-items-center">
                         <img src={TextWhite} alt="" className="cap-h-10" />
@@ -1109,6 +1074,7 @@ const SubscriptionButton: FC<SubscriptionButton> = ({
                                     setIsInfinity: setIsInfinitySubscription,
                                 }}
                                 coin={coin}
+                                explorerLink={explorerLink}
                             />
                         );
                     })()}

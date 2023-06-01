@@ -28,12 +28,9 @@ import {
     getAccount,
 } from "@wagmi/core";
 import { Login, LoadingState } from "@components";
-import {
-    CicleoSubscriptionManager__factory,
-    PaymentFacet__factory,
-} from "@context/Types";
+import { CicleoSubscriptionManager__factory } from "@context/Types";
 import { BridgeFacet__factory } from "@context/Types/factories/contracts/Subscription/Bridge/Facets";
-
+import { PaymentFacet__factory } from "@context/Types/factories/contracts/Subscription/Router/Facets";
 type SubscriptionDynamicButton = {
     chainId: number;
     subManagerId: number;
@@ -838,7 +835,7 @@ const SubscriptionDynamicButton: FC<SubscriptionDynamicButton> = ({
                 htmlFor={"cicleo-payment-modal-" + name}
                 className="cap-btn cap-btn-primary cap-max-w-[200px] cap-flex cap-justify-center "
             >
-                <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2">
+                <div className="cap-flex cap-items-center cap-text cap-justify-center cap-text-white cap-w-full cap-space-x-2 cap-z-30">
                     <img src={PayImage} alt="" className="cap-max-w-[90px]" />
                 </div>
             </label>

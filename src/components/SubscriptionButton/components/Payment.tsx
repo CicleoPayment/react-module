@@ -283,6 +283,7 @@ type Payment = {
     subscriptionLimit: Approval;
     isViaBridge: boolean;
     coin: any;
+    explorerLink: string;
 };
 
 const Payment: FC<Payment> = ({
@@ -300,6 +301,7 @@ const Payment: FC<Payment> = ({
     subscriptionLimit,
     isViaBridge,
     coin,
+    explorerLink,
 }) => {
     if (isPurchased) {
         return (
@@ -309,12 +311,20 @@ const Payment: FC<Payment> = ({
                 </h2>
 
                 {isViaBridge && (
-                    <span>
-                        Note that since you use a bridge to pay this
-                        subscription that can take some mintues to perform on
-                        the destination chain! You'll receive an email when that
-                        would be done !
-                    </span>
+                    <div className="cap-space-y-4 cap-flex cap-flex-col">
+                        <span>
+                            Note that since you use a bridge to pay this
+                            subscription that can take some mintues to perform
+                            on the destination chain! You'll receive an email
+                            when that would be done !
+                        </span>
+                        <a
+                            href={explorerLink}
+                            className="cap-btn cap-btn-primary"
+                        >
+                            Follow transaction
+                        </a>
+                    </div>
                 )}
 
                 <div className="cap-shadow-lg cap-alert cap-alert-success">
